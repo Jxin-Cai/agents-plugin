@@ -34,11 +34,11 @@ git clone git@github.com:Jxin-Cai/agents-plugin.git ~/.claude/plugins/agents-plu
 
 | 插件名 | 说明 | 版本 |
 |--------|------|------|
-| `product-analyst` | 产品分析师：结构化需求发现、头脑风暴、需求澄清与 PRD 生成 | 1.0.0 |
+| `product-manager` | 产品经理：结构化需求发现、头脑风暴、需求澄清与 PRD 生成 | 1.0.0 |
 
-## product-analyst
+## product-manager
 
-产品分析师 Agent 技能组，提供完整的需求分析工作流。
+产品经理 Agent 技能组，提供完整的需求分析工作流。
 
 ### 命令
 
@@ -61,19 +61,22 @@ git clone git@github.com:Jxin-Cai/agents-plugin.git ~/.claude/plugins/agents-plu
 ```
 agents-plugin/
 ├── .claude-plugin/
-│   ├── plugin.json          # 插件总配置
-│   └── marketplace.json     # 插件市场清单
-├── product-analyst/         # 产品分析师 Agent
-│   ├── skills/              # 技能定义
-│   ├── commands/            # 命令入口
-│   ├── hooks/               # 生命周期钩子
-│   └── prompts/             # Agent 提示词
-└── <new-agent>/             # 扩展：新增 Agent 子目录即可
+│   └── marketplace.json          # 插件市场清单
+├── product-manager/              # 产品经理 Agent
+│   ├── .claude-plugin/
+│   │   └── plugin.json           # 插件配置
+│   ├── skills/                   # 技能定义
+│   ├── commands/                 # 命令入口
+│   ├── hooks/                    # 生命周期钩子
+│   └── prompts/                  # Agent 提示词
+└── <new-agent>/                  # 扩展：新增 Agent 子目录即可
+    └── .claude-plugin/
+        └── plugin.json
 ```
 
 ## 扩展新 Agent
 
 1. 在根目录新建 Agent 子目录（如 `game-designer/`）
-2. 按照 `product-analyst/` 的结构组织 `skills/`、`commands/`、`hooks/`、`prompts/`
-3. 在 `.claude-plugin/plugin.json` 中追加路径引用
-4. 在 `.claude-plugin/marketplace.json` 中注册插件信息
+2. 在子目录内创建 `.claude-plugin/plugin.json` 声明插件信息
+3. 按照 `product-manager/` 的结构组织 `skills/`、`commands/`、`hooks/`、`prompts/`
+4. 在根目录 `.claude-plugin/marketplace.json` 中注册插件

@@ -1,5 +1,5 @@
 #!/bin/bash
-# SessionStart hook for product-analyst plugin
+# SessionStart hook for product-manager plugin
 # 1. 创建工作目录结构
 # 2. 输出 PO Agent 提示词到 stdout（注入为会话上下文）
 
@@ -7,4 +7,4 @@
 mkdir -p _requirements/raw _requirements/domain _requirements/prd
 
 # 输出 PO Agent 提示词作为会话上下文
-cat "${CLAUDE_PLUGIN_ROOT}/product-analyst/prompts/po-agent.md"
+cat "${CLAUDE_PLUGIN_ROOT}/prompts/po-agent.md"

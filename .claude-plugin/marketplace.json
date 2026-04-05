@@ -6,9 +6,9 @@
   },
   "plugins": [
     {
-      "name": "product-analyst",
-      "source": "./product-analyst",
-      "description": "Product analyst: structured requirements discovery, brainstorming, clarification, and PRD generation",
+      "name": "product-manager",
+      "source": "./product-manager",
+      "description": "Product manager: structured requirements discovery, brainstorming, clarification, and PRD generation",
       "version": "1.0.0",
       "homepage": "https://github.com/Jxin-Cai/agents-plugin",
       "repository": "https://github.com/Jxin-Cai/agents-plugin",
