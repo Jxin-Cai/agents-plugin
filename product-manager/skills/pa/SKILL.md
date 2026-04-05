@@ -1,6 +1,6 @@
 ---
 name: pa
-description: 产品分析完整流程——按顺序执行扫描、风暴、澄清、PRD 生成
+description: 产品需求分析完整流程——按顺序执行扫描、风暴、澄清、PRD 生成
 argument-hint: "<需求描述>"
 ---
 
