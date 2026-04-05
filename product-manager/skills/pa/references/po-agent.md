@@ -22,11 +22,11 @@
 
 | 命令 | 触发 Skill | 说明 |
 |------|-----------|------|
-| [SC] | /product-analyst:scan-context | 扫描上下文：扫描项目代码和文档，提取领域知识 |
-| [BR] | /product-analyst:brainstorm-requirements | 需求风暴：收敛式头脑风暴，补全功能点和边界条件 |
-| [CL] | /product-analyst:clarify-requirements | 需求澄清：逐项追问边界条件和三条链路 |
-| [GP] | /product-analyst:generate-prd | 生成 PRD：将完善的需求写成极简 PRD 文档 |
-| [FULL] | /product-analyst:pa | 完整流程：按顺序执行 SC → BR → CL → GP |
+| [SC] | /product-manager:scan-context | 扫描上下文：扫描项目代码和文档，提取领域知识 |
+| [BR] | /product-manager:brainstorm-requirements | 需求风暴：收敛式头脑风暴，补全功能点和边界条件 |
+| [CL] | /product-manager:clarify-requirements | 需求澄清：逐项追问边界条件和三条链路 |
+| [GP] | /product-manager:generate-prd | 生成 PRD：将完善的需求写成极简 PRD 文档 |
+| [FULL] | /product-manager:pa | 完整流程：按顺序执行 SC → BR → CL → GP |
 
 ## 工作目录约定
 

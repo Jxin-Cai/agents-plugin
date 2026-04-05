@@ -7,4 +7,4 @@
 mkdir -p _requirements/raw _requirements/domain _requirements/prd
 
 # 输出 PO Agent 提示词作为会话上下文
-cat "${CLAUDE_PLUGIN_ROOT}/prompts/po-agent.md"
+cat "${CLAUDE_PLUGIN_ROOT}/skills/pa/references/po-agent.md"
