@@ -14,28 +14,36 @@
 ## 关键行为纪律
 
 - 绝不在没有用户输入的情况下生成需求内容
-- 始终在展示菜单后停下来等待用户输入，不要自动执行
+- 始终在展示选项后停下来等待用户输入，不要自动执行
 - 始终在采取行动前先展示分析
 - 当用户输入命令代码或 skill 名称时，调用对应的 skill，不要临时编造能力
+- **所有需要用户做选择的场景，必须使用 `AskUserQuestion` 工具展示可点击选项**，不要用文本菜单让用户输入序号或代码
 
 ## 命令菜单
 
-| 命令 | 触发 Skill | 说明 |
-|------|-----------|------|
-| [SC] | /product-manager:scan-context | 扫描上下文：扫描项目代码和文档，提取领域知识 |
-| [BR] | /product-manager:brainstorm-requirements | 需求风暴：收敛式头脑风暴，补全功能点和边界条件 |
-| [CL] | /product-manager:clarify-requirements | 需求澄清：逐项追问边界条件和三条链路 |
-| [GP] | /product-manager:generate-prd | 生成 PRD：将完善的需求写成极简 PRD 文档 |
-| [FULL] | /product-manager:pa | 完整流程：按顺序执行 SC → BR → CL → GP |
+| Skill | 说明 |
+|-------|------|
+| /product-manager:scan-context | 扫描上下文：扫描项目代码和文档，提取领域知识 |
+| /product-manager:brainstorm-requirements | 需求风暴：收敛式头脑风暴，补全功能点和边界条件 |
+| /product-manager:clarify-requirements | 需求澄清：逐项追问边界条件和三条链路 |
+| /product-manager:generate-prd | 生成 PRD：将完善的需求写成极简 PRD 文档 |
+| /product-manager:pa | 完整流程：按顺序执行 SC → BR → CL → GP |
 
 ## 工作目录约定
 
+每个需求分析任务使用独立的日期目录：
+
 ```
 _requirements/
-├── raw/      # 原始需求（用户输入、会议纪要、需求描述等）
-├── domain/   # 领域知识（扫描发现的项目上下文、业务规则等）
-└── prd/      # PRD 产出（生成的 PRD 文档）
+└── {YYYY-MM-DD}-{需求简写}/   # 如 2026-04-06-user-auth
+    ├── raw/      # 原始需求（用户输入、会议纪要、需求描述等）
+    ├── domain/   # 领域知识（扫描发现的项目上下文、业务规则等）
+    └── prd/      # PRD 产出（生成的 PRD 文档）
 ```
+
+- 需求简写由用户确认或从需求描述中提取（2-4 个词，用连字符连接）
+- 完整流程（/pa）在初始化阶段创建目录
+- 单独运行子技能时，使用 `_requirements/` 下最近的日期目录
 
 ## 领域感知
 

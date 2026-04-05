@@ -14,9 +14,11 @@ argument-hint: "<需求描述>"
 
 ## Step 0: 初始化
 
-1. 检查 `_requirements/` 目录，不存在则创建 `_requirements/raw/`、`_requirements/domain/`、`_requirements/prd/`
-2. 扫描 `_requirements/` 下已有的文档，向用户简要报告
-3. 如果 `$ARGUMENTS` 非空，作为需求描述传递给后续阶段
+1. 从 `$ARGUMENTS` 中提取需求描述，生成一个简短的英文缩写（2-4 个词，用连字符连接，如 `user-auth`、`inventory-mgmt`）
+2. 使用 `AskUserQuestion` 工具向用户确认需求简写名称，提供你建议的缩写作为选项
+3. 设定需求目录：`_requirements/{当前日期}-{需求简写}/`（如 `_requirements/2026-04-06-user-auth/`）
+4. 创建子目录：`raw/`、`domain/`、`prd/`
+5. 扫描 `_requirements/` 下已有的需求目录，向用户简要报告
 
 ---
 
@@ -26,11 +28,11 @@ argument-hint: "<需求描述>"
 
 扫描项目代码和文档，提取与需求相关的领域知识。
 
-**阶段完成标志：** `_requirements/domain/context-*.md` 已生成。
+**阶段完成标志：** `{需求目录}/domain/context-*.md` 已生成。
 
-向用户确认是否进入下一阶段。
+使用 `AskUserQuestion` 工具询问用户是否进入下一阶段（选项：继续下一阶段 / 重新扫描 / 结束流程）。
 
-**⏸️ 等待用户确认后继续。**
+**⏸️ 等待用户选择后继续。**
 
 ---
 
@@ -40,11 +42,11 @@ argument-hint: "<需求描述>"
 
 基于扫描上下文的产出，进行收敛式需求发散。
 
-**阶段完成标志：** `_requirements/domain/brainstorm-*.md` 已生成。
+**阶段完成标志：** `{需求目录}/domain/brainstorm-*.md` 已生成。
 
-向用户确认是否进入下一阶段。
+使用 `AskUserQuestion` 工具询问用户是否进入下一阶段（选项：继续下一阶段 / 再来一轮风暴 / 结束流程）。
 
-**⏸️ 等待用户确认后继续。**
+**⏸️ 等待用户选择后继续。**
 
 ---
 
@@ -54,11 +56,11 @@ argument-hint: "<需求描述>"
 
 逐项追问边界条件、异常路径和逆向机制。
 
-**阶段完成标志：** `_requirements/domain/clarified-*.md` 已生成。
+**阶段完成标志：** `{需求目录}/domain/clarified-*.md` 已生成。
 
-向用户确认是否进入下一阶段。
+使用 `AskUserQuestion` 工具询问用户是否进入下一阶段（选项：继续生成 PRD / 再来一轮澄清 / 回到需求风暴）。
 
-**⏸️ 等待用户确认后继续。**
+**⏸️ 等待用户选择后继续。**
 
 ---
 
@@ -68,7 +70,9 @@ argument-hint: "<需求描述>"
 
 将完善的需求写成极简 PRD 文档。
 
-**阶段完成标志：** `_requirements/prd/prd-*.md` 已生成。
+**阶段完成标志：** `{需求目录}/prd/prd-*.md` 已生成。
+
+PRD 保存后，向用户展示文件的 **绝对路径**（如 `/Users/xxx/project/_requirements/2026-04-06-user-auth/prd/prd-user-auth-2026-04-06.md`），以便用户直接点击打开。
 
 ---
 
