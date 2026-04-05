@@ -1,12 +1,12 @@
 {
-  "name": "product-analyst",
-  "description": "Product analyst: structured requirements discovery, brainstorming, clarification, and PRD generation",
+  "name": "agents-plugin",
+  "description": "Multi-agent skill sets plugin — skill packs for different agent roles",
   "version": "1.0.0",
   "author": {
     "name": "jxin"
   },
   "agents": [],
-  "skills": ["./skills/"],
-  "commands": ["./commands/"],
-  "hooks": "./hooks/hooks.json"
+  "skills": ["./product-analyst/skills/"],
+  "commands": ["./product-analyst/commands/"],
+  "hooks": "./product-analyst/hooks/hooks.json"
 }

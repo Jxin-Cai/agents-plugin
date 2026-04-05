@@ -1,0 +1,20 @@
+{
+  "name": "agents-plugin",
+  "description": "Multi-agent skill sets — plug-and-play skill packs for different agent roles",
+  "owner": {
+    "name": "jxin"
+  },
+  "plugins": [
+    {
+      "name": "product-analyst",
+      "source": "./product-analyst",
+      "description": "Product analyst: structured requirements discovery, brainstorming, clarification, and PRD generation",
+      "version": "1.0.0",
+      "homepage": "https://github.com/Jxin-Cai/agents-plugin",
+      "repository": "https://github.com/Jxin-Cai/agents-plugin",
+      "author": {
+        "name": "jxin"
+      }
+    }
+  ]
+}
