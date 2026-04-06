@@ -1,0 +1,14 @@
+{
+  "name": "accessibility-auditor",
+  "description": "Accessibility auditor: WCAG audit, assistive technology testing, and compliance reporting",
+  "version": "1.0.0",
+  "author": {
+    "name": "jxin"
+  },
+  "homepage": "https://github.com/Jxin-Cai/agents-plugin",
+  "repository": "https://github.com/Jxin-Cai/agents-plugin",
+  "keywords": ["accessibility", "wcag", "a11y", "screen-reader", "compliance", "section-508"],
+  "agents": [],
+  "skills": ["./skills/"],
+  "commands": ["./commands/"]
+}

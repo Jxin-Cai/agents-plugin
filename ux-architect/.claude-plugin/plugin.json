@@ -1,0 +1,14 @@
+{
+  "name": "ux-architect",
+  "description": "UX architect: information architecture design, user flow analysis, and interaction design audit",
+  "version": "1.0.0",
+  "author": {
+    "name": "jxin"
+  },
+  "homepage": "https://github.com/Jxin-Cai/agents-plugin",
+  "repository": "https://github.com/Jxin-Cai/agents-plugin",
+  "keywords": ["ux-architect", "information-architecture", "user-flow", "interaction-design", "usability"],
+  "agents": [],
+  "skills": ["./skills/"],
+  "commands": ["./commands/"]
+}

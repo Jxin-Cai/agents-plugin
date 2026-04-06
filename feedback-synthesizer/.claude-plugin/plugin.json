@@ -1,0 +1,14 @@
+{
+  "name": "feedback-synthesizer",
+  "description": "Feedback synthesizer: structured feedback collection, sentiment analysis, and insight extraction for product decisions",
+  "version": "1.0.0",
+  "author": {
+    "name": "jxin"
+  },
+  "homepage": "https://github.com/Jxin-Cai/agents-plugin",
+  "repository": "https://github.com/Jxin-Cai/agents-plugin",
+  "keywords": ["feedback", "VoC", "sentiment-analysis", "insight", "NPS", "CSAT"],
+  "agents": [],
+  "skills": ["./skills/"],
+  "commands": ["./commands/"]
+}

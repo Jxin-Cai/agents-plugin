@@ -1,0 +1,14 @@
+{
+  "name": "ui-designer",
+  "description": "UI designer: structured visual audit, design system review, and prototype feedback",
+  "version": "1.0.0",
+  "author": {
+    "name": "jxin"
+  },
+  "homepage": "https://github.com/Jxin-Cai/agents-plugin",
+  "repository": "https://github.com/Jxin-Cai/agents-plugin",
+  "keywords": ["ui-designer", "visual-audit", "design-system", "prototype", "heuristic-evaluation"],
+  "agents": [],
+  "skills": ["./skills/"],
+  "commands": ["./commands/"]
+}

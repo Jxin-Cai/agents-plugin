@@ -1,0 +1,14 @@
+{
+  "name": "brand-guardian",
+  "description": "Brand guardian: structured brand consistency audit, voice & tone review, and visual identity check",
+  "version": "1.0.0",
+  "author": {
+    "name": "jxin"
+  },
+  "homepage": "https://github.com/Jxin-Cai/agents-plugin",
+  "repository": "https://github.com/Jxin-Cai/agents-plugin",
+  "keywords": ["brand-guardian", "brand-consistency", "voice-tone", "visual-identity", "brand-audit"],
+  "agents": [],
+  "skills": ["./skills/"],
+  "commands": ["./commands/"]
+}

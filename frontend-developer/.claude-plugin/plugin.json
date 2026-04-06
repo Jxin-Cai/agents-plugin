@@ -1,0 +1,14 @@
+{
+  "name": "frontend-developer",
+  "description": "Frontend developer expert: component architecture review, responsive design audit, and web performance optimization",
+  "version": "1.0.0",
+  "author": {
+    "name": "jxin"
+  },
+  "homepage": "https://github.com/Jxin-Cai/agents-plugin",
+  "repository": "https://github.com/Jxin-Cai/agents-plugin",
+  "keywords": ["frontend", "component-architecture", "responsive-design", "performance", "core-web-vitals"],
+  "agents": [],
+  "skills": ["./skills/"],
+  "commands": ["./commands/"]
+}

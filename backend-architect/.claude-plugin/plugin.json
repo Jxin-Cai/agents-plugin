@@ -1,0 +1,14 @@
+{
+  "name": "backend-architect",
+  "description": "Backend architect: API design, database modeling, and scalability review for backend systems",
+  "version": "1.0.0",
+  "author": {
+    "name": "jxin"
+  },
+  "homepage": "https://github.com/Jxin-Cai/agents-plugin",
+  "repository": "https://github.com/Jxin-Cai/agents-plugin",
+  "keywords": ["backend-architect", "api-design", "database-modeling", "scalability"],
+  "agents": [],
+  "skills": ["./skills/"],
+  "commands": ["./commands/"]
+}

@@ -12,9 +12,178 @@
       "version": "1.0.0",
       "homepage": "https://github.com/Jxin-Cai/agents-plugin",
       "repository": "https://github.com/Jxin-Cai/agents-plugin",
-      "author": {
-        "name": "jxin"
-      }
+      "author": { "name": "jxin" }
+    },
+    {
+      "name": "software-architect",
+      "source": "./software-architect",
+      "description": "Software architect: system design, architecture review, and ADR generation",
+      "version": "1.0.0",
+      "homepage": "https://github.com/Jxin-Cai/agents-plugin",
+      "repository": "https://github.com/Jxin-Cai/agents-plugin",
+      "author": { "name": "jxin" }
+    },
+    {
+      "name": "backend-architect",
+      "source": "./backend-architect",
+      "description": "Backend architect: API design, database modeling, and scalability review",
+      "version": "1.0.0",
+      "homepage": "https://github.com/Jxin-Cai/agents-plugin",
+      "repository": "https://github.com/Jxin-Cai/agents-plugin",
+      "author": { "name": "jxin" }
+    },
+    {
+      "name": "frontend-developer",
+      "source": "./frontend-developer",
+      "description": "Frontend developer: component review, responsive audit, and performance check",
+      "version": "1.0.0",
+      "homepage": "https://github.com/Jxin-Cai/agents-plugin",
+      "repository": "https://github.com/Jxin-Cai/agents-plugin",
+      "author": { "name": "jxin" }
+    },
+    {
+      "name": "ui-designer",
+      "source": "./ui-designer",
+      "description": "UI designer: visual audit, design system review, and prototype feedback",
+      "version": "1.0.0",
+      "homepage": "https://github.com/Jxin-Cai/agents-plugin",
+      "repository": "https://github.com/Jxin-Cai/agents-plugin",
+      "author": { "name": "jxin" }
+    },
+    {
+      "name": "ux-architect",
+      "source": "./ux-architect",
+      "description": "UX architect: information architecture, user flow analysis, and interaction audit",
+      "version": "1.0.0",
+      "homepage": "https://github.com/Jxin-Cai/agents-plugin",
+      "repository": "https://github.com/Jxin-Cai/agents-plugin",
+      "author": { "name": "jxin" }
+    },
+    {
+      "name": "ux-researcher",
+      "source": "./ux-researcher",
+      "description": "UX researcher: interview guide, usability test plan, and persona builder",
+      "version": "1.0.0",
+      "homepage": "https://github.com/Jxin-Cai/agents-plugin",
+      "repository": "https://github.com/Jxin-Cai/agents-plugin",
+      "author": { "name": "jxin" }
+    },
+    {
+      "name": "code-reviewer",
+      "source": "./code-reviewer",
+      "description": "Code reviewer: security review, quality audit, and refactor suggestions",
+      "version": "1.0.0",
+      "homepage": "https://github.com/Jxin-Cai/agents-plugin",
+      "repository": "https://github.com/Jxin-Cai/agents-plugin",
+      "author": { "name": "jxin" }
+    },
+    {
+      "name": "api-tester",
+      "source": "./api-tester",
+      "description": "API tester: contract test, integration test plan, and API health check",
+      "version": "1.0.0",
+      "homepage": "https://github.com/Jxin-Cai/agents-plugin",
+      "repository": "https://github.com/Jxin-Cai/agents-plugin",
+      "author": { "name": "jxin" }
+    },
+    {
+      "name": "test-results-analyzer",
+      "source": "./test-results-analyzer",
+      "description": "Test results analyzer: coverage analysis, failure analysis, and quality report",
+      "version": "1.0.0",
+      "homepage": "https://github.com/Jxin-Cai/agents-plugin",
+      "repository": "https://github.com/Jxin-Cai/agents-plugin",
+      "author": { "name": "jxin" }
+    },
+    {
+      "name": "performance-benchmarker",
+      "source": "./performance-benchmarker",
+      "description": "Performance benchmarker: load test plan, profiling guide, and optimization report",
+      "version": "1.0.0",
+      "homepage": "https://github.com/Jxin-Cai/agents-plugin",
+      "repository": "https://github.com/Jxin-Cai/agents-plugin",
+      "author": { "name": "jxin" }
+    },
+    {
+      "name": "accessibility-auditor",
+      "source": "./accessibility-auditor",
+      "description": "Accessibility auditor: WCAG audit, assistive tech test, and compliance report",
+      "version": "1.0.0",
+      "homepage": "https://github.com/Jxin-Cai/agents-plugin",
+      "repository": "https://github.com/Jxin-Cai/agents-plugin",
+      "author": { "name": "jxin" }
+    },
+    {
+      "name": "brand-guardian",
+      "source": "./brand-guardian",
+      "description": "Brand guardian: brand consistency audit, voice & tone review, and visual identity check",
+      "version": "1.0.0",
+      "homepage": "https://github.com/Jxin-Cai/agents-plugin",
+      "repository": "https://github.com/Jxin-Cai/agents-plugin",
+      "author": { "name": "jxin" }
+    },
+    {
+      "name": "experiment-tracker",
+      "source": "./experiment-tracker",
+      "description": "Experiment tracker: A/B test design, metrics definition, and results analysis",
+      "version": "1.0.0",
+      "homepage": "https://github.com/Jxin-Cai/agents-plugin",
+      "repository": "https://github.com/Jxin-Cai/agents-plugin",
+      "author": { "name": "jxin" }
+    },
+    {
+      "name": "feedback-synthesizer",
+      "source": "./feedback-synthesizer",
+      "description": "Feedback synthesizer: feedback collection, sentiment analysis, and insight extraction",
+      "version": "1.0.0",
+      "homepage": "https://github.com/Jxin-Cai/agents-plugin",
+      "repository": "https://github.com/Jxin-Cai/agents-plugin",
+      "author": { "name": "jxin" }
+    },
+    {
+      "name": "trend-researcher",
+      "source": "./trend-researcher",
+      "description": "Trend researcher: market analysis, competitive landscape, and tech trend report",
+      "version": "1.0.0",
+      "homepage": "https://github.com/Jxin-Cai/agents-plugin",
+      "repository": "https://github.com/Jxin-Cai/agents-plugin",
+      "author": { "name": "jxin" }
+    },
+    {
+      "name": "sprint-prioritizer",
+      "source": "./sprint-prioritizer",
+      "description": "Sprint prioritizer: backlog grooming, priority matrix, and sprint planning",
+      "version": "1.0.0",
+      "homepage": "https://github.com/Jxin-Cai/agents-plugin",
+      "repository": "https://github.com/Jxin-Cai/agents-plugin",
+      "author": { "name": "jxin" }
+    },
+    {
+      "name": "senior-project-manager",
+      "source": "./senior-project-manager",
+      "description": "Senior project manager: risk assessment, stakeholder map, and timeline planning",
+      "version": "1.0.0",
+      "homepage": "https://github.com/Jxin-Cai/agents-plugin",
+      "repository": "https://github.com/Jxin-Cai/agents-plugin",
+      "author": { "name": "jxin" }
+    },
+    {
+      "name": "project-shepherd",
+      "source": "./project-shepherd",
+      "description": "Project shepherd: health check, blocker removal, and velocity tracking",
+      "version": "1.0.0",
+      "homepage": "https://github.com/Jxin-Cai/agents-plugin",
+      "repository": "https://github.com/Jxin-Cai/agents-plugin",
+      "author": { "name": "jxin" }
+    },
+    {
+      "name": "jira-workflow-steward",
+      "source": "./jira-workflow-steward",
+      "description": "Jira workflow steward: workflow design, issue triage, and board optimization",
+      "version": "1.0.0",
+      "homepage": "https://github.com/Jxin-Cai/agents-plugin",
+      "repository": "https://github.com/Jxin-Cai/agents-plugin",
+      "author": { "name": "jxin" }
     }
   ]
 }
