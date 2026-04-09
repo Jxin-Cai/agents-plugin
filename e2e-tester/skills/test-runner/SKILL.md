@@ -58,13 +58,20 @@ allowed-tools: Read, Glob, Write, AskUserQuestion, Bash(playwright-cli:*), Bash(
 
 ### 路径 A: 自动化执行
 
+查看注册表中 `type` 字段判断脚本类型：
+
+**纯 API 脚本**（`type: api-script`）：
+```bash
+npx tsx .e2e-tests/{domain}/automation/ts-{nnn}-*.test.ts
+```
+
+**遗留 Playwright 脚本**（`type: playwright`，仅历史兼容）：
 ```bash
 npx playwright test .e2e-tests/{domain}/automation/ts-{nnn}-*.spec.ts --reporter=json
 ```
 
 执行后：
-- 解析 JSON 结果
-- 收集截图 / trace / 输出文件
+- 解析执行结果（exit code + stdout/stderr）
 - 映射到剧本的 Scenario / Step / Oracle 结构
 - 如脚本本身报错，归类为 **automation defect**，而不是产品失败
 
@@ -83,7 +90,11 @@ npx playwright test .e2e-tests/{domain}/automation/ts-{nnn}-*.spec.ts --reporter
 
 ### 路径 C: Playwright 探索执行
 
-读取 `references/playwright-explore-guide.md`，按其中的步骤（打开浏览器 → 逐场景执行 Given/When/Then → 失败分类 → 关闭浏览器）完成探索式测试。
+读取 `references/playwright-explore-guide.md`，按其中的步骤（打开浏览器 → 逐场景执行 Given/When/Then → **拦截并记录 API 调用链** → 失败分类 → 关闭浏览器）完成探索式测试。
+
+**路径 C 的双重目标**：
+1. 验证业务场景是否通过
+2. **提炼 API 调用链**——记录每个操作触发了哪些接口请求、参数和返回值，为后续沉淀纯 API 脚本提供知识输入
 
 ---
 
@@ -104,13 +115,16 @@ npx playwright test .e2e-tests/{domain}/automation/ts-{nnn}-*.spec.ts --reporter
 
 ### 阶段 4: 沉淀判断
 
-仅当满足以下条件时建议沉淀：
+仅当满足以下条件时建议沉淀为纯 API 自动化脚本：
 - 测试路径成立且证据完整
-- 关键 oracle 可稳定自动化
+- **核心操作有对应的 API 端点**（从探索过程中已确认）
+- **状态验证可通过查询接口完成**
 - 准备方案可重复
 - 当前结论不是偶发或环境噪音
 
 否则应明确说明：暂不适合自动化沉淀，原因是什么。
+
+**特别注意**：沉淀目标是纯 API 脚本，不是 Playwright 脚本。如果某场景只能通过 UI 交互验证（无对应 API），应标注为"不适合自动化沉淀"而非降级为 Playwright 脚本。
 
 ---
 

@@ -7,7 +7,7 @@
   },
   "homepage": "https://github.com/Jxin-Cai/agents-plugin",
   "repository": "https://github.com/Jxin-Cai/agents-plugin",
-  "keywords": ["e2e-testing", "playwright", "bdd", "test-automation"],
+  "keywords": ["e2e-testing", "api-testing", "bdd", "test-automation"],
   "agents": [],
   "skills": ["./skills/"],
   "commands": ["./commands/"]

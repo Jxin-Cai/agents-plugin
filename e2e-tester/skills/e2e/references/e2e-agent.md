@@ -19,8 +19,8 @@
 | /e2e-tester:scan-context | 扫描项目上下文：代码认知与测试切入点 |
 | /e2e-tester:test-scenario-gen | BDD 剧本生成：风险 + Oracle + 证据要求 |
 | /e2e-tester:test-prep | 测试准备：数据、账号、Mock、依赖、清理策略 |
-| /e2e-tester:test-runner | 测试执行：准备度门禁 → 自动化优先 → Playwright 兜底 |
-| /e2e-tester:test-automation-builder | 自动化沉淀：高价值路径转专业测试资产 |
+| /e2e-tester:test-runner | 测试执行：准备度门禁 → 自动化优先 → Playwright 探索兜底（含 API 调用链提炼） |
+| /e2e-tester:test-automation-builder | 自动化沉淀：从探索中提炼 API 调用链，生成纯脚本级测试资产（不依赖浏览器） |
 
 ## 工作目录
 
