@@ -1,0 +1,14 @@
+{
+  "name": "e2e-tester",
+  "description": "E2E testing expert: BDD scenario design, automated test execution, and test asset management",
+  "version": "1.0.0",
+  "author": {
+    "name": "jxin"
+  },
+  "homepage": "https://github.com/Jxin-Cai/agents-plugin",
+  "repository": "https://github.com/Jxin-Cai/agents-plugin",
+  "keywords": ["e2e-testing", "playwright", "bdd", "test-automation"],
+  "agents": [],
+  "skills": ["./skills/"],
+  "commands": ["./commands/"]
+}
