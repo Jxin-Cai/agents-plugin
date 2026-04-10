@@ -1,0 +1,14 @@
+{
+  "name": "ai-citation-strategist",
+  "description": "AI citation optimization: multi-platform audit, lost prompt analysis, and fix pack generation for AEO/GEO",
+  "version": "1.0.0",
+  "author": {
+    "name": "jxin"
+  },
+  "homepage": "https://github.com/Jxin-Cai/agents-plugin",
+  "repository": "https://github.com/Jxin-Cai/agents-plugin",
+  "keywords": ["ai-citation", "aeo", "geo", "citation-audit"],
+  "agents": [],
+  "skills": ["./skills/"],
+  "commands": ["./commands/"]
+}

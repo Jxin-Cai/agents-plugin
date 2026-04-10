@@ -1,0 +1,12 @@
+{
+  "name": "support-analytics-reporter",
+  "description": "Analytics reporting: executive dashboards, customer segmentation, and marketing attribution analysis",
+  "version": "1.0.0",
+  "author": { "name": "jxin" },
+  "homepage": "https://github.com/Jxin-Cai/agents-plugin",
+  "repository": "https://github.com/Jxin-Cai/agents-plugin",
+  "keywords": ["analytics", "dashboard", "customer-segmentation", "attribution"],
+  "agents": [],
+  "skills": ["./skills/"],
+  "commands": ["./commands/"]
+}

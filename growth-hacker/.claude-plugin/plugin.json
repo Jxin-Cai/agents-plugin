@@ -1,0 +1,12 @@
+{
+  "name": "growth-hacker",
+  "description": "Growth hacking: experiment design, funnel optimization, and viral loop engineering",
+  "version": "1.0.0",
+  "author": { "name": "jxin" },
+  "homepage": "https://github.com/Jxin-Cai/agents-plugin",
+  "repository": "https://github.com/Jxin-Cai/agents-plugin",
+  "keywords": ["growth-hacking", "funnel-optimization", "viral-loop", "experiment"],
+  "agents": [],
+  "skills": ["./skills/"],
+  "commands": ["./commands/"]
+}

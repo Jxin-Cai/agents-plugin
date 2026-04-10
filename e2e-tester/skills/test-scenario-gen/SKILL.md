@@ -56,7 +56,12 @@ allowed-tools: Read, Glob, Write, AskUserQuestion
 
 ### Step 3: 生成剧本
 
-读取 `references/scenario-template.md` 获取剧本模板结构，按模板逐个生成剧本文件。当剧本涉及 mock 依赖时，同时读取 `references/mock-strategy.md`。
+**条件加载参考文档**：
+- 读取 `references/scenario-template.md` 获取剧本模板结构（仅读取 Frontmatter 和正文结构部分，不在对话中复述全文）
+- 当剧本涉及 mock 依赖时，**才读取** `references/mock-strategy.md`
+- 当涉及契约校验、故障注入或有状态依赖时，**才读取** `references/mock-strategy-advanced.md`
+
+按模板逐个生成剧本文件。
 
 关键要求：
 - Frontmatter 必须包含：goal、risk_level、persona、out_of_scope、prep_ref、oracle_types、dependencies

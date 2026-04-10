@@ -40,6 +40,8 @@ allowed-tools: Read, Glob, Write, Agent, Bash(npx tsc --noEmit*), Bash(npx tsx*)
 
 ### Step 2: 判断是否适合自动化
 
+> **注意**：此步骤仅做适配性判断，**不要在此步骤读取** `references/script-conventions.md`。只有判断为"适合"并进入 Step 3 后才读取。
+
 **适合**：
 - 核心操作可通过 API 调用完成（不依赖纯前端交互如拖拽、画布）
 - 状态验证可通过接口查询或数据库查询实现

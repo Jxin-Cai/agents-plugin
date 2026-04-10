@@ -1,0 +1,14 @@
+{
+  "name": "wechat-official-account",
+  "description": "WeChat Official Account management: content strategy, article creation, publishing, and subscriber analytics",
+  "version": "1.0.0",
+  "author": {
+    "name": "jxin"
+  },
+  "homepage": "https://github.com/Jxin-Cai/agents-plugin",
+  "repository": "https://github.com/Jxin-Cai/agents-plugin",
+  "keywords": ["wechat", "official-account", "content-marketing", "wechat-publish"],
+  "agents": [],
+  "skills": ["./skills/"],
+  "commands": ["./commands/"]
+}

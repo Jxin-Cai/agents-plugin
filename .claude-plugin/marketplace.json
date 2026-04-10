@@ -184,6 +184,87 @@
       "homepage": "https://github.com/Jxin-Cai/agents-plugin",
       "repository": "https://github.com/Jxin-Cai/agents-plugin",
       "author": { "name": "jxin" }
+    },
+    {
+      "name": "e2e-tester",
+      "source": "./e2e-tester",
+      "description": "E2E tester: end-to-end test workflow covering scope clarification, scenario generation, test execution, and automation",
+      "version": "1.0.0",
+      "homepage": "https://github.com/Jxin-Cai/agents-plugin",
+      "repository": "https://github.com/Jxin-Cai/agents-plugin",
+      "author": { "name": "jxin" }
+    },
+    {
+      "name": "ai-citation-strategist",
+      "source": "./ai-citation-strategist",
+      "description": "AI citation strategist: citation audit, lost prompt analysis, and fix pack generation for AEO/GEO optimization",
+      "version": "1.0.0",
+      "homepage": "https://github.com/Jxin-Cai/agents-plugin",
+      "repository": "https://github.com/Jxin-Cai/agents-plugin",
+      "author": { "name": "jxin" }
+    },
+    {
+      "name": "growth-hacker",
+      "source": "./growth-hacker",
+      "description": "Growth hacker: growth experiment design, funnel optimization, and viral loop design",
+      "version": "1.0.0",
+      "homepage": "https://github.com/Jxin-Cai/agents-plugin",
+      "repository": "https://github.com/Jxin-Cai/agents-plugin",
+      "author": { "name": "jxin" }
+    },
+    {
+      "name": "private-domain-operator",
+      "source": "./private-domain-operator",
+      "description": "Private domain operator: WeCom ecosystem setup, community operations, user lifecycle management, and conversion funnel",
+      "version": "1.0.0",
+      "homepage": "https://github.com/Jxin-Cai/agents-plugin",
+      "repository": "https://github.com/Jxin-Cai/agents-plugin",
+      "author": { "name": "jxin" }
+    },
+    {
+      "name": "wechat-official-account",
+      "source": "./wechat-official-account",
+      "description": "WeChat official account: content strategy, article creation, publishing, and subscriber analytics",
+      "version": "1.0.0",
+      "homepage": "https://github.com/Jxin-Cai/agents-plugin",
+      "repository": "https://github.com/Jxin-Cai/agents-plugin",
+      "author": { "name": "jxin" }
+    },
+    {
+      "name": "support-analytics-reporter",
+      "source": "./support-analytics-reporter",
+      "description": "Support analytics reporter: executive dashboard, customer segmentation, and marketing attribution analysis",
+      "version": "1.0.0",
+      "homepage": "https://github.com/Jxin-Cai/agents-plugin",
+      "repository": "https://github.com/Jxin-Cai/agents-plugin",
+      "author": { "name": "jxin" }
+    },
+    {
+      "name": "support-infrastructure-maintainer",
+      "source": "./support-infrastructure-maintainer",
+      "description": "Support infrastructure maintainer: monitoring setup, IaC framework, and backup recovery",
+      "version": "1.0.0",
+      "homepage": "https://github.com/Jxin-Cai/agents-plugin",
+      "repository": "https://github.com/Jxin-Cai/agents-plugin",
+      "author": { "name": "jxin" }
+    },
+    {
+      "name": "support-legal-compliance-checker",
+      "source": "./support-legal-compliance-checker",
+      "description": "Support legal compliance checker: compliance audit, privacy policy generation, and contract review",
+      "version": "1.0.0",
+      "homepage": "https://github.com/Jxin-Cai/agents-plugin",
+      "repository": "https://github.com/Jxin-Cai/agents-plugin",
+      "author": { "name": "jxin" }
+    },
+    {
+      "name": "support-responder",
+      "source": "./support-responder",
+      "description": "Support responder: ticket resolution, knowledge base building, and support analytics",
+      "version": "1.0.0",
+      "homepage": "https://github.com/Jxin-Cai/agents-plugin",
+      "repository": "https://github.com/Jxin-Cai/agents-plugin",
+      "author": { "name": "jxin" }
     }
   ]
 }

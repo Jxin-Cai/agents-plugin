@@ -1,0 +1,14 @@
+{
+  "name": "private-domain-operator",
+  "description": "Private domain operations: WeCom ecosystem, community management, user lifecycle, and conversion funnels",
+  "version": "1.0.0",
+  "author": {
+    "name": "jxin"
+  },
+  "homepage": "https://github.com/Jxin-Cai/agents-plugin",
+  "repository": "https://github.com/Jxin-Cai/agents-plugin",
+  "keywords": ["private-domain", "wecom", "community-operations", "scrm"],
+  "agents": [],
+  "skills": ["./skills/"],
+  "commands": ["./commands/"]
+}

@@ -1,0 +1,12 @@
+{
+  "name": "support-infrastructure-maintainer",
+  "description": "Infrastructure maintenance: monitoring, IaC, backup/recovery, and security hardening",
+  "version": "1.0.0",
+  "author": { "name": "jxin" },
+  "homepage": "https://github.com/Jxin-Cai/agents-plugin",
+  "repository": "https://github.com/Jxin-Cai/agents-plugin",
+  "keywords": ["infrastructure", "monitoring", "iac", "backup-recovery", "security"],
+  "agents": [],
+  "skills": ["./skills/"],
+  "commands": ["./commands/"]
+}

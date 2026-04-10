@@ -1,7 +1,7 @@
 ---
 name: test-runner
 description: 基于专业 E2E 剧本执行测试并生成质量报告。当用户提到"执行测试"、"跑测试"、"运行剧本"，或在 /e2e 流程的执行阶段时触发。
-allowed-tools: Read, Glob, Write, AskUserQuestion, Bash(playwright-cli:*), Bash(npx playwright*), Bash(mkdir*)
+allowed-tools: Read, Glob, Write, AskUserQuestion, Bash(playwright-cli:*), Bash(npx playwright*), Bash(npx tsx*), Bash(mkdir*)
 ---
 
 # E2E 测试执行器
@@ -94,7 +94,9 @@ npx playwright test .e2e-tests/{domain}/automation/ts-{nnn}-*.spec.ts --reporter
 
 ### 路径 C: Playwright 探索执行
 
-读取 `references/playwright-explore-guide.md`，按其中的步骤（打开浏览器 → 逐场景执行 Given/When/Then → **拦截并记录 API 调用链** → 失败分类 → 关闭浏览器）完成探索式测试。
+> **条件加载**：仅当路径决策为 C 时，读取 `references/playwright-explore-guide.md`。路径 A/B 不读取此文件。
+
+按 playwright-explore-guide.md 中的步骤（打开浏览器 → 逐场景执行 Given/When/Then → **拦截并记录 API 调用链** → 失败分类 → 关闭浏览器）完成探索式测试。
 
 **路径 C 的双重目标**：
 1. 验证业务场景是否通过
@@ -104,7 +106,9 @@ npx playwright test .e2e-tests/{domain}/automation/ts-{nnn}-*.spec.ts --reporter
 
 ### 阶段 3: 生成质量报告
 
-此时读取 `references/report-template.md` 获取报告结构，生成 `.e2e-tests/{domain}/reports/{date}/TS-{NNN}-run-{RRR}.md`
+> **条件加载**：此时才读取 `references/report-template.md` 获取报告结构。不要在阶段 0/1/2 提前读取。
+
+生成 `.e2e-tests/{domain}/reports/{date}/TS-{NNN}-run-{RRR}.md`
 
 报告必须包含：
 1. 准备度结论

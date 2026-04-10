@@ -25,26 +25,77 @@ playwright-cli open {base-url}
    - **记录登录过程触发的 API（认证端点、token 获取方式）**
 
 2. **执行 When**
-   - 使用 snapshot → 命令映射 → 等待条件 → 截图
+   - 使用 `browser_snapshot` 获取页面快照 → 定位目标元素 → 使用 `browser_click` / `browser_type` / `browser_fill_form` 执行操作 → 使用 `browser_wait_for` 等待状态变化
    - 每步记录耗时、观察结果和异常现象
-   - **每个操作后记录触发的网络请求**：
-     - 请求方法和 URL（如 `POST /api/orders`）
-     - 关键请求参数
-     - 响应状态码和关键返回字段
-     - 请求顺序和依赖关系
+   - **每个操作后捕获网络请求**（具体方法见 C.2.1）
 
 3. **验证 Then**
    - 按剧本声明的 oracle_types 分层验证：
-     - UI Oracle
-     - API Oracle
-     - Data Oracle
-     - Side Effect Oracle
+     - UI Oracle：使用 `browser_snapshot` 检查页面状态
+     - API Oracle：通过捕获的网络请求验证
+     - Data Oracle：通过查询接口验证数据状态
+     - Side Effect Oracle：检查通知、导出等副作用
    - 如果关键场景声明了 Data / Side Effect oracle，但执行中没有拿到对应证据，**不得判 PASS**
    - **记录验证过程中查询用的 API（如 GET 列表、GET 详情）**
 
 4. **记录证据**
-   - 页面截图
+   - 使用 `browser_take_screenshot` 截图保存到 `.e2e-tests/{domain}/evidence/` 目录
    - 如适用，接口返回摘要、trace、导出文件、回显状态、通知页面截图
+
+### C.2.1 网络请求捕获方法
+
+每个 When 步骤执行后，使用 `browser_network_requests` 工具获取触发的网络请求：
+
+```
+工具: browser_network_requests
+参数:
+  filter: "/api/"        # 只关注业务接口，过滤掉静态资源
+  static: false          # 不包含静态资源
+  requestBody: true      # 包含请求体（用于记录参数）
+  requestHeaders: false  # 通常不需要请求头
+```
+
+**捕获要点**：
+- 操作前后各调用一次 `browser_network_requests`，通过对比识别新增请求
+- 关注请求的 `method`、`url`、`status`、`responseBody` 中的关键字段
+- 对于 POST/PUT/DELETE 请求，记录请求参数（requestBody）
+- 对于认证请求，记录 token 获取方式
+- 如果 `browser_network_requests` 返回过多请求，用更精确的 filter（如 `"/api/orders"`)
+
+**替代方案**（当 network_requests 信息不足时）：
+使用 `browser_evaluate` 在页面注入 fetch 拦截器：
+```javascript
+工具: browser_evaluate
+参数:
+  function: |
+    () => {
+      window.__apiLog = window.__apiLog || [];
+      const origFetch = window.fetch;
+      window.fetch = async (...args) => {
+        const res = await origFetch(...args);
+        const url = typeof args[0] === 'string' ? args[0] : args[0].url;
+        if (url.includes('/api/')) {
+          const clone = res.clone();
+          const body = await clone.json().catch(() => null);
+          window.__apiLog.push({ url, method: args[1]?.method || 'GET', status: res.status, body });
+        }
+        return res;
+      };
+      return 'API interceptor installed';
+    }
+```
+
+读取拦截记录：
+```javascript
+工具: browser_evaluate
+参数:
+  function: |
+    () => {
+      const log = window.__apiLog || [];
+      window.__apiLog = [];  // 清空已读记录
+      return JSON.stringify(log, null, 2);
+    }
+```
 
 ## C.3 提炼 API 调用链摘要
 
@@ -94,3 +145,4 @@ playwright-cli close
 1. 各 Scenario 的通过/失败结论及证据
 2. **完整的 API 调用链摘要**（C.3 的输出）
 3. **自动化适配性判断**：哪些操作可以纯 API 化，哪些只能 UI 操作
+4. **证据文件路径**：截图存放在 `.e2e-tests/{domain}/evidence/` 下

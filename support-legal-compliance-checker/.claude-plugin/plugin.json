@@ -1,0 +1,12 @@
+{
+  "name": "support-legal-compliance-checker",
+  "description": "Legal compliance: regulatory audits, privacy policies, and contract review across multiple jurisdictions",
+  "version": "1.0.0",
+  "author": { "name": "jxin" },
+  "homepage": "https://github.com/Jxin-Cai/agents-plugin",
+  "repository": "https://github.com/Jxin-Cai/agents-plugin",
+  "keywords": ["legal-compliance", "gdpr", "privacy-policy", "contract-review"],
+  "agents": [],
+  "skills": ["./skills/"],
+  "commands": ["./commands/"]
+}
