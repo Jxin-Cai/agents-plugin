@@ -50,6 +50,7 @@ allowed-tools: Read, Glob, Grep, Agent, AskUserQuestion
 
 ### 9. 现有测试与可复用资产
 - 已有测试文件、login helper、data factory、fixture / mock 模板
+- 跨 domain 可复用资产（查 `.e2e-tests/asset-catalog.md`）
 
 ## 扫描边界
 
@@ -87,6 +88,21 @@ prompt 要求：
 
 将扫描结果写入 `.e2e-tests/{domain}/context/context-{slug}.md`，按 9 段结构组织：技术栈 → 1.功能入口与状态迁移 → 2.调用链与依赖（含微服务拓扑图） → 3.权限与角色 → 4.异步链路与一致性窗口 → 5.Feature Flag / 配置开关 → 6.数据模型与状态字段 → 7.可观察信号 → 8.现有测试资产 → 9.测试建议。
 
+### Step 3.5: 回写系统知识图谱
+
+读取 `.e2e-tests/system-map.md`（如不存在则按 `references/system-map-template.md` 初始化）。
+
+将本次扫描中发现的**新知识**追加到 system-map：
+- **服务拓扑**：新发现的服务、依赖关系、消息队列
+- **调用链索引**：新发现的调用链路径和关键端点
+- **源码路径映射**：本次扫描的源码文件与服务/功能的对应关系（用于后续变更影响分析）
+- **认证模型**：扫描中发现的认证方式、角色、权限差异
+
+回写原则：
+- 已有条目只更新 `最后验证` 日期，不覆盖人工修正
+- 新条目追加到对应区块
+- 在 system-map 变更日志中记录本次回写
+
 ### Step 4: 用户确认
 
 使用 **AskUserQuestion** 确认扫描结果是否充分。
@@ -103,6 +119,7 @@ prompt 要求：
 2. **代码扫描必须走 Explore agent** — 不在主上下文中堆积大量代码
 3. **识别不造** — 扫不到就如实说
 4. **扫描结果必须落文件** — 沉淀到 `context/`
+5. **必须回写 system-map** — 每次扫描的知识不只服务当前任务，也服务未来所有任务
 
 <IMPORTANT>
 目标是"知道怎么测、能看什么信号"，不是"理解整个代码库"。

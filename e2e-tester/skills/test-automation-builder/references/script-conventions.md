@@ -2,7 +2,7 @@
 
 定义 E2E 自动化脚本的命名、元数据、自描述、注册表字段和适用边界。
 
-核心原则：**沉淀的是纯 API/脚本级自动化，不依赖浏览器。** Playwright 探索中拦截到的接口调用链是脚本的知识来源，但脚本本身直接调接口、验数据。
+核心原则：沉淀两种类型的自动化测试：**API 脚本**（纯接口，`.test.ts`，不依赖浏览器）和 **E2E 脚本**（Playwright 混合流，`.spec.ts`，API + UI 验证）。Playwright 探索中拦截到的接口调用链是脚本的知识来源，但脚本本身直接调接口、验数据。
 
 ---
 
@@ -11,6 +11,14 @@
 - 路径: `.e2e-tests/{domain}/automation/ts-{nnn}-{slug}.test.ts`
 - 示例: `.e2e-tests/user-auth/automation/ts-001-login-basic.test.ts`
 - 扩展名: `.test.ts`（不是 `.spec.ts`，不依赖 Playwright test runner）
+
+---
+
+## E2E 脚本命名
+
+- 路径: `.e2e-tests/{domain}/automation/ts-{nnn}-{slug}.spec.ts`
+- 示例: `.e2e-tests/user-auth/automation/ts-002-login-mfa.spec.ts`
+- 扩展名: `.spec.ts`（使用 Playwright Test Runner）
 
 ---
 
@@ -50,6 +58,8 @@
  */
 ```
 
+> API 脚本和 E2E 脚本使用相同的 JSDoc 元数据格式。E2E 脚本额外增加 `@type e2e-script`（API 脚本为 `@type api-script`，可省略）。
+
 ### 强制字段
 - `@business_scenario`
 - `@cases`
@@ -63,16 +73,69 @@
 - `@mock_assets`
 - `@helpers`
 - `@automation_confidence`
-- `限制` 说明（如无可写“无已知限制”）
+- `限制` 说明（如无可写"无已知限制"）
 
 ---
 
 ## 脚本结构要求
 
-### 禁止项
+### 禁止项（仅 `api-script`）
 - 不得 import playwright 或任何浏览器操作库
 - 不得使用 `page`、`browser`、`locator` 等浏览器概念
 - 不得依赖截图或 DOM 状态作为断言
+
+### E2E 脚本结构要求（`e2e-script`）
+
+**必须项**：
+- 使用 Playwright Test Runner 结构（`test.describe`、`test`、`test.beforeAll`）
+- 可使用 `page`、`browser`、`locator`、`expect` 等 Playwright API
+- 可在同一测试中混合 `page.request` API 调用和 UI 交互
+- 可通过 `npx playwright test {path}` 运行
+- 头部元数据格式与 API 脚本一致
+
+**推荐**：
+- 数据准备和状态验证优先用 API 调用（`page.request` 或 `test.beforeAll` 中的 fetch）
+- UI 交互只用于无 API 替代的操作（文件上传、拖拽、多步表单向导）和视觉确认
+- 每个 case 仍需独立断言块
+
+**推荐结构**：
+
+```typescript
+import { test, expect } from '@playwright/test';
+
+const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
+
+test.describe('TS-002: MFA 登录流程', () => {
+  let token: string;
+
+  test.beforeAll(async ({ request }) => {
+    // API 准备数据
+    const res = await request.post(`${BASE_URL}/api/test/seed-user`, {
+      data: { username: 'mfa-user', mfa_enabled: true }
+    });
+    expect(res.ok()).toBeTruthy();
+  });
+
+  test('C1: MFA 正常登录', async ({ page }) => {
+    // UI 操作（无法绕过 UI）
+    await page.goto(`${BASE_URL}/login`);
+    await page.fill('[name=username]', 'mfa-user');
+    await page.fill('[name=password]', 'password');
+    await page.click('button[type=submit]');
+    
+    // MFA 验证（纯 UI 交互）
+    await page.fill('[name=mfa-code]', '123456');
+    await page.click('button[type=submit]');
+    
+    // API 验证结果
+    await expect(page).toHaveURL(/dashboard/);
+    const session = await page.request.get(`${BASE_URL}/api/auth/session`);
+    expect(session.ok()).toBeTruthy();
+    const data = await session.json();
+    expect(data.mfa_verified).toBe(true);
+  });
+});
+```
 
 ### 必须项
 - 使用 `fetch` 或项目内 HTTP client 调用 API
@@ -81,6 +144,7 @@
 - 如需认证，通过 API 登录获取 token，不模拟 UI 登录
 - 脚本可通过 `npx tsx` 直接运行
 - 对多个 case 给出清晰的 case 级输出或断言段落
+- **如需加载 mock 配置，使用约定的 mock-loader**（见 mock-strategy.md 中的运行时集成约定）
 
 ### 推荐结构
 
@@ -126,7 +190,7 @@ async function runCaseC1() {
 - 必须有 API 层断言（HTTP status + response body 关键字段）
 - 对于状态流转，必须通过查询接口验证最终状态
 - 对异常路径，验证错误码和错误信息符合预期
-- 验证“操作没有产生错误副作用”（如重复记录、状态异常）
+- 验证"操作没有产生错误副作用"（如重复记录、状态异常）
 - 多个 case 时，每个 case 都必须有独立断言块
 
 ### 不接受的断言
@@ -136,20 +200,48 @@ async function runCaseC1() {
 
 ---
 
-## 注册表 schema
+## 注册表架构（分片）
+
+注册表从单文件 `registry.yaml` 改为**按 domain 分片**：
+
+```
+.e2e-tests/registry/
+├── index.yaml          # 全局索引
+├── user-auth.yaml      # domain 注册表
+├── order-flow.yaml
+├── payment-checkout.yaml
+└── suites.yaml         # 命名套件定义
+```
+
+### 全局索引 `registry/index.yaml`
 
 ```yaml
-version: 4
-updated: {ISO 8601 时间戳}
+version: 1
+updated: {ISO 8601}
+domains:
+  user-auth:
+    file: user-auth.yaml
+    script_count: 3
+    last_updated: {ISO 8601}
+  order-flow:
+    file: order-flow.yaml
+    script_count: 2
+    last_updated: {ISO 8601}
+```
+
+### 域注册表 `registry/{domain}.yaml`
+
+```yaml
+domain: {domain}
+updated: {ISO 8601}
 
 scripts:
   - id: ts-{nnn}
-    domain: {domain}
     scenario: TS-{NNN}-{slug}
     business_scenario: {business_scenario}
     cases: [C1, C2, C3]
     script: {domain}/automation/ts-{nnn}-{slug}.test.ts
-    type: api-script
+    type: api-script | e2e-script
     tags: [{tags}]
     covers: [{covers}]
     risk_level: High | Medium | Low
@@ -177,22 +269,88 @@ scripts:
     limitations:
       - {限制1：仍需人工验证的部分}
     source_exploration: {domain}/reports/{date}/TS-{NNN}-run-{RRR}.md
+    source_paths:
+      - src/modules/{module}/**
+      - src/api/{endpoint}.ts
     created: {YYYY-MM-DD}
     last_passed: {YYYY-MM-DD}
-    run_command: npx tsx .e2e-tests/{domain}/automation/ts-{nnn}-{slug}.test.ts
+    stale: false
+    last_failed: null         # set by run-suite on failure
+    fail_count: 0             # consecutive failure count
+    suites: []                # which named suites include this script
+    run_command: npx tsx .e2e-tests/{domain}/automation/ts-{nnn}-{slug}.test.ts    # api-script
+    # 或: npx playwright test .e2e-tests/{domain}/automation/ts-{nnn}-{slug}.spec.ts  # e2e-script
 ```
+
+### 关键字段说明
+
+**`source_paths`**（新增）：
+- 记录该脚本覆盖的**业务源码路径 glob 列表**
+- 来源：scan-context 扫描时建立的"源码路径 → 服务/功能映射"，由 test-automation-builder 在生成脚本时回填
+- 用途：**变更影响分析**（impact-analysis）根据 git diff 的文件列表匹配此字段，推导需要回归的脚本
+- 格式：glob 模式（如 `src/modules/order/**`、`src/api/auth/*.ts`）
+
+### 注册表操作规则
+
+1. **新增脚本**：写入 `registry/{domain}.yaml`，同步更新 `registry/index.yaml` 的 `script_count` 和 `last_updated`
+2. **检索复用**：先读 `registry/index.yaml` 找到目标 domain，再读对应域注册表；跨 domain 检索时需读 `asset-catalog.md`
+3. **过期标记**：`last_passed` 距今超过 90 天 → 自动标记 `stale: true`；stale 脚本在路径决策时降低优先级但不删除
+4. **兼容旧版**：若发现根目录存在旧的 `registry.yaml`（单文件），应迁移到分片结构
 
 ---
 
-## 资产目录登记要求
+## 套件定义
 
-`asset-catalog.md` 至少记录：
-- 共享数据集：名称、适用业务场景、路径、来源任务
-- 共享 mock：名称、覆盖依赖、路径、来源任务
-- 共享 helper：用途、路径、来源任务
-- 自动化脚本：剧本编号、业务场景、覆盖 case、路径、依赖资产
+`.e2e-tests/registry/suites.yaml` 定义命名套件，用于 `run-suite` 批量回归。
 
-新增脚本后，必须同步登记其依赖资产，保证后续技能可检索。
+```yaml
+version: 1
+updated: {ISO 8601}
+
+suites:
+  smoke:
+    description: 部署后冒烟测试
+    scripts:                      # 显式脚本列表
+      - user-auth/automation/ts-001-login-basic.test.ts
+      - order-flow/automation/ts-001-create-order.test.ts
+    estimated_duration: 2m
+
+  core-regression:
+    description: 核心回归（High risk 脚本）
+    scripts: []                   # 空 = 使用动态过滤
+    risk_filter: [High]
+    domains_filter: []
+    tags_filter: []
+    estimated_duration: 10m
+
+  payment-chain:
+    description: 支付链路专项
+    scripts: []
+    risk_filter: []
+    domains_filter: [payment-checkout, order-flow]
+    tags_filter: [payment]
+    estimated_duration: 5m
+```
+
+### 套件解析规则
+
+1. `scripts` 非空 → 使用显式列表
+2. `scripts` 为空 → 从全部域注册表中，按 `risk_filter` + `domains_filter` + `tags_filter` 动态匹配
+3. 多个过滤器取交集
+4. `stale: true` 的脚本降低优先级但不排除
+5. impact-analysis 可输出建议套件配置
+
+---
+
+## 剧本与脚本的关系
+
+> **剧本是设计阶段的中间产物，脚本 JSDoc 是活规格。**
+
+- 剧本（`scenarios/TS-*.md`）在设计模式 Stage 3 中用于与用户对齐测试策略
+- 脚本生成（Stage 6）后，脚本头部的 JSDoc 元数据（`@business_scenario`、`@cases`、`@oracle`、`@risk` 等）承载了剧本 80% 的信息
+- **回归模式不要求剧本存在**，不检查剧本-脚本同步
+- 需要理解脚本意图时，优先读 JSDoc 元数据；只有追溯原始设计决策时才读剧本
+- 剧本文件在设计完成后定性为"历史参考"，不再是活产物
 
 ---
 
@@ -219,16 +377,28 @@ scripts:
 启动子 agent 时使用以下 prompt 结构：
 
 ```text
-你是一个 API 级自动化测试脚本生成器。
+你是一个自动化测试脚本生成器。
+
+生成类型：{api-script | e2e-script}
 
 可用工具：仅限 Read, Write
-约束：只写入指定路径的 .test.ts 文件；不读取 node_modules/；不执行命令
+约束：只写入指定路径的脚本文件；不读取 node_modules/；不执行命令
 
 核心原则：
-- 生成纯 TypeScript 脚本，用 fetch 调接口，用 assert 验证结果
+【当 type = api-script 时】
+- 生成纯 TypeScript 脚本（.test.ts），用 fetch 调接口，用 assert 验证结果
 - 绝对不使用 Playwright 或任何浏览器操作库
 - 脚本必须可通过 npx tsx 直接运行
+
+【当 type = e2e-script 时】
+- 生成 Playwright 测试脚本（.spec.ts），使用 test.describe / test 结构
+- 数据准备和状态验证优先用 API 调用（page.request 或 beforeAll 中的 fetch）
+- UI 交互只用于无 API 替代的操作
+- 脚本必须可通过 npx playwright test 运行
+
+【通用】
 - 尽量复用已有 helper / 数据集 / mock；只有缺口部分才新增
+- 如需加载 mock 配置，使用 _shared/helpers/mock-loader.ts（如存在）
 
 输入：
 - 剧本内容（完整 Markdown）

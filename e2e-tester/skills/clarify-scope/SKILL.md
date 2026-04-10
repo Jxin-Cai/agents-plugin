@@ -55,8 +55,8 @@ allowed-tools: Read, Write, Glob, AskUserQuestion
 ### Step 0: 先找可复用资产，再决定问什么
 
 在追问用户之前，先扫描以下位置：
-- `.e2e-tests/asset-catalog.md`
-- `.e2e-tests/registry.yaml`
+- `.e2e-tests/asset-catalog.md`（跨 domain 资产发现的主入口）
+- `.e2e-tests/registry/index.yaml`（全局脚本索引）→ 按需读取 `registry/{domain}.yaml`
 - `.e2e-tests/_shared/datasets/**`
 - `.e2e-tests/_shared/mocks/**`
 - `.e2e-tests/_shared/helpers/**`

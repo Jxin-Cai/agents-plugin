@@ -112,6 +112,72 @@ endpoints:
 
 ---
 
+## 运行时集成约定
+
+Mock 配置不只是文档——需要在脚本执行时实际生效。以下定义 mock 在不同场景下的加载方式：
+
+### 方式 1：脚本内 mock helper（推荐，适合纯 API 脚本）
+
+当 `.e2e-tests/_shared/helpers/mock-loader.ts` 存在时，脚本可直接引用：
+
+```typescript
+// mock-loader.ts 约定接口
+export interface MockConfig {
+  service: string;
+  endpoints: MockEndpoint[];
+}
+
+/**
+ * 从 mock YAML 配置生成一个 mock 路由函数
+ * 用法：在测试脚本中替代真实 fetch 调用
+ */
+export function loadMockConfig(yamlPath: string): MockConfig;
+
+/**
+ * 创建一个代理 fetch 函数——匹配 mock 规则时返回预设响应，
+ * 未匹配时 fallback 到真实请求或抛错
+ */
+export function createMockFetch(configs: MockConfig[], options?: {
+  fallback: 'real' | 'error';
+}): typeof fetch;
+```
+
+使用示例：
+
+```typescript
+import { loadMockConfig, createMockFetch } from '../../_shared/helpers/mock-loader';
+
+const paymentMock = loadMockConfig('.e2e-tests/order-flow/fixtures/mocks/payment-gateway.mock.yaml');
+const mockFetch = createMockFetch([paymentMock], { fallback: 'error' });
+
+// 测试中使用 mockFetch 替代 fetch
+const res = await mockFetch(`${BASE_URL}/v1/charges`, { method: 'POST', ... });
+```
+
+### 方式 2：Playwright 网络拦截（适合路径 C 探索执行）
+
+Playwright 探索时通过 `page.route()` 拦截请求，按 mock YAML 配置返回预设响应。此方式由 test-runner 路径 C 自动处理。
+
+### 方式 3：外部 Mock Server（适合复杂微服务集成测试）
+
+准备方案（test-prep）中指定外部 mock server 地址和启动命令。此方式需人工或 CI 预配置，test-runner 仅做健康探测。
+
+### 决策规则
+
+| 场景 | 推荐方式 | 说明 |
+|------|----------|------|
+| 纯 API 脚本（Stage 6 沉淀） | mock helper | 零外部依赖，脚本内完成 |
+| Playwright 探索（路径 C） | 网络拦截 | 利用 Playwright 内置能力 |
+| 多服务联调 / CI 集成 | 外部 Mock Server | 需要独立进程提供 mock |
+| mock 配置简单 / 仅 1-2 个端点 | 脚本内硬编码 | 不值得为 1 个端点加载整套 mock |
+
+### mock-loader 首次创建时机
+
+- 首次有脚本需要 mock 且 `_shared/helpers/mock-loader.ts` 不存在时，由 `test-automation-builder` 的 subagent 一并生成
+- mock-loader 本身也登记到 `asset-catalog.md` 的共享 helper 区块
+
+---
+
 ## Mock 使用时机
 
 ### 在剧本中声明
@@ -129,7 +195,7 @@ dependencies:
 
 `test-runner` 在执行前检查剧本的 dependencies：
 1. 读取 mock_config 文件
-2. 根据实际 Mock 工具（如 WireMock、MSW）加载配置
+2. 根据执行路径决定加载方式（helper / 网络拦截 / 外部 server）
 3. 确认 Mock 服务就绪后再开始执行
 
 ### 在报告中记录
@@ -137,7 +203,7 @@ dependencies:
 测试报告的"基本信息"中标注使用了哪些 Mock：
 
 ```markdown
-| Mock 服务 | 配置文件 |
-|-----------|---------|
-| payment-gateway | fixtures/mocks/payment-gateway.mock.yaml |
+| Mock 服务 | 配置文件 | 加载方式 |
+|-----------|---------|----------|
+| payment-gateway | fixtures/mocks/payment-gateway.mock.yaml | mock-helper |
 ```

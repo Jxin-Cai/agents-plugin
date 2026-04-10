@@ -29,6 +29,8 @@ allowed-tools: Read, Glob, Write, AskUserQuestion, Bash(playwright-cli:*), Bash(
 
 ## 前置条件
 
+> **回归模式豁免**：通过 `run-suite` 触发时，不要求剧本和准备方案文件。脚本 JSDoc 元数据提供充足上下文。以下前置条件仅适用于设计模式执行。
+
 必须有对应的准备方案：`.e2e-tests/{domain}/prep/TP-{NNN}-*.md`
 
 ---
@@ -43,16 +45,20 @@ allowed-tools: Read, Glob, Write, AskUserQuestion, Bash(playwright-cli:*), Bash(
    - 解析 business scenario、case matrix、所有 case 和 step
 3. **读取准备方案**：解析 `.e2e-tests/{domain}/prep/TP-{NNN}-*.md`
 4. **读取已有报告（如存在）**：优先检查是否已有同一剧本的历史报告，判断是重跑、补证据、补 case，还是进入沉淀
-5. **准备度门禁**：读取准备方案中的 readiness 结论。若为 BLOCKED，停止执行并产出 BLOCKED 报告。
-6. **依赖健康探测**：对准备方案中策略为 `real` 的依赖服务，执行健康检查。任一关键依赖不可用时：
+5. **读取 quality-ledger**（如存在）：`.e2e-tests/quality-ledger.md`
+   - 提取与当前剧本涉及服务相关的**时序基线**（用于设置轮询超时）
+   - 提取与当前服务相关的**失败模式**（辅助归因）
+   - 提取**环境陷阱**（提前规避已知问题）
+6. **准备度门禁**：读取准备方案中的 readiness 结论。若为 BLOCKED，停止执行并产出 BLOCKED 报告。
+7. **依赖健康探测**：对准备方案中策略为 `real` 的依赖服务，执行健康检查。任一关键依赖不可用时：
    - 如有降级方案（切 mock）→ 记录降级并继续
    - 无降级方案 → 标记 BLOCKED，停止执行
 
 ### 阶段 1: 先检索可复用资产，再做路径决策
 
 查询以下来源：
-- `.e2e-tests/registry.yaml`
-- `.e2e-tests/asset-catalog.md`
+- `.e2e-tests/registry/index.yaml` → 按需读取 `registry/{domain}.yaml`（优先当前 domain，跨 domain 检索走 asset-catalog.md）
+- `.e2e-tests/asset-catalog.md`（跨 domain 资产发现的主入口）
 - `.e2e-tests/{domain}/task/task.md`
 - `.e2e-tests/{domain}/task/index.md`
 
@@ -83,7 +89,7 @@ allowed-tools: Read, Glob, Write, AskUserQuestion, Bash(playwright-cli:*), Bash(
 npx tsx .e2e-tests/{domain}/automation/ts-{nnn}-*.test.ts
 ```
 
-**遗留 Playwright 脚本**（`type: playwright`，仅历史兼容）：
+**E2E 脚本**（`type: e2e-script`）：
 ```bash
 npx playwright test .e2e-tests/{domain}/automation/ts-{nnn}-*.spec.ts --reporter=json
 ```
@@ -140,21 +146,37 @@ npx playwright test .e2e-tests/{domain}/automation/ts-{nnn}-*.spec.ts --reporter
 
 ### 阶段 4: 沉淀判断与索引回写
 
-仅当满足以下条件时建议沉淀为纯 API 自动化脚本：
+仅当满足以下条件时建议沉淀为自动化脚本（API 脚本或 E2E 脚本）：
 - 测试路径成立且证据完整
-- **核心操作有对应的 API 端点**（从探索过程中已确认）
+- **核心操作有对应的 API 端点**（从探索过程中已确认）→ 建议 `api-script`
+- **核心操作必须通过 UI 完成，但验证点明确且页面结构稳定** → 建议 `e2e-script`
 - **状态验证可通过查询接口完成**
 - 准备方案可重复
 - 当前结论不是偶发或环境噪音
 
 否则应明确说明：暂不适合自动化沉淀，原因是什么。
 
-完成后在 `.e2e-tests/{domain}/task/index.md` 中回写：
+完成后在 `.e2e-tests/{domain}/task/index.md` 中回写（格式参照 `references/index-template.md` 的 Stage 5 区块）：
 - 报告路径
 - 路径决策（A/B/C）
 - 每个 case 的执行结果
 - 复用的资产
 - 本次新增的证据或候选沉淀资产
+- 如执行中发现前置阶段认知有误（如调用链遗漏、依赖策略需调整），在 index.md 的"后续修正记录"中追加条目
+
+### 阶段 4.5: 回写跨任务知识
+
+**回写 quality-ledger**（`.e2e-tests/quality-ledger.md`，如不存在则按 `references/quality-ledger-template.md` 初始化）：
+- **失败模式**：每个 FAIL case 的归因，如果与已有模式匹配则更新复现次数，否则新增条目
+- **时序基线**：异步操作的实际等待时间（轮询了多久、一致性窗口多长）
+- **环境陷阱**：执行中遇到的环境问题（依赖不稳定、配置差异、数据污染）
+- **依赖稳定性**：本次执行中各依赖的可用性记录
+- **Flaky 治理**：本次出现的 flaky 现象和根因分类
+
+**回写 system-map**（`.e2e-tests/system-map.md`）：
+- **实测验证**：路径 C 探索中发现的 API 端点、调用链、认证方式，作为对 system-map 的实测验证
+- 更新已有条目的 `最后验证` 日期
+- 新发现的端点/调用链追加到对应区块
 
 ### 阶段 5: 用户决定后续动作
 

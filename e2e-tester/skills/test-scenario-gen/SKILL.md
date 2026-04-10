@@ -22,6 +22,7 @@ allowed-tools: Read, Glob, Write, AskUserQuestion
 1. 需要有来自 `clarify-scope` 的测试任务文件：`.e2e-tests/{domain}/task/task.md`
 2. 需要有来自 `scan-context` 的上下文摘要（除非用户明确跳过）
 3. 需要先读取 `.e2e-tests/{domain}/task/index.md`，识别已挂载的共享数据集、mock、helper、历史脚本
+4. 检索 `.e2e-tests/registry/index.yaml`（查看已有脚本避免编号冲突）和 `.e2e-tests/asset-catalog.md`（跨 domain 可复用资产）
 
 ---
 
@@ -123,7 +124,7 @@ allowed-tools: Read, Glob, Write, AskUserQuestion
 3. **一剧本一业务场景** — 不相关功能不塞进同一剧本
 4. **一剧本多 case，逐个验证** — case 必须可单独判断通过/失败
 5. **操作可映射** — 操作描述要精确到可被 Playwright 执行或被 API 脚本映射
-6. **编号全局唯一** — 检查 registry.yaml 确保编号不冲突
+6. **编号全局唯一** — 检查 `registry/index.yaml` 及各域注册表确保编号不冲突
 7. **准备引用必须明确** — 每个剧本都要指向 `prep_ref`
 8. **优先复用资产** — 能从任务文件或共享目录复用的内容，不要重新发明
 9. **支持中断接续** — 已有剧本时优先在原文件体系上续写、补 case 或重审

@@ -30,13 +30,16 @@ allowed-tools: Read, Glob, Write, AskUserQuestion
 - `.e2e-tests/_shared/datasets/**`
 - `.e2e-tests/_shared/mocks/**`
 - `.e2e-tests/_shared/helpers/**`
-- `.e2e-tests/asset-catalog.md`
+- `.e2e-tests/asset-catalog.md`（跨 domain 资产发现的主入口）
+- `.e2e-tests/registry/index.yaml` → 按需读取 `registry/{domain}.yaml`
+- `.e2e-tests/quality-ledger.md`（如存在）— 读取"环境陷阱"和"依赖稳定性画像"，提前规避已知问题
 
 目标：
 - 找出现有可复用的数据集 / mock / helper
 - 判断哪些可直接复用，哪些需要复制后定制，哪些必须为本任务新建
 - 判断当前任务是否已有可接续的准备方案
 - 避免准备阶段再次让用户从零提供相同信息
+- **参考 quality-ledger 中的环境陷阱和依赖稳定性画像，为依赖策略决策提供历史依据**
 
 ### Step 1: 读取剧本并识别准备项
 
