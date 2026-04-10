@@ -21,13 +21,19 @@
  * @scenario TS-{NNN}
  * @domain {business-domain}
  * @title {中文标题}
+ * @business_scenario {单一业务场景}
+ * @cases C1, C2, C3
  * @risk {High | Medium | Low}
  * @persona {role}
  * @covers {feature1}, {feature2}
  * @tags {tag1}, {tag2}
  * @oracle {api, data, side-effect}
  * @prep prep/TP-{NNN}-{slug}.md
+ * @task task/task.md
  * @api_endpoints {POST /api/xxx}, {GET /api/yyy}
+ * @datasets .e2e-tests/_shared/datasets/{dataset}.json
+ * @mock_assets .e2e-tests/_shared/mocks/{mock}.yaml
+ * @helpers .e2e-tests/_shared/helpers/{helper}.ts
  * @created {YYYY-MM-DD}
  * @last_updated {YYYY-MM-DD}
  * @automation_confidence {high | medium | low}
@@ -45,13 +51,19 @@
 ```
 
 ### 强制字段
+- `@business_scenario`
+- `@cases`
 - `@risk`
 - `@persona`
 - `@oracle`
 - `@prep`
+- `@task`
 - `@api_endpoints`
+- `@datasets`
+- `@mock_assets`
+- `@helpers`
 - `@automation_confidence`
-- `限制` 说明（如无可写"无已知限制"）
+- `限制` 说明（如无可写“无已知限制”）
 
 ---
 
@@ -68,6 +80,7 @@
 - 状态验证通过查询接口（如 GET 列表、GET 详情）
 - 如需认证，通过 API 登录获取 token，不模拟 UI 登录
 - 脚本可通过 `npx tsx` 直接运行
+- 对多个 case 给出清晰的 case 级输出或断言段落
 
 ### 推荐结构
 
@@ -86,12 +99,11 @@ async function login(username: string, password: string): Promise<string> {
   return data.token;
 }
 
-// 测试场景
-async function testScenario() {
-  // Given: 准备数据
+async function runCaseC1() {
+  // Given
   const token = await login('test-user', 'password');
 
-  // When: 执行业务操作
+  // When
   const res = await fetch(`${BASE_URL}/api/orders`, {
     method: 'POST',
     headers: {
@@ -101,14 +113,8 @@ async function testScenario() {
     body: JSON.stringify({ /* ... */ }),
   });
 
-  // Then: 验证结果
+  // Then
   assert(res.status === 201, `期望 201，实际 ${res.status}`);
-
-  // 验证状态变更
-  const order = await fetch(`${BASE_URL}/api/orders/${orderId}`, {
-    headers: { 'Authorization': `Bearer ${token}` },
-  }).then(r => r.json());
-  assert(order.status === 'pending', `期望 pending，实际 ${order.status}`);
 }
 ```
 
@@ -120,7 +126,8 @@ async function testScenario() {
 - 必须有 API 层断言（HTTP status + response body 关键字段）
 - 对于状态流转，必须通过查询接口验证最终状态
 - 对异常路径，验证错误码和错误信息符合预期
-- 验证"操作没有产生错误副作用"（如重复记录、状态异常）
+- 验证“操作没有产生错误副作用”（如重复记录、状态异常）
+- 多个 case 时，每个 case 都必须有独立断言块
 
 ### 不接受的断言
 - 只检查 HTTP 200 不看 body
@@ -132,15 +139,17 @@ async function testScenario() {
 ## 注册表 schema
 
 ```yaml
-version: 3
+version: 4
 updated: {ISO 8601 时间戳}
 
 scripts:
   - id: ts-{nnn}
     domain: {domain}
     scenario: TS-{NNN}-{slug}
+    business_scenario: {business_scenario}
+    cases: [C1, C2, C3]
     script: {domain}/automation/ts-{nnn}-{slug}.test.ts
-    type: api-script  # 标识为纯 API 脚本
+    type: api-script
     tags: [{tags}]
     covers: [{covers}]
     risk_level: High | Medium | Low
@@ -149,6 +158,13 @@ scripts:
       - POST /api/xxx
       - GET /api/yyy
     prep: {domain}/prep/TP-{NNN}-{slug}.md
+    source_task: {domain}/task/task.md
+    datasets:
+      - _shared/datasets/{dataset}.json
+    mock_assets:
+      - _shared/mocks/{mock}.yaml
+    helpers:
+      - _shared/helpers/{helper}.ts
     match_keys:
       persona: {role}
       goal: {goal}
@@ -160,11 +176,23 @@ scripts:
     automation_confidence: high | medium | low
     limitations:
       - {限制1：仍需人工验证的部分}
-    source_exploration: {domain}/reports/{date}/TS-{NNN}-run-{RRR}.md  # 来源探索报告
+    source_exploration: {domain}/reports/{date}/TS-{NNN}-run-{RRR}.md
     created: {YYYY-MM-DD}
     last_passed: {YYYY-MM-DD}
     run_command: npx tsx .e2e-tests/{domain}/automation/ts-{nnn}-{slug}.test.ts
 ```
+
+---
+
+## 资产目录登记要求
+
+`asset-catalog.md` 至少记录：
+- 共享数据集：名称、适用业务场景、路径、来源任务
+- 共享 mock：名称、覆盖依赖、路径、来源任务
+- 共享 helper：用途、路径、来源任务
+- 自动化脚本：剧本编号、业务场景、覆盖 case、路径、依赖资产
+
+新增脚本后，必须同步登记其依赖资产，保证后续技能可检索。
 
 ---
 
@@ -200,12 +228,14 @@ scripts:
 - 生成纯 TypeScript 脚本，用 fetch 调接口，用 assert 验证结果
 - 绝对不使用 Playwright 或任何浏览器操作库
 - 脚本必须可通过 npx tsx 直接运行
+- 尽量复用已有 helper / 数据集 / mock；只有缺口部分才新增
 
 输入：
 - 剧本内容（完整 Markdown）
 - 准备方案（完整 Markdown）
-- API 调用链摘要（从 Playwright 探索报告提炼）
-- 可复用 helper（如有）
+- 当前任务文件与任务索引
+- API 调用链摘要（从报告提炼）
+- 可复用 helper / 数据集 / mock（如有）
 - 本文档中的头部元数据格式和代码规范
 
 输出：
@@ -213,6 +243,7 @@ scripts:
 - 头部必须包含完整的 JSDoc 元数据
 - 使用 fetch 进行 HTTP 调用
 - 断言覆盖剧本声明的关键 oracle
+- 覆盖多个 case 时，为每个 case 写独立执行函数或断言块
 - 包含清理/回滚逻辑（如适用）
 - 脚本末尾调用主函数并处理错误退出码
 ```

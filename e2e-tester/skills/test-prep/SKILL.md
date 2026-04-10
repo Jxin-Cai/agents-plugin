@@ -6,19 +6,45 @@ allowed-tools: Read, Glob, Write, AskUserQuestion
 
 # E2E 测试准备器
 
-围绕已确认的测试剧本，生成可执行的测试准备方案，给执行阶段提供 readiness gate。
+围绕已确认的测试剧本，生成可执行的测试准备方案，并对数据集、mock、helper 等资产做“复用 / 定制 / 新建”的决策，给执行阶段提供 readiness gate。
+
+---
+
+## 提问规则
+
+1. 所有阶段选择使用 `AskUserQuestion`
+2. 默认允许用户用 Other 补充不在选项内的准备策略
+3. 当多个准备动作可以并行成立时，使用 `multiSelect: true`
+4. 如果已存在 TP 文件，应优先问“沿用哪些、补哪些、重做哪些”
 
 ---
 
 ## 执行流程
 
+### Step 0: 先检索共享资产
+
+读取并检查：
+- `.e2e-tests/{domain}/task/task.md`
+- `.e2e-tests/{domain}/task/index.md`
+- `.e2e-tests/{domain}/prep/TP-*.md`（如存在）
+- `.e2e-tests/_shared/datasets/**`
+- `.e2e-tests/_shared/mocks/**`
+- `.e2e-tests/_shared/helpers/**`
+- `.e2e-tests/asset-catalog.md`
+
+目标：
+- 找出现有可复用的数据集 / mock / helper
+- 判断哪些可直接复用，哪些需要复制后定制，哪些必须为本任务新建
+- 判断当前任务是否已有可接续的准备方案
+- 避免准备阶段再次让用户从零提供相同信息
+
 ### Step 1: 读取剧本并识别准备项
 
-从剧本 frontmatter 和正文提取：persona、preconditions、dependencies、oracle_types、out_of_scope、测试数据占位符、Side Effect / Data / API 层的验证需求。
+从剧本 frontmatter 和正文提取：persona、preconditions、dependencies、oracle_types、out_of_scope、测试数据占位符、Side Effect / Data / API 层验证需求、`reused_assets`。
 
 据此整理准备项：账号与角色、数据前置状态、Mock / Fixture 文件、依赖服务健康检查、特性开关 / 环境配置、环境隔离策略、清理与回滚策略。
 
-### Step 2: 生成准备方案
+### Step 2: 生成或更新准备方案
 
 生成 `.e2e-tests/{domain}/prep/TP-{NNN}-{slug}.md`，按以下结构：
 
@@ -31,13 +57,20 @@ allowed-tools: Read, Glob, Write, AskUserQuestion
 - **执行角色**: {persona}
 - **风险等级**: {risk_level}
 
+## 资产决策表
+| 资产类型 | 名称 | 处理方式 | 路径 | 说明 |
+|----------|------|----------|------|------|
+| dataset | {名称} | reuse / clone-and-tune / new-task / new-shared | {路径} | {说明} |
+| mock | {名称} | reuse / clone-and-tune / new-task / new-shared | {路径} | {说明} |
+| helper | {名称} | reuse / clone-and-tune / new-task / new-shared | {路径} | {说明} |
+
 ## 账号与权限
 | 账号 | 角色 | 权限要求 | 来源 |
 |------|------|----------|------|
 
 ## 前置数据
-| 数据项 | 目标状态 | 准备方式 | 清理方式 |
-|--------|----------|---------|---------|
+| 数据项 | 目标状态 | 准备方式 | 资产来源 | 清理方式 |
+|--------|----------|---------|----------|---------|
 
 ## 依赖与策略
 | 服务 | 策略 | 配置 | 健康检查 |
@@ -47,25 +80,20 @@ allowed-tools: Read, Glob, Write, AskUserQuestion
 对策略为 `real` 的每个依赖服务，列出健康探测方式和预期结果：
 | 服务 | 探测方式 | 预期结果 | 不可用时的降级方案 |
 |------|----------|----------|-------------------|
-> 探测方式示例：`GET /health`、`ping DB`、`MQ connectivity check`。
-> 如果无法探测，策略应调整为 mock，或将准备度标记为 PARTIAL/BLOCKED。
 
 ## 环境隔离策略
-在共享环境中执行 E2E 测试时，必须明确隔离机制以防污染：
 - **流量标记**: 测试请求是否携带特殊 header/trace-tag 以区分测试流量
 - **数据隔离**: 测试数据写入独立命名空间/租户/前缀，还是共享库
 - **版本锁定**: 被测链路各服务版本是否固定，是否有其他部署可能干扰
 
 ## 数据准备策略
-| 数据项 | 准备方式 | 关联数据 | 清理方式 |
-|--------|----------|----------|---------|
+| 数据项 | 准备方式 | 关联数据 | 落盘位置 | 清理方式 |
+|--------|----------|----------|----------|---------|
 > **准备方式**类型：
 > - `api-create` — 通过 API 调用创建（推荐，可编程复现）
 > - `db-seed` — 通过数据库脚本注入
 > - `fixture-import` — 导入预制数据集
 > - `snapshot-restore` — 从快照还原到已知状态
->
-> 对于关联数据（如用户→订单→支付），需标明创建顺序和依赖关系。
 
 ## 特性开关 / 环境要求
 
@@ -78,7 +106,21 @@ allowed-tools: Read, Glob, Write, AskUserQuestion
 - 原因: {简述}
 ```
 
-### Step 3: 准备度判定
+如果 TP 文件已存在，应基于现有文件补齐、修订或追加，而不是默认推倒重来。
+
+### Step 3: 共享资产沉淀决策
+
+对于准备过程中新增的资产，必须明确落盘位置：
+- **任务专用资产**：`.e2e-tests/{domain}/fixtures/`
+- **可复用共享数据集**：`.e2e-tests/_shared/datasets/`
+- **可复用共享 mock**：`.e2e-tests/_shared/mocks/`
+- **可复用共享 helper**：`.e2e-tests/_shared/helpers/`
+
+判断原则：
+- 只服务当前任务、强依赖当前环境状态 → 任务专用
+- 可在相近场景复用、命名可抽象、准备方式稳定 → 共享资产
+
+### Step 4: 准备度判定
 
 以下任一条件成立时，准备度 **不得判 READY**：
 - 核心账号未明确
@@ -89,13 +131,17 @@ allowed-tools: Read, Glob, Write, AskUserQuestion
 - 清理 / 回滚方式不明
 - 策略为 real 的关键依赖健康探测未通过或未执行
 - 共享环境下无隔离机制且存在数据污染风险
+- 可复用资产明明存在但未说明为何不复用
 
-### Step 4: 用户确认
+### Step 5: 更新任务索引并用户确认
 
-使用 **AskUserQuestion** 确认：
-- 准备充分，进入执行
-- 仍需补充数据 / Mock / 账号
-- 回到剧本阶段调整场景
+1. 在 `.e2e-tests/{domain}/task/index.md` 中登记：TP 文件、资产决策、准备度结论
+2. 使用 **AskUserQuestion** 确认：
+   - 准备充分，进入执行
+   - 仍需补充数据 / Mock / 账号
+   - 回到剧本阶段调整场景
+   - 其他自定义处理
+3. 当用户可能同时选择多项补充动作时，使用 `multiSelect: true`
 
 **⏸️ 等待用户确认后结束。**
 
@@ -109,6 +155,8 @@ allowed-tools: Read, Glob, Write, AskUserQuestion
 4. **清理策略必须明确** — 涉及脏数据或副作用的场景必须说明回滚办法
 5. **数据准备必须可复现** — 优先 API 创建或快照还原，避免依赖手工操作
 6. **共享环境必须说明隔离** — 不标明隔离策略的共享环境测试方案不完整
+7. **优先复用共享资产** — 若共享目录已有可复用资产，默认先复用或复制定制，而不是从零新建
+8. **支持中断接续** — 已有 TP 文件时优先续写、补齐、重审
 
 <IMPORTANT>
 测试准备不是附属品，而是执行质量的前提。

@@ -1,6 +1,6 @@
 # E2E 测试质量报告模板
 
-报告的目标不是记录执行流水，而是给出测试结论的可信度说明。
+报告的目标不是记录执行流水，而是给出测试结论的可信度说明，并明确本次复用了什么、沉淀了什么。
 
 ---
 
@@ -29,10 +29,10 @@
 
 ## 三、风险覆盖矩阵
 
-| 场景 | 风险 | 是否执行 | 结果 | 备注 |
+| Case | 风险 | 是否执行 | 结果 | 备注 |
 |------|------|----------|------|------|
-| Happy Path | High | 是 | PASS | ... |
-| Exception | High | 是 | FAIL | ... |
+| C1 Happy Path | High | 是 | PASS | ... |
+| C2 Exception | High | 是 | FAIL | ... |
 
 ## 四、Oracle 完整度
 
@@ -45,35 +45,33 @@
 | Async | 否 | - | - | N/A |
 | Idempotency | 否 | - | - | N/A |
 
-## 四-A、异步验证详情（如涉及）
+## 五、Case 执行汇总
 
-| 异步操作 | 一致性窗口 | 轮询策略 | 实际等待 | 结果 |
-|----------|-----------|---------|---------|------|
-| {操作描述} | {预期}ms | {interval}ms × {retries} | {实际}ms | PASS / TIMEOUT |
+| Case | 类型 | 执行方式 | 结果 | 主要证据 | 结论 |
+|------|------|----------|------|----------|------|
+| C1 | Happy Path | A | PASS | API + Data | 业务承诺成立 |
+| C2 | Exception | C | FAIL | API + Error | 错误处理不符合预期 |
 
-时序验证（如涉及）：
-| 预期顺序 | 实际顺序 | 结果 |
-|----------|---------|------|
-| A → B → C | A → B → C | ✅ |
+## 六、场景详情
 
-## 五、场景详情
+### Case C1: {case 名称} — {PASS / FAIL / BLOCKED}
 
-### Scenario 1: {场景名称} — {PASS / FAIL / BLOCKED}
-
-#### Step 1.1: {步骤名称} — {PASS / FAIL / SKIP}
+#### Step 1: {步骤名称} — {PASS / FAIL / SKIP}
 - 操作: ...
 - 观察: ...
 - 证据: ...
 
 #### Oracle 判定
-- UI: PASS / FAIL
+- UI: PASS / FAIL / NOT CHECKED
 - API: PASS / FAIL / NOT CHECKED
 - Data: PASS / FAIL / NOT CHECKED
 - Side Effect: PASS / FAIL / NOT CHECKED
+- Async: PASS / FAIL / NOT CHECKED
+- Idempotency: PASS / FAIL / NOT CHECKED
 
-## 六、失败分析与归因
+## 七、失败分析与归因
 
-### 失败 1: Scenario {N} / Step {N.M}
+### 失败 1: Case {N} / Step {N.M}
 | 项目 | 内容 |
 |------|------|
 | 现象 | ... |
@@ -81,18 +79,31 @@
 | 归因置信度 | High / Medium / Low |
 | 建议动作 | ... |
 
-## 七、Flaky 观察与治理
+## 八、Flaky 观察与治理
 - flaky suspicion: none / low / medium / high
 - 是否触发自动重试: 是 / 否
 - 重试结果: {PASS / FAIL / 未重试}
 - flaky 根因分类: {env_unstable / timing / data_pollution / test_defect / 未确定}
 - 治理建议: {修复脚本 / 延长一致性窗口 / 增加数据隔离 / 降级为告警 / 无需处理}
 
-## 八、未覆盖项与限制
+## 九、复用 / 新增资产汇总
+
+### 已复用资产
+- 数据集: {路径或“无”}
+- Mock: {路径或“无”}
+- Helper: {路径或“无”}
+- 自动化脚本: {路径或“无”}
+
+### 本次新增资产
+- 证据文件: {路径或“无”}
+- 候选共享数据集 / Mock / Helper: {路径或“无”}
+- 候选自动化脚本: {路径或“无”}
+
+## 十、未覆盖项与限制
 - 本次未覆盖: ...
 - 原因: ...
 
-## 九、总结与建议
+## 十一、总结与建议
 - 证明了什么
 - 没证明什么
 - 下一步建议
@@ -105,6 +116,8 @@
 1. 准备度为 BLOCKED 时，总体结论不得为 PASS
 2. 关键 oracle 缺失时，总体结论不得为 PASS
 3. 每个 FAIL 都要归因
-4. 要写出"证明了什么"和"没证明什么"
-5. 异步操作超时未达成时，需区分"业务真的失败"和"一致性窗口不够长"
-6. flaky 场景必须标注根因分类，不能只写 suspicion level
+4. 每个 case 都要单独给出执行结论
+5. 要写出“证明了什么”和“没证明什么”
+6. 异步操作超时未达成时，需区分“业务真的失败”和“一致性窗口不够长”
+7. flaky 场景必须标注根因分类，不能只写 suspicion level
+8. 必须交代“复用了什么、沉淀了什么”，否则报告不完整

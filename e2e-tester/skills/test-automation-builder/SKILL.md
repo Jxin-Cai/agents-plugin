@@ -17,30 +17,40 @@ allowed-tools: Read, Glob, Write, Agent, Bash(npx tsc --noEmit*), Bash(npx tsx*)
 - **直接调 API**：用 HTTP 请求完成业务操作，不模拟 UI 交互
 - **直接验证数据**：查接口返回、查数据库状态，不靠页面截图
 - **零浏览器依赖**：`npx tsx` 就能跑，不需要 Playwright runtime
+- **可被后续场景复用**：脚本、数据集、mock、helper 都必须可检索、可登记
 
 ---
 
 ## 前置条件
 
 - 剧本文件和准备方案
-- **Playwright 探索报告**（含 API 调用链摘要）——这是从路径 C 执行中提炼的关键输入
+- `task/task.md` 与 `task/index.md`
+- **Playwright 探索报告**（含 API 调用链摘要）——这是从路径 C 执行中提炼的关键输入；若路径 A/B 已有足够接口知识，也可作为输入
 - `references/script-conventions.md` 在 Step 3 确认要生成脚本时才读取
 
 ---
 
 ## 执行流程
 
-### Step 1: 收集上下文
+### Step 1: 收集上下文并先检查可复用资产
 
 读取：
 - 剧本文件
 - 准备方案（TP-{NNN}）
+- 当前任务文件与任务索引
 - 最近成功报告（如有），**重点提取其中的 API 调用链摘要**
-- `_shared/helpers/` 中可复用 helper
+- `.e2e-tests/_shared/helpers/` 中可复用 helper
+- `.e2e-tests/registry.yaml`
+- `.e2e-tests/asset-catalog.md`
+
+目标：
+- 判断是否已有足够接近的脚本可直接复用或复制微调
+- 判断是否已有数据集 / mock / helper 可以直接引用
+- 只有确有缺口时才生成新脚本或新共享资产
 
 ### Step 2: 判断是否适合自动化
 
-> **注意**：此步骤仅做适配性判断，**不要在此步骤读取** `references/script-conventions.md`。只有判断为"适合"并进入 Step 3 后才读取。
+> **注意**：此步骤仅做适配性判断，**不要在此步骤读取** `references/script-conventions.md`。只有判断为“适合”并进入 Step 3 后才读取。
 
 **适合**：
 - 核心操作可通过 API 调用完成（不依赖纯前端交互如拖拽、画布）
@@ -56,7 +66,7 @@ allowed-tools: Read, Glob, Write, Agent, Bash(npx tsc --noEmit*), Bash(npx tsx*)
 
 ### Step 3: 用 subagent 生成脚本
 
-读取 `references/script-conventions.md`（含脚本规范、注册表 schema、subagent prompt 模板）。
+读取 `references/script-conventions.md`（含脚本规范、注册表 schema、资产登记要求、subagent prompt 模板）。
 使用 **Agent 工具** 启动子 agent，按其中的 subagent 模板提供 prompt。
 
 **生成的脚本特征**：
@@ -64,6 +74,7 @@ allowed-tools: Read, Glob, Write, Agent, Bash(npx tsc --noEmit*), Bash(npx tsx*)
 - 不 import playwright，不操作浏览器
 - 断言基于接口返回值和数据状态
 - 可通过 `npx tsx` 直接运行
+- 头部元数据明确声明依赖的数据集 / mock / helper / 来源任务
 
 ### Step 4: 校验
 
@@ -72,16 +83,29 @@ allowed-tools: Read, Glob, Write, Agent, Bash(npx tsc --noEmit*), Bash(npx tsx*)
 - **不含任何 Playwright/浏览器依赖**
 - 如用户要求可试运行：`npx tsx .e2e-tests/{domain}/automation/ts-{nnn}-*.test.ts`
 
-### Step 5: 更新注册表
+### Step 5: 更新注册表与资产目录
 
-在 `.e2e-tests/registry.yaml` 中新增条目（schema 见 `script-conventions.md`）。
+完成后必须同步更新：
+- `.e2e-tests/registry.yaml`
+- `.e2e-tests/asset-catalog.md`
+- `.e2e-tests/{domain}/task/index.md`
+
+至少登记：
+- 脚本路径
+- 覆盖的业务场景与 case
+- 依赖的数据集 / mock / helper
+- 来源报告 / 来源任务
+- 自动化置信度
+- 限制说明
 
 ### Step 6: 输出资产摘要
 
 展示：
 - 脚本路径
 - 覆盖的 API 端点和 oracle
-- 与 Playwright 探索报告的对应关系
+- 与探索报告的对应关系
+- 复用的资产
+- 新增沉淀的资产
 - 限制说明（哪些验证点仍需人工确认）
 
 ---
@@ -93,6 +117,8 @@ allowed-tools: Read, Glob, Write, Agent, Bash(npx tsc --noEmit*), Bash(npx tsx*)
 3. **不适合自动化时要明确拒绝**
 4. **注册表必须同步更新**
 5. **生成的脚本不得依赖 Playwright 或任何浏览器 runtime**
+6. **优先复用再新建** — 有相近脚本、helper、数据集时，先复用或复制微调
+7. **资产必须可追溯** — 脚本依赖了什么、来自哪次任务，必须能从元数据和索引中看出来
 
 <IMPORTANT>
 如果某个业务场景只能通过 UI 交互验证（无对应 API），应在 limitations 中明确标注，而不是生成 Playwright 脚本来凑数。

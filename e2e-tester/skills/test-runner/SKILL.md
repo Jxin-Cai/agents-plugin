@@ -6,7 +6,16 @@ allowed-tools: Read, Glob, Write, AskUserQuestion, Bash(playwright-cli:*), Bash(
 
 # E2E 测试执行器
 
-读取剧本和准备方案，通过准备度门禁、三路径执行策略和多层 oracle 验证执行测试。目标不是“跑完步骤”，而是给出可信的测试结论。
+读取任务文件、剧本和准备方案，通过准备度门禁、三路径执行策略和多层 oracle 验证执行测试。目标不是“跑完步骤”，而是给出可信的测试结论，并把复用/新增资产回写到索引里。
+
+---
+
+## 提问规则
+
+1. 所有选择必须使用 `AskUserQuestion`
+2. 默认允许用户通过 Other 输入不在预设选项中的后续动作
+3. 当用户可能同时想“查看失败分析 + 补充准备 + 修改剧本”时，使用 `multiSelect: true`
+4. 如果已有报告存在，应优先问“基于已有报告继续什么动作”，而不是默认重跑
 
 ---
 
@@ -28,29 +37,34 @@ allowed-tools: Read, Glob, Write, AskUserQuestion, Bash(playwright-cli:*), Bash(
 
 ### 阶段 0: 读取输入并做 readiness gate
 
-1. **读取剧本**：解析 `.e2e-tests/{domain}/scenarios/TS-{NNN}-*.md`
+1. **读取任务主文件**：`.e2e-tests/{domain}/task/task.md` 与 `.e2e-tests/{domain}/task/index.md`
+2. **读取剧本**：解析 `.e2e-tests/{domain}/scenarios/TS-{NNN}-*.md`
    - 提取 frontmatter 全部字段
-   - 解析所有 Scenario 和 Step
-
-2. **读取准备方案**：解析 `.e2e-tests/{domain}/prep/TP-{NNN}-*.md`
-
-3. **准备度门禁**：读取准备方案中的 readiness 结论。若为 BLOCKED，停止执行并产出 BLOCKED 报告。
-
-4. **依赖健康探测**：对准备方案中策略为 `real` 的依赖服务，执行健康检查（`GET /health`、DB ping 等）。任一关键依赖不可用时：
+   - 解析 business scenario、case matrix、所有 case 和 step
+3. **读取准备方案**：解析 `.e2e-tests/{domain}/prep/TP-{NNN}-*.md`
+4. **读取已有报告（如存在）**：优先检查是否已有同一剧本的历史报告，判断是重跑、补证据、补 case，还是进入沉淀
+5. **准备度门禁**：读取准备方案中的 readiness 结论。若为 BLOCKED，停止执行并产出 BLOCKED 报告。
+6. **依赖健康探测**：对准备方案中策略为 `real` 的依赖服务，执行健康检查。任一关键依赖不可用时：
    - 如有降级方案（切 mock）→ 记录降级并继续
    - 无降级方案 → 标记 BLOCKED，停止执行
 
-### 阶段 1: 路径决策
+### 阶段 1: 先检索可复用资产，再做路径决策
 
-查询 `.e2e-tests/registry.yaml` 匹配自动化脚本：
+查询以下来源：
+- `.e2e-tests/registry.yaml`
+- `.e2e-tests/asset-catalog.md`
+- `.e2e-tests/{domain}/task/task.md`
+- `.e2e-tests/{domain}/task/index.md`
 
-1. 精确匹配：剧本编号 + match_keys
-2. 模糊匹配：同 domain 下 tags/covers/risk_level/oracle_types
+匹配逻辑：
+1. 精确匹配：剧本编号 + business_scenario + persona + match_keys
+2. 模糊匹配：同 domain 下 tags/covers/risk_level/oracle_types/依赖画像
+3. 辅助匹配：共享数据集、mock、helper 是否已齐备
 
 **决策规则**：
 - **路径 A：已有脚本** → 直接执行
 - **路径 B：生成脚本后执行** → 仅在满足以下条件时允许：
-  - 剧本的 oracle 可以机械验证
+  - 剧本内各 case 的 oracle 可以机械验证
   - 准备方案完整
   - 页面结构和交互稳定
   - 没有复杂异步链路需要先探索
@@ -76,7 +90,7 @@ npx playwright test .e2e-tests/{domain}/automation/ts-{nnn}-*.spec.ts --reporter
 
 执行后：
 - 解析执行结果（exit code + stdout/stderr）
-- 映射到剧本的 Scenario / Step / Oracle 结构
+- 映射到剧本的 case / step / oracle 结构
 - 如脚本本身报错，归类为 **automation defect**，而不是产品失败
 
 ---
@@ -96,11 +110,11 @@ npx playwright test .e2e-tests/{domain}/automation/ts-{nnn}-*.spec.ts --reporter
 
 > **条件加载**：仅当路径决策为 C 时，读取 `references/playwright-explore-guide.md`。路径 A/B 不读取此文件。
 
-按 playwright-explore-guide.md 中的步骤（打开浏览器 → 逐场景执行 Given/When/Then → **拦截并记录 API 调用链** → 失败分类 → 关闭浏览器）完成探索式测试。
+按 playwright-explore-guide.md 中的步骤（打开浏览器 → 逐 case 执行 Given/When/Then → **拦截并记录 API 调用链** → 失败分类 → 关闭浏览器）完成探索式测试。
 
 **路径 C 的双重目标**：
-1. 验证业务场景是否通过
-2. **提炼 API 调用链**——记录每个操作触发了哪些接口请求、参数和返回值，为后续沉淀纯 API 脚本提供知识输入
+1. 验证业务场景下每个 case 是否通过
+2. **提炼 API 调用链**——记录每个 case 的关键操作触发了哪些接口请求、参数和返回值，为后续沉淀纯 API 脚本提供知识输入
 
 ---
 
@@ -114,16 +128,17 @@ npx playwright test .e2e-tests/{domain}/automation/ts-{nnn}-*.spec.ts --reporter
 1. 准备度结论
 2. 执行方式与整体结果
 3. 风险覆盖情况
-4. oracle 完整度（含 async / idempotency oracle，如涉及）
-5. 证据完整度
+4. oracle 完整度
+5. **case 执行汇总**
 6. 场景与步骤细节
 7. 失败分类与置信度
 8. flaky 观察与治理建议
-9. 未覆盖项与后续建议
+9. **复用/新增资产汇总**
+10. 未覆盖项与后续建议
 
 > **条件加载**：当剧本包含 `async` 或 `idempotency` oracle，或执行中出现 flaky 现象时，读取 `references/async-and-flaky-guide.md` 获取详细的异步验证策略和 flaky 治理规范。
 
-### 阶段 4: 沉淀判断
+### 阶段 4: 沉淀判断与索引回写
 
 仅当满足以下条件时建议沉淀为纯 API 自动化脚本：
 - 测试路径成立且证据完整
@@ -134,6 +149,25 @@ npx playwright test .e2e-tests/{domain}/automation/ts-{nnn}-*.spec.ts --reporter
 
 否则应明确说明：暂不适合自动化沉淀，原因是什么。
 
+完成后在 `.e2e-tests/{domain}/task/index.md` 中回写：
+- 报告路径
+- 路径决策（A/B/C）
+- 每个 case 的执行结果
+- 复用的资产
+- 本次新增的证据或候选沉淀资产
+
+### 阶段 5: 用户决定后续动作
+
+使用 `AskUserQuestion` 展示后续动作：
+- 继续补证据
+- 补充准备后重测
+- 修改剧本后重测
+- 进入自动化沉淀
+- 结束当前轮次
+- 其他自定义动作
+
+当多个动作可并行规划时，使用 `multiSelect: true`。
+
 ---
 
 ## 约束
@@ -143,6 +177,9 @@ npx playwright test .e2e-tests/{domain}/automation/ts-{nnn}-*.spec.ts --reporter
 3. **失败必须归类** — 不要只写 FAIL，要说明更像哪类问题
 4. **Playwright 不是默认选项** — 但在不确定时，要优先探索而不是冒险生成低质量脚本
 5. **报告必须体现可信度** — 不是只汇总执行过程，而是交付测试判断
+6. **优先复用已有资产** — 路径决策前先查共享资产和历史脚本，不要默认从零执行
+7. **按 case 判定** — 剧本内多个 case 必须逐个给出 PASS / FAIL / BLOCKED / SKIP
+8. **支持中断接续** — 有历史报告时，优先基于已有结论决定下一步，而不是默认整轮重跑
 
 <IMPORTANT>
 关键 oracle 缺失时，即使页面表现正常，也不能判 PASS。
