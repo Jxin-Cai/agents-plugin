@@ -24,13 +24,15 @@ allowed-tools: Read, Glob, Grep, Write, Agent, Bash(git log*), Bash(git diff*), 
 ### Step 0: 收集失败上下文
 
 1. 读取失败脚本文件（从 `$ARGUMENTS` 或最近的 `regression-*.md` 报告）
-2. 提取脚本 JSDoc 元数据：`@api_endpoints`、`@source_paths`、`@domain`、`@scenario`、`@cases`、`@type`
-3. 读取 `registry/{domain}.yaml` 中对应条目
+2. 提取脚本 JSDoc 元数据：`@api_endpoints`、`@domain`、`@scenario`、`@cases`
+3. 读取 `registry/{domain}.yaml` 中对应条目，提取 `source_paths`、`type`、`api_endpoints`
 4. 获取错误输出（从回归报告或重新执行脚本获取）
+
+> **source_paths 和 type 从 registry 读取**，不从 JSDoc 提取——registry 是权威来源，JSDoc 可能遗漏。
 
 ### Step 1: 诊断根因
 
-根据 `@source_paths`，检查相关源码的近期变更：
+根据 registry 条目的 `source_paths`，检查相关源码的近期变更：
 
 ```bash
 git log --oneline -10 -- {source_paths}
@@ -72,7 +74,7 @@ Subagent 修复规则：
 
 ### Step 3: 验证修复
 
-重跑修复后的脚本：
+重跑修复后的脚本（按 registry 中的 `type` 字段判断执行器，如 registry 缺失则按文件扩展名：`.test.ts` → api-script，`.spec.ts` → e2e-script）：
 
 ```bash
 # type: api-script

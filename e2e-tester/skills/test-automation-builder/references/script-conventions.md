@@ -58,9 +58,10 @@
  */
 ```
 
-> API 脚本和 E2E 脚本使用相同的 JSDoc 元数据格式。E2E 脚本额外增加 `@type e2e-script`（API 脚本为 `@type api-script`，可省略）。
+> API 脚本和 E2E 脚本使用相同的 JSDoc 元数据格式。`@type` 为必填字段：API 脚本写 `@type api-script`，E2E 脚本写 `@type e2e-script`。
 
 ### 强制字段
+- `@type`（`api-script` 或 `e2e-script`）
 - `@business_scenario`
 - `@cases`
 - `@risk`

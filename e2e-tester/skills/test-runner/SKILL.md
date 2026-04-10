@@ -1,7 +1,7 @@
 ---
 name: test-runner
 description: 基于专业 E2E 剧本执行测试并生成质量报告。当用户提到"执行测试"、"跑测试"、"运行剧本"，或在 /e2e 流程的执行阶段时触发。
-allowed-tools: Read, Glob, Write, Skill, AskUserQuestion, Bash(playwright-cli:*), Bash(npx playwright*), Bash(npx tsx*), Bash(mkdir*)
+allowed-tools: Read, Glob, Write, Skill, AskUserQuestion, Bash(npx playwright*), Bash(npx tsx*), Bash(mkdir*)
 ---
 
 # E2E 测试执行器

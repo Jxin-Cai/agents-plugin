@@ -2,7 +2,7 @@
 name: run-suite
 description: 批量回归执行器——按套件/域/标签/脚本列表批量执行已有自动化脚本，生成轻量回归报告。当用户说"跑回归"、"回归测试"、"跑套件"、"run suite"、"regression"时触发。
 argument-hint: "<suite名 | domain名 | tag过滤 | 脚本列表>"
-allowed-tools: Read, Glob, Write, Bash(npx tsx*), Bash(npx playwright*), Bash(mkdir*), AskUserQuestion
+allowed-tools: Read, Glob, Write, Skill, Bash(npx tsx*), Bash(npx playwright*), Bash(mkdir*), AskUserQuestion
 ---
 
 # 批量回归执行器
