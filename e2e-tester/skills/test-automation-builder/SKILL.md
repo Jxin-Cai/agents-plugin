@@ -12,12 +12,11 @@ allowed-tools: Read, Glob, Write, Agent, Bash(npx tsc --noEmit*), Bash(npx tsx*)
 
 ## 核心理念
 
-Playwright 是侦察工具，不是沉淀目标。探索过程中拦截到的网络请求、接口调用链、状态变化才是真正的知识。沉淀的脚本应该：
+沉淀的脚本应该：
 
 - **直接调 API**：用 HTTP 请求完成业务操作，不模拟 UI 交互
 - **直接验证数据**：查接口返回、查数据库状态，不靠页面截图
 - **零浏览器依赖**：`npx tsx` 就能跑，不需要 Playwright runtime
-- **稳定不脆弱**：接口契约变化远少于 UI 变化，脚本寿命更长
 
 ---
 
@@ -94,6 +93,5 @@ Playwright 是侦察工具，不是沉淀目标。探索过程中拦截到的网
 5. **生成的脚本不得依赖 Playwright 或任何浏览器 runtime**
 
 <IMPORTANT>
-沉淀的是纯 API/脚本级的自动化资产。Playwright 探索是发现接口和验证点的手段，不是最终产物的格式。
 如果某个业务场景只能通过 UI 交互验证（无对应 API），应在 limitations 中明确标注，而不是生成 Playwright 脚本来凑数。
 </IMPORTANT>

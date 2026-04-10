@@ -31,6 +31,11 @@ allowed-tools: Read, Glob, Bash(mkdir*), AskUserQuestion
 
 **阶段完成标志：** 用户确认了测试任务定义（包含目标、风险等级、角色、边界、依赖策略、通过标准）。
 
+**阶段摘要提取：** 记录以下信息供后续阶段引用（避免后续阶段重读全文）：
+- 被测流程名称与风险等级
+- 关键依赖列表及策略（real/mock/fixture）
+- 成功判据与不可接受结果
+
 使用 `AskUserQuestion` 工具询问用户是否进入下一阶段（选项：继续下一阶段 / 调整测试任务 / 结束流程）。
 
 **⏸️ 等待用户选择后继续。**
@@ -43,6 +48,12 @@ allowed-tools: Read, Glob, Bash(mkdir*), AskUserQuestion
 
 **阶段完成标志：** `.e2e-tests/{domain}/context/` 下已有上下文摘要，且用户确认扫描结果充分。
 
+**阶段摘要提取：** 记录以下信息：
+- 上下文摘要文件路径
+- 关键调用链（A → B → C 形式）
+- 已识别的异步链路和可观察信号
+- 可复用的测试资产
+
 使用 `AskUserQuestion` 工具询问用户是否进入下一阶段（选项：继续下一阶段 / 补充扫描 / 跳过扫描直接进入剧本生成）。
 
 **⏸️ 等待用户选择后继续。**
@@ -51,9 +62,14 @@ allowed-tools: Read, Glob, Bash(mkdir*), AskUserQuestion
 
 ## Step 3: 构建测试剧本
 
-调用 `/test-scenario-gen`
+将 Step 1 和 Step 2 的阶段摘要作为上下文传入。调用 `/test-scenario-gen`
 
 **阶段完成标志：** `.e2e-tests/{domain}/scenarios/TS-{NNN}-*.md` 已生成，用户已审阅确认。
+
+**阶段摘要提取：** 记录以下信息：
+- 生成的剧本文件路径列表
+- 场景矩阵（场景名 + 类型 + 风险 + 主要 oracle）
+- 涉及的 mock 依赖
 
 使用 `AskUserQuestion` 工具询问用户是否进入下一阶段（选项：继续准备测试 / 修改剧本 / 新增更多剧本 / 结束流程）。
 
@@ -63,9 +79,14 @@ allowed-tools: Read, Glob, Bash(mkdir*), AskUserQuestion
 
 ## Step 4: 准备测试环境与数据
 
-调用 `/test-prep`
+将 Step 3 的剧本路径列表传入。调用 `/test-prep`
 
 **阶段完成标志：** `.e2e-tests/{domain}/prep/TP-{NNN}-*.md` 已生成，准备度结论明确（READY / BLOCKED / PARTIAL）。
+
+**阶段摘要提取：** 记录以下信息：
+- 准备方案文件路径列表
+- 各剧本的准备度结论
+- BLOCKED 或 PARTIAL 的原因（如有）
 
 使用 `AskUserQuestion` 工具询问用户是否进入下一阶段（选项：继续执行测试 / 补充准备项 / 回到剧本修改 / 结束流程）。
 
@@ -75,7 +96,7 @@ allowed-tools: Read, Glob, Bash(mkdir*), AskUserQuestion
 
 ## Step 5: 执行测试
 
-调用 `/test-runner`
+将 Step 3 的剧本路径和 Step 4 的准备方案路径传入。调用 `/test-runner`
 
 **阶段完成标志：** `.e2e-tests/{domain}/reports/{date}/TS-{NNN}-run-{RRR}.md` 已生成。
 

@@ -19,10 +19,8 @@ allowed-tools: Read, Glob, Write, AskUserQuestion
 
 ## 前置条件
 
-1. 读取 `references/scenario-template.md` — 剧本模板
-2. 需要有来自 `clarify-scope` 的测试任务定义
-3. 需要有来自 `scan-context` 的上下文摘要（除非用户明确跳过）
-4. 当剧本涉及 mock 依赖时，读取 `references/mock-strategy.md`
+1. 需要有来自 `clarify-scope` 的测试任务定义
+2. 需要有来自 `scan-context` 的上下文摘要（除非用户明确跳过）
 
 ---
 
@@ -37,6 +35,9 @@ allowed-tools: Read, Glob, Write, AskUserQuestion
 - **Key Exception** — 关键异常路径，必须
 - **Boundary** — 关键边界或状态切换，建议
 - **Permission / Persona** — 角色差异场景，存在则必须
+- **Async / Eventual Consistency** — 异步链路场景（涉及 MQ、回调、Saga），存在则必须
+- **Idempotency** — 幂等性场景（重复提交是否安全），涉及写操作则建议
+- **Fault Tolerance** — 下游超时/降级/部分失败时的行为，微服务链路建议
 
 使用 **AskUserQuestion** 向用户展示规划的场景矩阵，确认优先级。
 
@@ -46,14 +47,18 @@ allowed-tools: Read, Glob, Write, AskUserQuestion
 
 1. **为什么测这个场景** — 它覆盖什么风险或业务承诺？
 2. **通过要看什么信号** — UI / API / Data / Side Effect 哪些是必须验证的？
-3. **失败时最担心什么** — 脏数据、重复操作、越权、通知缺失、状态不一致？
+3. **失败时最担心什么** — 脏数据、重复操作、越权、通知缺失、状态不一致、异步链路断裂、补偿未执行？
 4. **需要什么准备** — 账号、数据、权限、Mock、特性开关、环境状态？
+5. **是否涉及异步** — 操作结果是否需要等待异步处理完成？一致性窗口多长？用什么方式轮询确认？
+6. **是否需要验证幂等性** — 同一请求重复提交是否安全？是否产生重复数据或重复副作用？
 
 如果场景只有 UI 信号，没有业务结果信号，要重新设计，不能直接写剧本。
 
 ### Step 3: 生成剧本
 
-按 `references/scenario-template.md` 模板结构逐个生成剧本文件。关键要求：
+读取 `references/scenario-template.md` 获取剧本模板结构，按模板逐个生成剧本文件。当剧本涉及 mock 依赖时，同时读取 `references/mock-strategy.md`。
+
+关键要求：
 - Frontmatter 必须包含：goal、risk_level、persona、out_of_scope、prep_ref、oracle_types、dependencies
 - 有 `strategy: mock` 的依赖 → 同步生成或引用 mock 配置文件
 - 有 `strategy: fixture` 的依赖 → 同步生成或引用 fixture 文件
@@ -90,6 +95,5 @@ allowed-tools: Read, Glob, Write, AskUserQuestion
 7. **准备引用必须明确** — 每个剧本都要指向 `prep_ref`
 
 <IMPORTANT>
-如果一个剧本无法回答“为什么测”“怎么证明真的通过”“需要什么准备”，那它还不够专业，不能进入执行阶段。
-拒绝把 BDD 写成漂亮但空洞的形式文档。
+如果一个剧本无法回答”为什么测””怎么证明真的通过””需要什么准备”，不能进入执行阶段。
 </IMPORTANT>

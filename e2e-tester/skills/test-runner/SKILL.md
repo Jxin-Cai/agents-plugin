@@ -36,6 +36,10 @@ allowed-tools: Read, Glob, Write, AskUserQuestion, Bash(playwright-cli:*), Bash(
 
 3. **准备度门禁**：读取准备方案中的 readiness 结论。若为 BLOCKED，停止执行并产出 BLOCKED 报告。
 
+4. **依赖健康探测**：对准备方案中策略为 `real` 的依赖服务，执行健康检查（`GET /health`、DB ping 等）。任一关键依赖不可用时：
+   - 如有降级方案（切 mock）→ 记录降级并继续
+   - 无降级方案 → 标记 BLOCKED，停止执行
+
 ### 阶段 1: 路径决策
 
 查询 `.e2e-tests/registry.yaml` 匹配自动化脚本：
@@ -100,18 +104,20 @@ npx playwright test .e2e-tests/{domain}/automation/ts-{nnn}-*.spec.ts --reporter
 
 ### 阶段 3: 生成质量报告
 
-读取 `references/report-template.md`，生成 `.e2e-tests/{domain}/reports/{date}/TS-{NNN}-run-{RRR}.md`
+此时读取 `references/report-template.md` 获取报告结构，生成 `.e2e-tests/{domain}/reports/{date}/TS-{NNN}-run-{RRR}.md`
 
 报告必须包含：
 1. 准备度结论
 2. 执行方式与整体结果
 3. 风险覆盖情况
-4. oracle 完整度
+4. oracle 完整度（含 async / idempotency oracle，如涉及）
 5. 证据完整度
 6. 场景与步骤细节
 7. 失败分类与置信度
-8. flaky suspicion
+8. flaky 观察与治理建议
 9. 未覆盖项与后续建议
+
+> **条件加载**：当剧本包含 `async` 或 `idempotency` oracle，或执行中出现 flaky 现象时，读取 `references/async-and-flaky-guide.md` 获取详细的异步验证策略和 flaky 治理规范。
 
 ### 阶段 4: 沉淀判断
 
@@ -124,8 +130,6 @@ npx playwright test .e2e-tests/{domain}/automation/ts-{nnn}-*.spec.ts --reporter
 
 否则应明确说明：暂不适合自动化沉淀，原因是什么。
 
-**特别注意**：沉淀目标是纯 API 脚本，不是 Playwright 脚本。如果某场景只能通过 UI 交互验证（无对应 API），应标注为"不适合自动化沉淀"而非降级为 Playwright 脚本。
-
 ---
 
 ## 约束
@@ -137,6 +141,5 @@ npx playwright test .e2e-tests/{domain}/automation/ts-{nnn}-*.spec.ts --reporter
 5. **报告必须体现可信度** — 不是只汇总执行过程，而是交付测试判断
 
 <IMPORTANT>
-测试通过的定义不是“步骤都跑完了”，而是“业务承诺被可信地验证了”。
 关键 oracle 缺失时，即使页面表现正常，也不能判 PASS。
 </IMPORTANT>

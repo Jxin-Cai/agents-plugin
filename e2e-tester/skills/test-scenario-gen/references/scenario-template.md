@@ -19,7 +19,7 @@ app: {app-name}
 base_url: {base-url}
 tags: [{tag1}, {tag2}, {tag3}]
 covers: [{feature1}, {feature2}]
-oracle_types: [ui, api, data, side-effect]   # 按需组合
+oracle_types: [ui, api, data, side-effect, async, idempotency]   # 按需组合
 prep_ref: prep/TP-{NNN}-{slug}.md
 dependencies:
   - service: {service-name}
@@ -85,6 +85,18 @@ out_of_scope:
 #### Side Effect Oracle
 - [ ] {通知已发出 / 导出文件生成 / 审批记录新增 / 库存变化正确}
 
+#### Async Oracle（如涉及异步链路）
+- [ ] {异步操作在一致性窗口内完成}
+- [ ] {消息已投递到目标 topic / 消费者已处理}
+- [ ] {Saga 补偿链路正确执行（如触发回滚场景）}
+- 轮询策略: {interval}ms × {max_retries} 次，退避方式: {fixed | exponential}
+- 一致性窗口: {预期最大等待时间}
+
+#### Idempotency Oracle（如涉及写操作）
+- [ ] {同一请求重复提交不产生重复数据}
+- [ ] {重复操作不触发重复副作用（通知、扣款等）}
+- [ ] {重复请求返回结果与首次一致}
+
 **证据要求**
 - 截图: `ts-{nnn}-step-1.2.png`
 - 若有接口证据: {接口响应 / trace / 请求摘要}
@@ -105,6 +117,8 @@ out_of_scope:
 | Scenario 1 | Happy Path | High | ui + data + side-effect | 是 |
 | Scenario 2 | Exception | High | ui + api | 是 |
 | Scenario 3 | Permission | Medium | ui + data | 视稳定性而定 |
+| Scenario 4 | Async | High | async + data | 是 |
+| Scenario 5 | Idempotency | Medium | api + data + idempotency | 是 |
 
 ## 测试数据
 
