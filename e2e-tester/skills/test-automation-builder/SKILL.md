@@ -1,7 +1,7 @@
 ---
 name: test-automation-builder
 description: 将高价值 E2E 测试路径沉淀为自动化测试资产。支持两种类型：纯 API 脚本（.test.ts）和 E2E 脚本（.spec.ts，含 Playwright UI 验证）。当用户要求"沉淀脚本"，或 test-runner 确认适合自动化时触发。
-allowed-tools: Read, Glob, Write, Agent, Bash(npx tsc --noEmit*), Bash(npx tsx*), Bash(npx playwright*)
+allowed-tools: Read, Glob, Write, Agent, AskUserQuestion, Bash(npx tsc --noEmit*), Bash(npx tsx*), Bash(npx playwright*)
 ---
 
 # 自动化测试资产构建器
@@ -109,7 +109,7 @@ allowed-tools: Read, Glob, Write, Agent, Bash(npx tsc --noEmit*), Bash(npx tsx*)
 - `.e2e-tests/registry/{domain}.yaml`（域注册表，按 `references/script-conventions.md` 中的分片 schema）
 - `.e2e-tests/registry/index.yaml`（更新 `script_count` 和 `last_updated`）
 - `.e2e-tests/asset-catalog.md`（跨 domain 可发现）
-- `.e2e-tests/{domain}/task/index.md`（格式参照 `references/index-template.md` 的 Stage 6 区块）
+- `.e2e-tests/{domain}/task/index.md`（格式参照 `e2e/references/index-template.md` 的 Stage 6 区块）
 
 至少登记：
 - 脚本路径

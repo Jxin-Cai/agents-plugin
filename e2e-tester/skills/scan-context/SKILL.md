@@ -1,7 +1,7 @@
 ---
 name: scan-context
 description: 扫描当前项目代码获取被测系统的技术上下文和测试切入点。当在 /e2e 流程的扫描阶段，或用户要求"扫描代码"、"分析项目"时触发。
-allowed-tools: Read, Glob, Grep, Agent, AskUserQuestion
+allowed-tools: Read, Write, Glob, Grep, Agent, AskUserQuestion
 ---
 
 # 项目上下文与测试切入点扫描
@@ -90,7 +90,7 @@ prompt 要求：
 
 ### Step 3.5: 回写系统知识图谱
 
-读取 `.e2e-tests/system-map.md`（如不存在则按 `references/system-map-template.md` 初始化）。
+读取 `.e2e-tests/system-map.md`（如不存在则按 `e2e/references/system-map-template.md` 初始化）。
 
 将本次扫描中发现的**新知识**追加到 system-map：
 - **服务拓扑**：新发现的服务、依赖关系、消息队列

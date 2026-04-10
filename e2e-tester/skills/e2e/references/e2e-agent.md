@@ -49,4 +49,4 @@
 - 自动化索引：`.e2e-tests/registry/index.yaml`（全局索引）+ `.e2e-tests/registry/{domain}.yaml`（域注册表）
 - 套件定义：`.e2e-tests/registry/suites.yaml`（命名套件 → 脚本列表映射）
 - 跨任务知识：`.e2e-tests/system-map.md`（系统架构缓存）+ `.e2e-tests/quality-ledger.md`（质量经验缓存）
-- 回归报告：`.e2e-tests/reports/regression-{date}.md`（轻量回归摘要）
+- 回归报告：`.e2e-tests/reports/regression-{YYYY-MM-DD}-{HHmm}.md`（轻量回归摘要）

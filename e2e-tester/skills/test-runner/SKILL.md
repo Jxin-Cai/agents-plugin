@@ -1,7 +1,7 @@
 ---
 name: test-runner
 description: 基于专业 E2E 剧本执行测试并生成质量报告。当用户提到"执行测试"、"跑测试"、"运行剧本"，或在 /e2e 流程的执行阶段时触发。
-allowed-tools: Read, Glob, Write, AskUserQuestion, Bash(playwright-cli:*), Bash(npx playwright*), Bash(npx tsx*), Bash(mkdir*)
+allowed-tools: Read, Glob, Write, Skill, AskUserQuestion, Bash(playwright-cli:*), Bash(npx playwright*), Bash(npx tsx*), Bash(mkdir*)
 ---
 
 # E2E 测试执行器
@@ -156,7 +156,7 @@ npx playwright test .e2e-tests/{domain}/automation/ts-{nnn}-*.spec.ts --reporter
 
 否则应明确说明：暂不适合自动化沉淀，原因是什么。
 
-完成后在 `.e2e-tests/{domain}/task/index.md` 中回写（格式参照 `references/index-template.md` 的 Stage 5 区块）：
+完成后在 `.e2e-tests/{domain}/task/index.md` 中回写（格式参照 `e2e/references/index-template.md` 的 Stage 5 区块）：
 - 报告路径
 - 路径决策（A/B/C）
 - 每个 case 的执行结果
@@ -166,7 +166,7 @@ npx playwright test .e2e-tests/{domain}/automation/ts-{nnn}-*.spec.ts --reporter
 
 ### 阶段 4.5: 回写跨任务知识
 
-**回写 quality-ledger**（`.e2e-tests/quality-ledger.md`，如不存在则按 `references/quality-ledger-template.md` 初始化）：
+**回写 quality-ledger**（`.e2e-tests/quality-ledger.md`，如不存在则按 `e2e/references/quality-ledger-template.md` 初始化）：
 - **失败模式**：每个 FAIL case 的归因，如果与已有模式匹配则更新复现次数，否则新增条目
 - **时序基线**：异步操作的实际等待时间（轮询了多久、一致性窗口多长）
 - **环境陷阱**：执行中遇到的环境问题（依赖不稳定、配置差异、数据污染）

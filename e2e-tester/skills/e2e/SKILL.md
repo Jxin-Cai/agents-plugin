@@ -73,7 +73,7 @@ domains: {}
    - `scenarios/TS-*.md` 是否存在
    - `prep/TP-*.md` 是否存在
    - `reports/**/TS-*-run-*.md` 是否存在
-   - `automation/*.test.ts` 是否存在
+   - `automation/*.test.ts` 或 `automation/*.spec.ts` 是否存在
    - `task/index.md` 中是否已记录这些产物
 9. **推断当前可接续阶段**：
    - 若无 `task/task.md` → 从 Step 1 开始
@@ -213,7 +213,7 @@ domains: {}
 
 使用 Skill 工具调用 `test-automation-builder` skill。等待该 skill 执行完毕。
 
-**阶段完成标志：** 纯 API 脚本文件已生成（`.test.ts`），`registry/{domain}.yaml` 与 `asset-catalog.md` 已更新，脚本依赖的数据集/mock/helper 已登记。
+**阶段完成标志：** 自动化脚本已生成（API 脚本 `.test.ts` 或 E2E 脚本 `.spec.ts`），`registry/{domain}.yaml` 与 `asset-catalog.md` 已更新，脚本依赖的数据集/mock/helper 已登记。
 
 **更新 `task/index.md`**：同步记录脚本路径、覆盖范围、依赖资产和沉淀结论。更新 frontmatter：`current_stage: done`，`status: completed`，将 6 加入 `completed_stages`。
 

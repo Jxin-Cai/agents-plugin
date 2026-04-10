@@ -1,7 +1,7 @@
 ---
 name: impact-analysis
 description: 分析代码变更对已有测试的影响，推导需要回归的剧本和脚本。当用户提到"这次改了什么需要测"、"回归分析"、"影响分析"、"哪些测试要跑"，或提供 git commit/PR/diff 时触发。
-allowed-tools: Read, Glob, Grep, Bash(git log*), Bash(git diff*), Bash(git show*), AskUserQuestion
+allowed-tools: Read, Write, Glob, Grep, Skill, Bash(git log*), Bash(git diff*), Bash(git show*), AskUserQuestion
 ---
 
 # 变更影响分析

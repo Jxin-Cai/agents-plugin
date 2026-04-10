@@ -80,7 +80,7 @@ npx playwright test .e2e-tests/{domain}/automation/{script}.spec.ts --reporter=j
 
 ### Step 2: 生成轻量回归报告
 
-按 `references/report-template.md` 中"轻量回归报告格式"生成报告。
+按 `test-runner/references/report-template.md` 中"轻量回归报告格式"生成报告。
 
 写入路径：`.e2e-tests/reports/regression-{YYYY-MM-DD}-{HHmm}.md`
 
