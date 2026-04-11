@@ -73,7 +73,7 @@ allowed-tools: Read, Glob, Write, Agent, AskUserQuestion, Bash(npx tsc --noEmit*
 
 ### Step 3: 用 subagent 生成脚本
 
-读取 `references/script-conventions.md`（含脚本规范、注册表 schema、资产登记要求、subagent prompt 模板）。
+读取 `references/script-conventions.md`（脚本规范和 subagent prompt 模板）。注册表 schema 见 `skills/e2e/references/registry-conventions.md`。
 使用 **Agent 工具** 启动子 agent，按其中的 subagent 模板提供 prompt。
 
 **生成的脚本特征**：
@@ -105,11 +105,11 @@ allowed-tools: Read, Glob, Write, Agent, AskUserQuestion, Bash(npx tsc --noEmit*
 
 ### Step 5: 更新注册表与资产目录
 
-完成后必须同步更新：
-- `.e2e-tests/registry/{domain}.yaml`（域注册表，按 `references/script-conventions.md` 中的分片 schema）
+完成后必须同步更新（registry schema 见 `skills/e2e/references/registry-conventions.md`）：
+- `.e2e-tests/registry/{domain}.yaml`（域注册表）
 - `.e2e-tests/registry/index.yaml`（更新 `script_count` 和 `last_updated`）
-- `.e2e-tests/asset-catalog.md`（跨 domain 可发现）
-- `.e2e-tests/{domain}/task/index.md`（格式参照 `e2e/references/index-template.md` 的 Stage 6 区块）
+- `.e2e-tests/asset-catalog.md`（跨 domain 可发现，分片策略见 `skills/e2e/references/registry-conventions.md`）
+- `.e2e-tests/{domain}/task/index.md`（格式参照 `skills/e2e/references/index-template.md` 的 Stage 6 区块）
 
 至少登记：
 - 脚本路径
@@ -118,7 +118,7 @@ allowed-tools: Read, Glob, Write, Agent, AskUserQuestion, Bash(npx tsc --noEmit*
 - 来源报告 / 来源任务
 - 自动化置信度
 - 限制说明
-- **`source_paths`**：从 system-map 的"源码路径 → 服务/功能映射"中提取该脚本覆盖的业务源码路径 glob 列表（用于变更影响分析）
+- **`source_paths`**：该脚本覆盖的业务源码路径 glob 列表，从 scan-context 扫描结果（`context/` 文件）中提取（用于 impact-analysis 的变更影响匹配）
 
 ### Step 6: 输出资产摘要
 

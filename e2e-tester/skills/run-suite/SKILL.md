@@ -18,7 +18,7 @@ allowed-tools: Read, Glob, Write, Skill, Bash(npx tsx*), Bash(npx playwright*), 
 - **速度优先**：脚本间无交互门禁，失败不中断批次
 - **脚本即规格**：不需要 task.md、scenario、prep 文件。脚本 JSDoc 元数据就是全部上下文
 - **轻量报告**：一行一脚本摘要，仅失败展开。不生成 11 节完整报告
-- **知识缓存可选**：system-map 和 quality-ledger 存在就用，不存在就跳过
+- **知识缓存可选**：quality-ledger 存在时读取时序基线和环境陷阱，不存在就跳过
 
 ---
 
@@ -80,7 +80,7 @@ npx playwright test .e2e-tests/{domain}/automation/{script}.spec.ts --reporter=j
 
 ### Step 2: 生成轻量回归报告
 
-按 `test-runner/references/report-template.md` 中"轻量回归报告格式"生成报告。
+按 `references/regression-report-template.md` 生成报告。
 
 写入路径：`.e2e-tests/reports/regression-{YYYY-MM-DD}-{HHmm}.md`
 

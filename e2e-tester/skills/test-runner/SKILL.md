@@ -78,9 +78,11 @@ allowed-tools: Read, Glob, Write, Skill, AskUserQuestion, Bash(npx playwright*),
 
 如果条件不明确，优先路径 C，而不是冒险直接自动生成脚本。
 
----
+### 阶段 2: 执行测试
 
-### 路径 A: 自动化执行
+根据阶段 1 的路径决策，按以下三种路径之一执行。
+
+#### 路径 A: 自动化执行
 
 查看注册表中 `type` 字段判断脚本类型：
 
@@ -101,7 +103,7 @@ npx playwright test .e2e-tests/{domain}/automation/ts-{nnn}-*.spec.ts --reporter
 
 ---
 
-### 路径 B: 生成脚本后执行
+#### 路径 B: 生成脚本后执行
 
 1. 调用 `test-automation-builder` 生成脚本
 2. 生成后执行脚本
@@ -112,7 +114,7 @@ npx playwright test .e2e-tests/{domain}/automation/ts-{nnn}-*.spec.ts --reporter
 
 ---
 
-### 路径 C: Playwright 探索执行
+#### 路径 C: Playwright 探索执行
 
 > **条件加载**：仅当路径决策为 C 时，读取 `references/playwright-explore-guide.md`。路径 A/B 不读取此文件。
 
@@ -156,7 +158,7 @@ npx playwright test .e2e-tests/{domain}/automation/ts-{nnn}-*.spec.ts --reporter
 
 否则应明确说明：暂不适合自动化沉淀，原因是什么。
 
-完成后在 `.e2e-tests/{domain}/task/index.md` 中回写（格式参照 `e2e/references/index-template.md` 的 Stage 5 区块）：
+完成后在 `.e2e-tests/{domain}/task/index.md` 中回写（格式参照 `skills/e2e/references/index-template.md` 的 Stage 5 区块）：
 - 报告路径
 - 路径决策（A/B/C）
 - 每个 case 的执行结果
@@ -164,19 +166,16 @@ npx playwright test .e2e-tests/{domain}/automation/ts-{nnn}-*.spec.ts --reporter
 - 本次新增的证据或候选沉淀资产
 - 如执行中发现前置阶段认知有误（如调用链遗漏、依赖策略需调整），在 index.md 的"后续修正记录"中追加条目
 
-### 阶段 4.5: 回写跨任务知识
+### 阶段 4.5: 回写质量经验
 
-**回写 quality-ledger**（`.e2e-tests/quality-ledger.md`，如不存在则按 `e2e/references/quality-ledger-template.md` 初始化）：
+**回写 quality-ledger**（`.e2e-tests/quality-ledger.md`，如不存在则按 `skills/e2e/references/quality-ledger-template.md` 初始化）：
 - **失败模式**：每个 FAIL case 的归因，如果与已有模式匹配则更新复现次数，否则新增条目
 - **时序基线**：异步操作的实际等待时间（轮询了多久、一致性窗口多长）
 - **环境陷阱**：执行中遇到的环境问题（依赖不稳定、配置差异、数据污染）
 - **依赖稳定性**：本次执行中各依赖的可用性记录
 - **Flaky 治理**：本次出现的 flaky 现象和根因分类
 
-**回写 system-map**（`.e2e-tests/system-map.md`）：
-- **实测验证**：路径 C 探索中发现的 API 端点、调用链、认证方式，作为对 system-map 的实测验证
-- 更新已有条目的 `最后验证` 日期
-- 新发现的端点/调用链追加到对应区块
+> 不回写 system-map 或类似的代码结构缓存。代码逻辑高频变动，缓存即过期。下次需要时通过 scan-context 的 Explore subagent 实时扫描。
 
 ### 阶段 5: 用户决定后续动作
 

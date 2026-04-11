@@ -62,7 +62,7 @@ Subagent prompt 包含：
 - 错误输出
 - 相关源码的 git diff
 - 诊断的根因分类
-- `test-automation-builder/references/script-conventions.md` 中对应类型的规范
+- `skills/test-automation-builder/references/script-conventions.md` 中对应类型的规范
 
 Subagent 修复规则：
 - 保留 JSDoc 元数据结构，更新 `@last_updated`
