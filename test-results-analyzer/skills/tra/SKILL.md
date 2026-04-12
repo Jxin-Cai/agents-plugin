@@ -1,68 +1,96 @@
 ---
 name: tra
-description: 测试结果分析完整流程——按顺序执行覆盖率分析、失败分析、质量报告生成
-argument-hint: "<测试分析任务描述>"
+description: 测试结果分析工作台——按意图路由到覆盖率分析、失败分析、质量报告或完整流程
+argument-hint: "<任务描述>"
+allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Skill"]
 ---
 
-# 测试结果分析完整流程
-
-入口编排技能，串联三个阶段完成从测试数据收集到质量报告产出的完整流程。
+# 测试结果分析工作台
 
 用户传入的参数：`$ARGUMENTS`
 
----
-
-## Step 0: 初始化
-
-1. 从 `$ARGUMENTS` 中提取任务描述，生成一个简短的英文缩写（2-4 个词，用连字符连接，如 `login-api`、`payment-module`）
-2. 使用 `AskUserQuestion` 工具向用户确认任务简写名称，提供你建议的缩写作为选项
-3. 设定工作目录：`_test-analysis/{当前日期}-{任务简写}/`（如 `_test-analysis/2026-04-06-login-api/`）
-4. 创建子目录：`context/`、`coverage/`、`failures/`、`reports/`
-5. 扫描 `_test-analysis/` 下已有的分析目录，向用户简要报告
+先判断用户此刻要完成的工作，再带他进入对应 workflow。不是所有需求都需要走完整管道。
 
 ---
 
-## Step 1: 覆盖率分析
+## 强制执行规则
 
-调用 `/coverage-analysis $ARGUMENTS`
-
-解析测试覆盖率报告，识别覆盖盲区，给出覆盖率改进的优先级建议。
-
-**阶段完成标志：** `{工作目录}/coverage/coverage-*.md` 已生成。
-
-使用 `AskUserQuestion` 工具询问用户是否进入下一阶段（选项：继续下一阶段 / 重新分析覆盖率 / 结束流程）。
-
-**⏸️ 等待用户选择后继续。**
+- ✅ 始终用中文与用户沟通
+- ✅ 先识别 workflow 类型，再进入对应流程
+- 🚫 不默认跑完整管道
+- 🚫 不在入口全量加载所有 references
+- ⏸️ 每个阶段完成后等待用户确认
 
 ---
 
-## Step 2: 失败分析
+## Step 0: 意图识别与 Workflow 路由
 
-调用 `/failure-analysis $ARGUMENTS`
+| 意图信号 | Workflow | 动作 |
+|----------|----------|------|
+| "覆盖率 / coverage / 未覆盖" | coverage-only | 调用 `/coverage-analysis $ARGUMENTS` |
+| "失败 / 错误 / 根因" | failure-only | 调用 `/failure-analysis $ARGUMENTS` |
+| "报告 / 质量 / 趋势" | report-only | 调用 `/quality-report $ARGUMENTS` |
+| "快速检查 / 概览" | quick-scan | → Step 3 |
+| "完整分析 / 全套 或复杂需求" | full-analysis | → Step 1 |
 
-结构化诊断测试失败的根本原因，识别失败模式和缺陷聚集区域。
+意图不明确时，用 `AskUserQuestion` 让用户选择：
+- 仅覆盖率 
+- 仅失败 
+- 仅报告 
+- 快速测试质量分析检查
+- 完整测试质量分析流程（推荐）
 
-**阶段完成标志：** `{工作目录}/failures/failure-*.md` 已生成。
+**⏸️ 等待用户选择。**
 
-使用 `AskUserQuestion` 工具询问用户是否进入下一阶段（选项：继续生成质量报告 / 再来一轮深度分析 / 回到覆盖率分析）。
+---
 
-**⏸️ 等待用户选择后继续。**
+## Step 1: 完整流程初始化
+
+1. 从 `$ARGUMENTS` 提取任务描述，生成英文缩写（2-4 词，连字符连接）
+2. 使用 `AskUserQuestion` 确认缩写
+3. 创建 `_test-analysis/{当前日期}-{缩写}/` 及子目录 `context/` `meta/` 和各阶段子目录
+4. 初始化 `meta/state.md`（workflow_mode、completed_steps、next_step）
+5. 扫描已有目录，检查接续点（产物优先于状态文件）
+
+**⏸️ 使用 `AskUserQuestion` 确认从哪里开始。**
 
 ---
 
-## Step 3: 质量报告
+## Step 2: 完整流程串联执行
 
-调用 `/quality-report $ARGUMENTS`
+每阶段入口重新 Read `meta/state.md`，完成后更新。
 
-基于覆盖率分析和失败分析的产出，生成综合质量报告，含 KPI 度量、质量门控判定和改进建议。
+| 阶段 | 调用 | 完成标志 | 门控 |
+|------|------|---------|------|
+| 覆盖率分析 | `/coverage-analysis $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
+| 失败分析 | `/failure-analysis $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
+| 质量报告 | `/quality-report $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
 
-**阶段完成标志：** `{工作目录}/reports/quality-report-*.md` 已生成。
+每阶段写入摘要到 `meta/{stage}-summary.md`（不超过 20 行）。
 
-质量报告保存后，向用户展示文件的 **绝对路径**，以便用户直接点击打开。
+**⏸️ 每步等待用户确认。**
 
 ---
+
+## Step 3: 快速检查
+
+编排器内轻量执行各维度速览，生成精简报告到 `_test-analysis/quick-scan-{日期}.md`。
+
+使用 `AskUserQuestion`：深入某项 / 进入完整流程 / 结束。
+
+---
+
+## 断点恢复
+
+1. 扫描 `_test-analysis/` 下未完成目录
+2. Read `meta/state.md`，结合产物推断进度
+3. 使用 `AskUserQuestion`：从断点继续 / 重新开始
 
 <IMPORTANT>
-每个阶段完成后必须等待用户确认再进入下一阶段。不要跳过任何阶段。
-如果用户中途要求调整（回到上一步、跳过某步），按用户指令执行。
+工作台的职责是"意图识别 + 路由 + 接续"，不是把所有请求都塞进固定管道。
+覆盖率分析必须区分行覆盖和分支覆盖。
+失败分析必须有根因分类（代码/环境/数据/flaky）。
+不可仅看覆盖率数字，需分析覆盖质量。
+每个阶段完成后必须等待用户确认。
+产出文件与状态文件冲突时，以产出文件为准。
 </IMPORTANT>

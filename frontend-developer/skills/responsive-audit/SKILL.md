@@ -2,6 +2,7 @@
 name: responsive-audit
 description: 响应式审计——检查断点策略、布局弹性、触控适配和多端一致性
 argument-hint: "<目标页面/组件路径或描述>"
+allowed-tools: ["Read", "Write", "Glob", "Grep", "Bash(mkdir*)", "AskUserQuestion"]
 ---
 
 # 响应式审计

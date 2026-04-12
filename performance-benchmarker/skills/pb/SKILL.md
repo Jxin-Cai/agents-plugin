@@ -1,68 +1,96 @@
 ---
 name: pb
-description: 性能基准测试完整流程——按顺序执行负载测试计划、性能分析指南、优化报告
+description: 性能基准测试工作台——按意图路由到负载测试计划、性能分析指南、优化报告或完整流程
 argument-hint: "<任务描述>"
+allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Skill"]
 ---
 
-# 性能基准测试完整流程
-
-入口编排技能，串联三个阶段完成从测试规划到优化报告的完整流程。
+# 性能基准测试工作台
 
 用户传入的参数：`$ARGUMENTS`
 
----
-
-## Step 0: 初始化
-
-1. 从 `$ARGUMENTS` 中提取任务描述，生成简短英文缩写（2-4 词，连字符连接，如 `api-perf`、`checkout-load`）
-2. 使用 `AskUserQuestion` 工具向用户确认任务简写名称，提供你建议的缩写作为选项
-3. 设定工作目录：`_performance/{当前日期}-{任务简写}/`（如 `_performance/2026-04-06-api-perf/`）
-4. 创建子目录：`context/`、`load-tests/`、`profiling/`、`reports/`
-5. 扫描 `_performance/` 下已有的目录，向用户简要报告
+先判断用户此刻要完成的工作，再带他进入对应 workflow。不是所有需求都需要走完整管道。
 
 ---
 
-## Step 1: 负载测试计划
+## 强制执行规则
 
-调用 `/load-test-plan $ARGUMENTS`
-
-设计分阶段压测方案，定义工作负载模型、SLO 目标和测试场景。
-
-**阶段完成标志：** `{任务目录}/load-tests/load-test-plan-*.md` 已生成。
-
-使用 `AskUserQuestion` 工具询问用户是否进入下一阶段（选项：继续下一阶段 / 调整测试计划 / 结束流程）。
-
-**⏸️ 等待用户选择后继续。**
+- ✅ 始终用中文与用户沟通
+- ✅ 先识别 workflow 类型，再进入对应流程
+- 🚫 不默认跑完整管道
+- 🚫 不在入口全量加载所有 references
+- ⏸️ 每个阶段完成后等待用户确认
 
 ---
 
-## Step 2: 性能分析指南
+## Step 0: 意图识别与 Workflow 路由
 
-调用 `/profiling-guide`
+| 意图信号 | Workflow | 动作 |
+|----------|----------|------|
+| "负载 / 压测 / 并发 / QPS" | load-test-only | 调用 `/load-test-plan $ARGUMENTS` |
+| "分析 / profiling / 火焰图" | profiling-only | 调用 `/profiling-guide $ARGUMENTS` |
+| "优化 / 报告 / 对比" | optimization-only | 调用 `/optimization-report $ARGUMENTS` |
+| "快速诊断 / 性能体检" | quick-diagnosis | → Step 3 |
+| "完整基准 / 全套 或复杂需求" | full-benchmark | → Step 1 |
 
-基于测试计划的产出，系统化定位 CPU/内存/I/O 瓶颈，生成分析指南。
+意图不明确时，用 `AskUserQuestion` 让用户选择：
+- 仅负载 
+- 仅分析 
+- 仅优化 
+- 快速性能优化检查
+- 完整性能优化流程（推荐）
 
-**阶段完成标志：** `{任务目录}/profiling/profiling-guide-*.md` 已生成。
+**⏸️ 等待用户选择。**
 
-使用 `AskUserQuestion` 工具询问用户是否进入下一阶段（选项：继续下一阶段 / 补充分析 / 回到测试计划）。
+---
 
-**⏸️ 等待用户选择后继续。**
+## Step 1: 完整流程初始化
+
+1. 从 `$ARGUMENTS` 提取任务描述，生成英文缩写（2-4 词，连字符连接）
+2. 使用 `AskUserQuestion` 确认缩写
+3. 创建 `_performance/{当前日期}-{缩写}/` 及子目录 `context/` `meta/` 和各阶段子目录
+4. 初始化 `meta/state.md`（workflow_mode、completed_steps、next_step）
+5. 扫描已有目录，检查接续点（产物优先于状态文件）
+
+**⏸️ 使用 `AskUserQuestion` 确认从哪里开始。**
 
 ---
 
-## Step 3: 优化报告
+## Step 2: 完整流程串联执行
 
-调用 `/optimization-report`
+每阶段入口重新 Read `meta/state.md`，完成后更新。
 
-将测试数据和分析结果整合为结构化的优化报告。
+| 阶段 | 调用 | 完成标志 | 门控 |
+|------|------|---------|------|
+| 负载测试计划 | `/load-test-plan $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
+| 性能分析指南 | `/profiling-guide $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
+| 优化报告 | `/optimization-report $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
 
-**阶段完成标志：** `{任务目录}/reports/optimization-report-*.md` 已生成。
+每阶段写入摘要到 `meta/{stage}-summary.md`（不超过 20 行）。
 
-报告保存后，向用户展示文件的 **绝对路径**（如 `/Users/xxx/project/_performance/2026-04-06-api-perf/reports/optimization-report-api-perf-2026-04-06.md`），以便用户直接点击打开。
+**⏸️ 每步等待用户确认。**
 
 ---
+
+## Step 3: 快速检查
+
+编排器内轻量执行各维度速览，生成精简报告到 `_performance/quick-scan-{日期}.md`。
+
+使用 `AskUserQuestion`：深入某项 / 进入完整流程 / 结束。
+
+---
+
+## 断点恢复
+
+1. 扫描 `_performance/` 下未完成目录
+2. Read `meta/state.md`，结合产物推断进度
+3. 使用 `AskUserQuestion`：从断点继续 / 重新开始
 
 <IMPORTANT>
-每个阶段完成后必须等待用户确认再进入下一阶段。不要跳过任何阶段。
-如果用户中途要求调整（回到上一步、跳过某步），按用户指令执行。
+工作台的职责是"意图识别 + 路由 + 接续"，不是把所有请求都塞进固定管道。
+负载测试必须有明确的验收标准（响应时间/吞吐量/错误率）。
+优化必须有 before/after 量化对比。
+不可在无基线数据时声称「性能提升 X%」。
+每个阶段完成后必须等待用户确认。
+产出文件与状态文件冲突时，以产出文件为准。
 </IMPORTANT>

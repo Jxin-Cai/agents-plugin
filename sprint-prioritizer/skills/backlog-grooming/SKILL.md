@@ -63,8 +63,11 @@ argument-hint: "<需求池描述或 Backlog 来源>"
 - 上个 Sprint 未完成的溢出项
 - 新提出的需求或变更
 - 技术债务和 Bug 清单
+- **从需求平台拉取（如已配置）**：使用 `/req-search` 直接从 Jira/Linear/GitHub Issues 查询 Backlog 条目（如 Jira: `project = PROJ AND sprint is EMPTY AND status = "To Do" ORDER BY priority`），自动获取结构化数据（标题、描述、优先级、标签等），省去手动输入
 
 如果 `$ARGUMENTS` 非空，以此作为初始输入，但仍需补充缺失信息。
+
+若用户选择从需求平台拉取，引导用户提供搜索条件，用 `/req-search` 执行查询后，再对结果中的关键条目使用 `/req-fetch` 获取完整详情（验收标准、描述、关联等），作为 Step 2 结构化整理的输入。
 
 将团队信息保存到 `{工作目录}/context/team-context.md`。
 

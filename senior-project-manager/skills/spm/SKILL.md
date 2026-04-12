@@ -1,68 +1,96 @@
 ---
 name: spm
-description: 高级项目经理完整工作流——按顺序执行风险评估、干系人地图、时间线规划
-argument-hint: "<项目描述>"
+description: 高级项目经理工作台——按意图路由到风险评估、干系人地图、时间线规划或完整流程
+argument-hint: "<任务描述>"
+allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Skill"]
 ---
 
-# 高级项目经理完整流程
-
-入口编排技能，串联三个阶段完成从项目风险识别到时间线交付的完整流程。
+# 高级项目经理工作台
 
 用户传入的参数：`$ARGUMENTS`
 
----
-
-## Step 0: 初始化
-
-1. 从 `$ARGUMENTS` 中提取项目描述，生成一个简短的英文缩写（2-4 个词，用连字符连接，如 `platform-migration`、`app-launch`）
-2. 使用 `AskUserQuestion` 工具向用户确认项目简写名称，提供你建议的缩写作为选项
-3. 设定工作目录：`_project-mgmt/{当前日期}-{项目简写}/`（如 `_project-mgmt/2026-04-06-platform-migration/`）
-4. 创建子目录：`context/`、`risks/`、`stakeholders/`、`timeline/`
-5. 扫描 `_project-mgmt/` 下已有的项目目录，向用户简要报告
+先判断用户此刻要完成的工作，再带他进入对应 workflow。不是所有需求都需要走完整管道。
 
 ---
 
-## Step 1: 风险评估
+## 强制执行规则
 
-调用 `/risk-assessment $ARGUMENTS`
-
-识别项目风险，通过概率-影响矩阵量化评估，制定应对策略。
-
-**阶段完成标志：** `{项目目录}/risks/risk-register-*.md` 已生成。
-
-使用 `AskUserQuestion` 工具询问用户是否进入下一阶段（选项：继续下一阶段 / 补充更多风险 / 结束流程）。
-
-**⏸️ 等待用户选择后继续。**
+- ✅ 始终用中文与用户沟通
+- ✅ 先识别 workflow 类型，再进入对应流程
+- 🚫 不默认跑完整管道
+- 🚫 不在入口全量加载所有 references
+- ⏸️ 每个阶段完成后等待用户确认
 
 ---
 
-## Step 2: 干系人地图
+## Step 0: 意图识别与 Workflow 路由
 
-调用 `/stakeholder-map $ARGUMENTS`
+| 意图信号 | Workflow | 动作 |
+|----------|----------|------|
+| "风险 / 评估 / 应对" | risk-only | 调用 `/risk-assessment $ARGUMENTS` |
+| "干系人 / 利益相关 / stakeholder" | stakeholder-only | 调用 `/stakeholder-map $ARGUMENTS` |
+| "时间线 / 排期 / 里程碑" | timeline-only | 调用 `/timeline-planning $ARGUMENTS` |
+| "快速诊断 / 概览" | quick-diagnosis | → Step 3 |
+| "完整规划 / 全套 或复杂需求" | full-planning | → Step 1 |
 
-基于权力-利益矩阵识别和分类干系人，制定差异化沟通策略。
+意图不明确时，用 `AskUserQuestion` 让用户选择：
+- 仅风险 
+- 仅干系人 
+- 仅时间线 
+- 快速项目管理检查
+- 完整项目管理流程（推荐）
 
-**阶段完成标志：** `{项目目录}/stakeholders/stakeholder-map-*.md` 已生成。
+**⏸️ 等待用户选择。**
 
-使用 `AskUserQuestion` 工具询问用户是否进入下一阶段（选项：继续下一阶段 / 补充更多干系人 / 回到风险评估）。
+---
 
-**⏸️ 等待用户选择后继续。**
+## Step 1: 完整流程初始化
+
+1. 从 `$ARGUMENTS` 提取任务描述，生成英文缩写（2-4 词，连字符连接）
+2. 使用 `AskUserQuestion` 确认缩写
+3. 创建 `_project-mgmt/{当前日期}-{缩写}/` 及子目录 `context/` `meta/` 和各阶段子目录
+4. 初始化 `meta/state.md`（workflow_mode、completed_steps、next_step）
+5. 扫描已有目录，检查接续点（产物优先于状态文件）
+
+**⏸️ 使用 `AskUserQuestion` 确认从哪里开始。**
 
 ---
 
-## Step 3: 时间线规划
+## Step 2: 完整流程串联执行
 
-调用 `/timeline-planning $ARGUMENTS`
+每阶段入口重新 Read `meta/state.md`，完成后更新。
 
-基于 WBS 分解项目范围，分析任务依赖，识别关键路径，输出里程碑计划。
+| 阶段 | 调用 | 完成标志 | 门控 |
+|------|------|---------|------|
+| 风险评估 | `/risk-assessment $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
+| 干系人地图 | `/stakeholder-map $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
+| 时间线规划 | `/timeline-planning $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
 
-**阶段完成标志：** `{项目目录}/timeline/timeline-plan-*.md` 已生成。
+每阶段写入摘要到 `meta/{stage}-summary.md`（不超过 20 行）。
 
-时间线保存后，向用户展示文件的 **绝对路径**，以便用户直接点击打开。
+**⏸️ 每步等待用户确认。**
 
 ---
+
+## Step 3: 快速检查
+
+编排器内轻量执行各维度速览，生成精简报告到 `_project-mgmt/quick-scan-{日期}.md`。
+
+使用 `AskUserQuestion`：深入某项 / 进入完整流程 / 结束。
+
+---
+
+## 断点恢复
+
+1. 扫描 `_project-mgmt/` 下未完成目录
+2. Read `meta/state.md`，结合产物推断进度
+3. 使用 `AskUserQuestion`：从断点继续 / 重新开始
 
 <IMPORTANT>
-每个阶段完成后必须等待用户确认再进入下一阶段。不要跳过任何阶段。
-如果用户中途要求调整（回到上一步、跳过某步），按用户指令执行。
+工作台的职责是"意图识别 + 路由 + 接续"，不是把所有请求都塞进固定管道。
+风险评估必须有影响×概率矩阵。
+时间线必须标注关键路径和缓冲区。
+干系人地图必须区分影响力和利益维度。
+每个阶段完成后必须等待用户确认。
+产出文件与状态文件冲突时，以产出文件为准。
 </IMPORTANT>

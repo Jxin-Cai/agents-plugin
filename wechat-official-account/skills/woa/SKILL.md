@@ -1,101 +1,97 @@
 ---
 name: woa
-description: 微信公众号运营完整流程——内容策略、文章创作、发布到微信、数据分析
+description: 微信公众号运营工作台——按意图路由到内容策略、文章创作、发布到微信、粉丝分析或完整流程
 argument-hint: "<任务描述>"
+allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Skill"]
 ---
 
-# 微信公众号运营完整流程
-
-入口编排技能，串联四个阶段完成从内容策略到发布和数据分析的完整运营流程。
+# 微信公众号运营工作台
 
 用户传入的参数：`$ARGUMENTS`
 
----
-
-## Step 0: 初始化
-
-1. 从 `$ARGUMENTS` 中提取任务描述，生成一个简短的英文缩写（2-4 个词，用连字符连接，如 `weekly-push`、`product-launch`、`festival-special`）
-2. 使用 `AskUserQuestion` 工具向用户确认任务简写名称，提供你建议的缩写作为选项
-3. 收集公众号基本信息（如果是首次使用或未配置 EXTEND.md）：
-   - 公众号名称和类型（订阅号/服务号）
-   - 目标定位和受众群体
-   - 当前运营状态（新号/成长期/成熟期）
-4. 设定任务目录：`_wechat-oa/{当前日期}-{任务简写}/`（如 `_wechat-oa/2026-04-07-weekly-push/`）
-5. 创建子目录：`context/`、`strategy/`、`articles/`、`analytics/`
-6. 扫描 `_wechat-oa/` 下已有的任务目录，向用户简要报告历史任务
+先判断用户此刻要完成的工作，再带他进入对应 workflow。不是所有需求都需要走完整管道。
 
 ---
 
-## Step 1: 内容策略
+## 强制执行规则
 
-调用 `/content-strategy $ARGUMENTS`
-
-制定或调整公众号内容策略，包括订阅者画像、内容支柱、编辑日历。
-
-**阶段完成标志：** `{任务目录}/strategy/content-strategy-*.md` 已生成。
-
-使用 `AskUserQuestion` 工具询问用户是否进入下一阶段（选项：继续到文章创作 / 调整策略 / 跳过直接创作 / 结束流程）。
-
-**等待用户选择后继续。**
+- ✅ 始终用中文与用户沟通
+- ✅ 先识别 workflow 类型，再进入对应流程
+- 🚫 不默认跑完整管道
+- 🚫 不在入口全量加载所有 references
+- ⏸️ 每个阶段完成后等待用户确认
 
 ---
 
-## Step 2: 文章创作
+## Step 0: 意图识别与 Workflow 路由
 
-调用 `/article-creation $ARGUMENTS`
+| 意图信号 | Workflow | 动作 |
+|----------|----------|------|
+| "内容策略 / 选题 / 排期" | strategy-only | 调用 `/content-strategy $ARGUMENTS` |
+| "文章 / 创作 / 写作" | article-only | 调用 `/article-creation $ARGUMENTS` |
+| "发布 / 推送 / 排版" | publish-only | 调用 `/publish-to-wechat $ARGUMENTS` |
+| "分析 / 数据 / 粉丝" | analytics-only | 调用 `/subscriber-analytics $ARGUMENTS` |
+| "完整流程 / 全套 或复杂需求" | full-workflow | → Step 1 |
 
-基于内容策略创作公众号文章，输出 Markdown 格式的文章文件。
+意图不明确时，用 `AskUserQuestion` 让用户选择：
+- 仅内容策略 
+- 仅文章 
+- 仅发布 
+- 仅分析 
+- 完整公众号运营流程（推荐）
 
-**阶段完成标志：** `{任务目录}/articles/article-*.md` 已生成。
-
-使用 `AskUserQuestion` 工具询问用户是否进入下一阶段（选项：继续到发布 / 修改文章 / 再写一篇 / 结束流程）。
-
-**等待用户选择后继续。**
-
----
-
-## Step 3: 发布到微信
-
-调用 `/publish-to-wechat`
-
-将文章发布到微信公众号（创建草稿），支持 API 方式和浏览器方式。
-
-**阶段完成标志：** 草稿创建成功，返回 media_id 或管理链接。
-
-使用 `AskUserQuestion` 工具询问用户是否进入下一阶段（选项：继续到数据分析 / 发布另一篇 / 结束流程）。
-
-**等待用户选择后继续。**
+**⏸️ 等待用户选择。**
 
 ---
 
-## Step 4: 数据分析
+## Step 1: 完整流程初始化
 
-调用 `/subscriber-analytics`
+1. 从 `$ARGUMENTS` 提取任务描述，生成英文缩写（2-4 词，连字符连接）
+2. 使用 `AskUserQuestion` 确认缩写
+3. 创建 `_wechat-oa/{当前日期}-{缩写}/` 及子目录 `context/` `meta/` 和各阶段子目录
+4. 初始化 `meta/state.md`（workflow_mode、completed_steps、next_step）
+5. 扫描已有目录，检查接续点（产物优先于状态文件）
 
-分析公众号订阅者数据和内容表现，输出分析报告。
-
-**阶段完成标志：** `{任务目录}/analytics/analytics-report-*.md` 已生成。
-
-向用户展示分析报告的绝对路径，并提供改进建议。
+**⏸️ 使用 `AskUserQuestion` 确认从哪里开始。**
 
 ---
 
-## 成功/失败指标
+## Step 2: 完整流程串联执行
 
-### 成功
-- 完整走完所需的运营流程阶段
-- 每个阶段产出对应的文档文件
-- 所有发布操作经过用户确认
-- 数据分析基于真实数据而非假设
+每阶段入口重新 Read `meta/state.md`，完成后更新。
 
-### 失败
-- 未经用户确认执行发布操作
-- 跳过用户确认自动进入下一阶段
-- 生成违反平台规范的内容
-- 在对话中明文暴露 API 密钥等敏感信息
+| 阶段 | 调用 | 完成标志 | 门控 |
+|------|------|---------|------|
+| 内容策略 | `/content-strategy $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
+| 文章创作 | `/article-creation $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
+| 发布到微信 | `/publish-to-wechat $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
+| 粉丝分析 | `/subscriber-analytics $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
+
+每阶段写入摘要到 `meta/{stage}-summary.md`（不超过 20 行）。
+
+**⏸️ 每步等待用户确认。**
+
+---
+
+## Step 3: 快速检查
+
+编排器内轻量执行各维度速览，生成精简报告到 `_wechat-oa/quick-scan-{日期}.md`。
+
+使用 `AskUserQuestion`：深入某项 / 进入完整流程 / 结束。
+
+---
+
+## 断点恢复
+
+1. 扫描 `_wechat-oa/` 下未完成目录
+2. Read `meta/state.md`，结合产物推断进度
+3. 使用 `AskUserQuestion`：从断点继续 / 重新开始
 
 <IMPORTANT>
-每个阶段完成后必须等待用户确认再进入下一阶段。不要跳过任何阶段。
-如果用户中途要求调整（回到上一步、跳过某步），按用户指令执行。
-发布操作（Step 3）必须在用户明确确认后才能执行。
+工作台的职责是"意图识别 + 路由 + 接续"，不是把所有请求都塞进固定管道。
+内容策略必须考虑平台规则和封号风险。
+文章创作必须注明引用来源。
+数据分析必须标注时间窗口和样本量。
+每个阶段完成后必须等待用户确认。
+产出文件与状态文件冲突时，以产出文件为准。
 </IMPORTANT>

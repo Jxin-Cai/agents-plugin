@@ -2,6 +2,7 @@
 name: performance-check
 description: 性能检查——Core Web Vitals 合规检测、资源加载优化和渲染性能分析
 argument-hint: "<目标页面/组件路径或描述>"
+allowed-tools: ["Read", "Write", "Glob", "Grep", "Bash(mkdir*)", "AskUserQuestion"]
 ---
 
 # 性能检查

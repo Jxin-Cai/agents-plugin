@@ -56,6 +56,15 @@ argument-hint: "<看板或团队描述>"
 
 通过结构化提问诊断当前看板状况：
 
+### 从需求平台获取真实分布数据（如已配置）
+
+若 `.requirement-mgmt/config.yaml` 存在，先拉取数据做量化诊断：
+
+- 使用 `/req-search` 按状态分组查询（如 Jira: `project = PROJ AND sprint in openSprints()`），统计各列/状态的 issue 数量
+- 识别堆积最严重的状态（数量最多的列）
+- 使用 `/req-search` 查找"僵尸卡片"（如 `updated < -14d AND status != Done`），统计长期不动的卡片数量
+- 将量化数据作为诊断依据展示给用户，比口头描述"经常堆积"更有说服力
+
 ### 看板基本信息
 - **看板类型**：Scrum Board / Kanban Board？
 - **当前列配置**：有哪些列？每列对应什么状态？

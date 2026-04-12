@@ -211,8 +211,14 @@ B006 ──等待──→ 第三方 API 接口文档（未确认时间）⚠️
 产出摘要：Sprint 目标：{目标}。选入 [N] 个条目，共 [X] 故事点，容量利用率 [Y]%。识别 [Z] 个风险。
 
 - **确认计划，Sprint 启动** — 计划已完成，可以开始执行
+- **同步到需求平台** — 将 Sprint 决策写回需求管理系统（为选入的条目添加评论记录 Sprint 编号，并将状态流转到"Sprint Ready"或对应状态）
 - **调整条目选择** — 重新调整选入/移出的条目
 - **回到优先级矩阵** — 重新评估优先级排序
+
+若用户选择"同步到需求平台"，对每个选入 Sprint 的条目：
+1. 使用 `/req-comment <ISSUE_ID> "Selected for Sprint {name}. Priority: #{rank}. Story points: {points}."` 添加评论
+2. 若用户指定了目标状态，使用 `/req-transitions <ISSUE_ID>` 确认可用转换后，使用 `/req-transition <ISSUE_ID> <STATUS>` 执行状态流转
+3. 完成后向用户展示同步结果摘要
 
 **⏸️ 停下来等待用户选择。不要自动执行。**
 

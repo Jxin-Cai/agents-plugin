@@ -1,120 +1,97 @@
 ---
 name: pdo
-description: 私域运营完整流程——按顺序执行企微生态搭建、社群运营、生命周期管理、全链路转化
-argument-hint: "<品牌/产品名称>"
+description: 私域运营工作台——按意图路由到企微生态搭建、社群运营、用户生命周期、全链路转化或完整流程
+argument-hint: "<任务描述>"
+allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Skill"]
 ---
 
-# 私域运营完整流程
-
-入口编排技能，串联四个阶段完成从企微生态搭建到全链路转化设计的完整私域运营方案。
+# 私域运营工作台
 
 用户传入的参数：`$ARGUMENTS`
 
----
-
-## Step 0: 初始化
-
-1. 从 `$ARGUMENTS` 中提取品牌/产品名称，生成一个简短的英文缩写（2-4 个词，用连字符连接，如 `beauty-brand`、`health-food`）
-2. 使用 `AskUserQuestion` 工具向用户确认任务简写名称，提供你建议的缩写作为选项
-3. 设定任务目录：`_private-domain/{当前日期}-{任务简写}/`（如 `_private-domain/2026-04-07-beauty-brand/`）
-4. 创建子目录：`context/`、`ecosystem/`、`community/`、`lifecycle/`、`funnel/`
-5. 扫描 `_private-domain/` 下已有的任务目录，向用户简要报告
-
-### 私域现状盘点
-
-使用 `AskUserQuestion` 工具收集以下信息：
-
-- **品牌/产品信息**：行业类别、核心产品线、客单价区间、目标用户画像
-- **私域现状**：
-  - 当前是否已有企微？好友数量大约多少？
-  - 是否已有社群？数量和活跃度如何？
-  - 是否已使用 SCRM 工具？用的哪家？
-  - 现有私域月 GMV 大约多少？
-- **目标设定**：
-  - 3个月目标（好友数、社群数、月 GMV）
-  - 6个月目标
-  - 核心痛点是什么？（拉新难、活跃低、转化差、复购少）
-
-将收集到的信息保存到 `{任务目录}/context/brand-profile.md`。
+先判断用户此刻要完成的工作，再带他进入对应 workflow。不是所有需求都需要走完整管道。
 
 ---
 
-## Step 1: 企微生态搭建
+## 强制执行规则
 
-调用 `/wecom-ecosystem-setup $ARGUMENTS`
-
-设计企微组织架构、渠道活码、客户标签体系、SCRM 选型和对接方案。
-
-**阶段完成标志：** `{任务目录}/ecosystem/scrm-blueprint.yaml` 已生成。
-
-使用 `AskUserQuestion` 工具询问用户是否进入下一阶段（选项：继续下一阶段 / 调整生态配置 / 结束流程）。
-
-**⏸️ 等待用户选择后继续。**
+- ✅ 始终用中文与用户沟通
+- ✅ 先识别 workflow 类型，再进入对应流程
+- 🚫 不默认跑完整管道
+- 🚫 不在入口全量加载所有 references
+- ⏸️ 每个阶段完成后等待用户确认
 
 ---
 
-## Step 2: 分层社群运营
+## Step 0: 意图识别与 Workflow 路由
 
-调用 `/community-operations`
+| 意图信号 | Workflow | 动作 |
+|----------|----------|------|
+| "企微 / 企业微信 / 搭建" | wecom-only | 调用 `/wecom-ecosystem-setup $ARGUMENTS` |
+| "社群 / 社区 / 运营" | community-only | 调用 `/community-operations $ARGUMENTS` |
+| "生命周期 / 留存 / 召回" | lifecycle-only | 调用 `/user-lifecycle $ARGUMENTS` |
+| "转化 / 漏斗 / 成交" | conversion-only | 调用 `/conversion-funnel $ARGUMENTS` |
+| "完整策略 / 全套 或复杂需求" | full-strategy | → Step 1 |
 
-设计社群分层体系、运营 SOP、内容日历和活跃率提升方案。
+意图不明确时，用 `AskUserQuestion` 让用户选择：
+- 仅企微 
+- 仅社群 
+- 仅生命周期 
+- 仅转化 
+- 完整私域运营流程（推荐）
 
-**阶段完成标志：** `{任务目录}/community/community-playbook.md` 已生成。
-
-使用 `AskUserQuestion` 工具询问用户是否进入下一阶段（选项：继续下一阶段 / 调整社群方案 / 回到生态配置）。
-
-**⏸️ 等待用户选择后继续。**
-
----
-
-## Step 3: 用户生命周期管理
-
-调用 `/user-lifecycle`
-
-设计各阶段运营策略和自动化触达流程。
-
-**阶段完成标志：** `{任务目录}/lifecycle/lifecycle-automation.py` 已生成。
-
-使用 `AskUserQuestion` 工具询问用户是否进入下一阶段（选项：继续下一阶段 / 调整生命周期方案 / 回到社群运营）。
-
-**⏸️ 等待用户选择后继续。**
+**⏸️ 等待用户选择。**
 
 ---
 
-## Step 4: 全链路转化设计
+## Step 1: 完整流程初始化
 
-调用 `/conversion-funnel`
+1. 从 `$ARGUMENTS` 提取任务描述，生成英文缩写（2-4 词，连字符连接）
+2. 使用 `AskUserQuestion` 确认缩写
+3. 创建 `_private-domain/{当前日期}-{缩写}/` 及子目录 `context/` `meta/` 和各阶段子目录
+4. 初始化 `meta/state.md`（workflow_mode、completed_steps、next_step）
+5. 扫描已有目录，检查接续点（产物优先于状态文件）
 
-设计从公域引流到复购裂变的全链路转化方案。
-
-**阶段完成标志：** `{任务目录}/funnel/funnel-dashboard.sql` 已生成。
-
-结果保存后，向用户展示所有产出文件的 **绝对路径**，以便用户直接点击打开。
+**⏸️ 使用 `AskUserQuestion` 确认从哪里开始。**
 
 ---
 
-## 成功/失败指标
+## Step 2: 完整流程串联执行
 
-### 成功
-- 品牌/产品信息和私域现状盘点完整记录
-- 企微生态配置方案包含组织架构、活码、标签、SCRM 四个维度
-- 社群分层体系至少包含3层，每层有明确的 SOP
-- 生命周期覆盖新客→成长→成熟→沉睡四个阶段
-- 转化漏斗覆盖引流→加好友→社群→私聊→复购五个环节
-- 每个阶段都有可量化的成功指标
-- 所有产出向用户展示并获得确认
-- 每个阶段之间等待了用户确认
+每阶段入口重新 Read `meta/state.md`，完成后更新。
 
-### 失败
-- 没有收集品牌/产品基础信息就开始出方案
-- 方案过于通用，没有结合用户的行业和产品特点
-- 缺少数据指标和衡量标准
-- 没有考虑合规风险
-- 替用户做决定而不是引导确认
-- 没有等用户确认就进入下一步
+| 阶段 | 调用 | 完成标志 | 门控 |
+|------|------|---------|------|
+| 企微生态搭建 | `/wecom-ecosystem-setup $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
+| 社群运营 | `/community-operations $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
+| 用户生命周期 | `/user-lifecycle $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
+| 全链路转化 | `/conversion-funnel $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
+
+每阶段写入摘要到 `meta/{stage}-summary.md`（不超过 20 行）。
+
+**⏸️ 每步等待用户确认。**
+
+---
+
+## Step 3: 快速检查
+
+编排器内轻量执行各维度速览，生成精简报告到 `_private-domain/quick-scan-{日期}.md`。
+
+使用 `AskUserQuestion`：深入某项 / 进入完整流程 / 结束。
+
+---
+
+## 断点恢复
+
+1. 扫描 `_private-domain/` 下未完成目录
+2. Read `meta/state.md`，结合产物推断进度
+3. 使用 `AskUserQuestion`：从断点继续 / 重新开始
 
 <IMPORTANT>
-每个阶段完成后必须等待用户确认再进入下一阶段。不要跳过任何阶段。
-如果用户中途要求调整（回到上一步、跳过某步），按用户指令执行。
-私域运营方案必须结合用户的具体行业和产品特点，不要输出通用模板。
+工作台的职责是"意图识别 + 路由 + 接续"，不是把所有请求都塞进固定管道。
+转化漏斗必须有可量化 KPI。
+用户生命周期必须包含触发式自动化规则。
+社群运营方案必须考虑人力可执行性。
+每个阶段完成后必须等待用户确认。
+产出文件与状态文件冲突时，以产出文件为准。
 </IMPORTANT>

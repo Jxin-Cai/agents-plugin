@@ -1,13 +1,21 @@
 {
   "name": "backend-architect",
-  "description": "Backend architect: API design, database modeling, and scalability review for backend systems",
-  "version": "1.0.0",
+  "description": "Backend architect workbench: route across API design, database modeling, scalability review, microservice design, and tech debt assessment workflows",
+  "version": "2.0.0",
   "author": {
     "name": "jxin"
   },
   "homepage": "https://github.com/Jxin-Cai/agents-plugin",
   "repository": "https://github.com/Jxin-Cai/agents-plugin",
-  "keywords": ["backend-architect", "api-design", "database-modeling", "scalability"],
+  "keywords": [
+    "backend-architect",
+    "api-design",
+    "database-modeling",
+    "scalability",
+    "microservice",
+    "tech-debt",
+    "architecture-review"
+  ],
   "agents": [],
   "skills": ["./skills/"],
   "commands": ["./commands/"]

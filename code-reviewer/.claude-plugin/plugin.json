@@ -1,7 +1,7 @@
 {
   "name": "code-reviewer",
-  "description": "Code reviewer: structured security review, quality audit, and refactoring suggestions for codebases",
-  "version": "1.0.0",
+  "description": "Code reviewer: 按意图路由的代码审查工作台——安全审查、质量审计、重构建议",
+  "version": "2.0.0",
   "author": {
     "name": "jxin"
   },

@@ -1,10 +1,36 @@
 #!/bin/bash
 # SessionStart hook for code-reviewer plugin
-# 1. 创建顶层工作目录
-# 2. 输出 Code Reviewer Agent 提示词到 stdout（注入为会话上下文）
+# 1. 初始化工作目录
+# 2. 展示工作区状态（历史审查、活跃任务）
+# 3. 注入角色行为原则
 
-# 创建 _code-review 顶层目录（具体审查子目录在流程中按日期创建）
-mkdir -p _code-review
+PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT}"
+WORKSPACE="_code-review"
 
-# 输出 Code Reviewer Agent 提示词作为会话上下文
-cat "${CLAUDE_PLUGIN_ROOT}/skills/cr/references/code-reviewer-agent.md"
+# 1. 初始化工作目录
+mkdir -p "$WORKSPACE"
+
+# 2. 工作区状态展示
+echo "## Code Reviewer 工作台"
+echo ""
+
+# 统计历史审查目录
+TOTAL=$(ls -d ${WORKSPACE}/*/ 2>/dev/null | wc -l | tr -d ' ')
+if [ "$TOTAL" -gt 0 ]; then
+  echo "### 历史审查 (${TOTAL} 个)"
+  for dir in $(ls -dt ${WORKSPACE}/*/ 2>/dev/null | head -5); do
+    name=$(basename "$dir")
+    if [ -f "${dir}meta/review-state.md" ]; then
+      echo "- ${name} [有状态记录]"
+    else
+      echo "- ${name}"
+    fi
+  done
+  echo ""
+fi
+
+echo "输入 \`/cr <目标>\` 开始代码审查"
+echo ""
+
+# 3. 注入角色行为原则
+cat "${PLUGIN_ROOT}/skills/cr/references/code-reviewer-agent.md"

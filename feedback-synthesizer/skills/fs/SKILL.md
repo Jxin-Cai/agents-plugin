@@ -1,68 +1,96 @@
 ---
 name: fs
-description: 反馈综合分析完整流程——按顺序执行收集、情感分析、洞察提取
-argument-hint: "<反馈分析任务描述>"
+description: 反馈综合分析工作台——按意图路由到反馈收集、情感分析、洞察提取或完整流程
+argument-hint: "<任务描述>"
+allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Skill"]
 ---
 
-# 反馈综合分析完整流程
-
-入口编排技能，串联三个阶段完成从反馈收集到可操作洞察的完整流程。
+# 反馈综合分析工作台
 
 用户传入的参数：`$ARGUMENTS`
 
----
-
-## Step 0: 初始化
-
-1. 从 `$ARGUMENTS` 中提取任务描述，生成一个简短的英文缩写（2-4 个词，用连字符连接，如 `app-v3-launch`、`checkout-complaints`）
-2. 使用 `AskUserQuestion` 工具向用户确认任务简写名称，提供你建议的缩写作为选项
-3. 设定工作目录：`_feedback/{当前日期}-{任务简写}/`（如 `_feedback/2026-04-06-app-v3-launch/`）
-4. 创建子目录：`context/`、`raw-feedback/`、`analysis/`、`insights/`
-5. 扫描 `_feedback/` 下已有的任务目录，向用户简要报告
+先判断用户此刻要完成的工作，再带他进入对应 workflow。不是所有需求都需要走完整管道。
 
 ---
 
-## Step 1: 反馈收集
+## 强制执行规则
 
-调用 `/feedback-collection $ARGUMENTS`
-
-多渠道收集和结构化整理用户反馈数据，建立统一的反馈数据集。
-
-**阶段完成标志：** `{工作目录}/raw-feedback/feedback-*.md` 已生成。
-
-使用 `AskUserQuestion` 工具询问用户是否进入下一阶段（选项：继续下一阶段 / 补充更多反馈 / 结束流程）。
-
-**⏸️ 等待用户选择后继续。**
+- ✅ 始终用中文与用户沟通
+- ✅ 先识别 workflow 类型，再进入对应流程
+- 🚫 不默认跑完整管道
+- 🚫 不在入口全量加载所有 references
+- ⏸️ 每个阶段完成后等待用户确认
 
 ---
 
-## Step 2: 情感分析
+## Step 0: 意图识别与 Workflow 路由
 
-调用 `/sentiment-analysis`
+| 意图信号 | Workflow | 动作 |
+|----------|----------|------|
+| "收集 / 采集 / 汇总反馈" | collect-only | 调用 `/feedback-collection $ARGUMENTS` |
+| "情感 / 情绪 / 正负面" | sentiment-only | 调用 `/sentiment-analysis $ARGUMENTS` |
+| "洞察 / 提炼 / 趋势" | insight-only | 调用 `/insight-extraction $ARGUMENTS` |
+| "快速检查 / 概览" | quick-scan | → Step 3 |
+| "完整分析 / 全套 或复杂需求" | full-synthesis | → Step 1 |
 
-对收集的反馈进行情感分类、NPS/CSAT 评分分析和主题聚类。
+意图不明确时，用 `AskUserQuestion` 让用户选择：
+- 仅收集 
+- 仅情感 
+- 仅洞察 
+- 快速反馈分析检查
+- 完整反馈分析流程（推荐）
 
-**阶段完成标志：** `{工作目录}/analysis/sentiment-*.md` 已生成。
+**⏸️ 等待用户选择。**
 
-使用 `AskUserQuestion` 工具询问用户是否进入下一阶段（选项：继续下一阶段 / 深入分析某个主题 / 回到反馈收集补充数据）。
+---
 
-**⏸️ 等待用户选择后继续。**
+## Step 1: 完整流程初始化
+
+1. 从 `$ARGUMENTS` 提取任务描述，生成英文缩写（2-4 词，连字符连接）
+2. 使用 `AskUserQuestion` 确认缩写
+3. 创建 `_feedback/{当前日期}-{缩写}/` 及子目录 `context/` `meta/` 和各阶段子目录
+4. 初始化 `meta/state.md`（workflow_mode、completed_steps、next_step）
+5. 扫描已有目录，检查接续点（产物优先于状态文件）
+
+**⏸️ 使用 `AskUserQuestion` 确认从哪里开始。**
 
 ---
 
-## Step 3: 洞察提取
+## Step 2: 完整流程串联执行
 
-调用 `/insight-extraction`
+每阶段入口重新 Read `meta/state.md`，完成后更新。
 
-从分析结果中提炼可操作的产品洞察，输出优先级矩阵和决策建议。
+| 阶段 | 调用 | 完成标志 | 门控 |
+|------|------|---------|------|
+| 反馈收集 | `/feedback-collection $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
+| 情感分析 | `/sentiment-analysis $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
+| 洞察提取 | `/insight-extraction $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
 
-**阶段完成标志：** `{工作目录}/insights/insights-*.md` 已生成。
+每阶段写入摘要到 `meta/{stage}-summary.md`（不超过 20 行）。
 
-洞察报告保存后，向用户展示文件的 **绝对路径**（如 `/Users/xxx/project/_feedback/2026-04-06-app-v3-launch/insights/insights-app-v3-launch-2026-04-06.md`），以便用户直接点击打开。
+**⏸️ 每步等待用户确认。**
 
 ---
+
+## Step 3: 快速检查
+
+编排器内轻量执行各维度速览，生成精简报告到 `_feedback/quick-scan-{日期}.md`。
+
+使用 `AskUserQuestion`：深入某项 / 进入完整流程 / 结束。
+
+---
+
+## 断点恢复
+
+1. 扫描 `_feedback/` 下未完成目录
+2. Read `meta/state.md`，结合产物推断进度
+3. 使用 `AskUserQuestion`：从断点继续 / 重新开始
 
 <IMPORTANT>
-每个阶段完成后必须等待用户确认再进入下一阶段。不要跳过任何阶段。
-如果用户中途要求调整（回到上一步、跳过某步），按用户指令执行。
+工作台的职责是"意图识别 + 路由 + 接续"，不是把所有请求都塞进固定管道。
+洞察必须有原始反馈引用支撑，不可凭空推断。
+情感分析必须附带典型引言。
+数据量不足时必须声明置信度限制。
+每个阶段完成后必须等待用户确认。
+产出文件与状态文件冲突时，以产出文件为准。
 </IMPORTANT>

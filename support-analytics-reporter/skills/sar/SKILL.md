@@ -1,118 +1,96 @@
 ---
 name: sar
-description: 数据分析报告主编排——端到端完成高管仪表盘、客户分群和营销归因分析
-argument-hint: "<业务场景或分析需求描述>"
+description: 数据分析报告工作台——按意图路由到高管仪表盘、客户分群、营销归因或完整流程
+argument-hint: "<任务描述>"
+allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Skill"]
 ---
 
-# SAR — 数据分析报告主编排
+# 数据分析报告工作台
 
-端到端编排分析报告流程：从业务场景理解到高管仪表盘、客户分群、营销归因的完整交付。
+用户传入的参数：`$ARGUMENTS`
 
-## 加载引用
+先判断用户此刻要完成的工作，再带他进入对应 workflow。不是所有需求都需要走完整管道。
 
-Read skills/sar/references/analytics-reporter-agent.md
+---
 
 ## 强制执行规则
 
-- 所有用户交互使用中文
-- 每个步骤完成后必须使用 AskUserQuestion 确认后再进入下一步
-- 所有产出文件存放在 `_analytics/{YYYY-MM-DD}-{任务简写}/` 目录下
-- SQL 和 Python 代码必须可直接运行
-- 分析报告必须包含数据来源标注和置信度说明
+- ✅ 始终用中文与用户沟通
+- ✅ 先识别 workflow 类型，再进入对应流程
+- 🚫 不默认跑完整管道
+- 🚫 不在入口全量加载所有 references
+- ⏸️ 每个阶段完成后等待用户确认
 
-## 前置条件
+---
 
-- 用户已明确分析需求或业务问题
-- 可访问的数据源信息（数据库、文件、API）
-- 明确的报告受众（高管、运营、市场团队等）
+## Step 0: 意图识别与 Workflow 路由
 
-## Step 0: 初始化
+| 意图信号 | Workflow | 动作 |
+|----------|----------|------|
+| "仪表盘 / dashboard / 高管" | dashboard-only | 调用 `/executive-dashboard $ARGUMENTS` |
+| "分群 / 细分 / 画像" | segmentation-only | 调用 `/customer-segmentation $ARGUMENTS` |
+| "归因 / 渠道 / attribution" | attribution-only | 调用 `/marketing-attribution $ARGUMENTS` |
+| "快速概览 / 数据速查" | quick-scan | → Step 3 |
+| "完整分析 / 全套 或复杂需求" | full-analysis | → Step 1 |
 
-收集关键信息并建立分析上下文：
+意图不明确时，用 `AskUserQuestion` 让用户选择：
+- 仅仪表盘 
+- 仅分群 
+- 仅归因 
+- 快速数据分析检查
+- 完整数据分析流程（推荐）
 
-1. **业务场景** — 询问用户当前面临的业务问题或分析需求
-2. **数据源** — 确认可用的数据来源（数据库类型、表结构、数据范围）
-3. **分析目标** — 明确期望的产出（仪表盘、分群报告、归因分析、或全部）
-4. **受众** — 确认报告面向的决策者和使用场景
+**⏸️ 等待用户选择。**
 
-创建工作目录：
-```bash
-mkdir -p _analytics/{YYYY-MM-DD}-{任务简写}/{context,dashboards,segmentation,attribution}
-```
+---
 
-将收集到的信息写入 `context/brief.md`。
+## Step 1: 完整流程初始化
 
-使用 AskUserQuestion 确认：
-- "以上是我理解的分析需求，请确认或补充：
-  - 业务场景：{场景}
-  - 数据源：{数据源}
-  - 分析目标：{目标}
-  - 报告受众：{受众}
-  确认无误后我将开始分析。"
+1. 从 `$ARGUMENTS` 提取任务描述，生成英文缩写（2-4 词，连字符连接）
+2. 使用 `AskUserQuestion` 确认缩写
+3. 创建 `_analytics/{当前日期}-{缩写}/` 及子目录 `context/` `meta/` 和各阶段子目录
+4. 初始化 `meta/state.md`（workflow_mode、completed_steps、next_step）
+5. 扫描已有目录，检查接续点（产物优先于状态文件）
 
-## Step 1: 高管仪表盘设计
+**⏸️ 使用 `AskUserQuestion` 确认从哪里开始。**
 
-调用 `/executive-dashboard` 技能完成：
-- KPI 层级设计
-- 核心 SQL 查询编写
-- 仪表盘布局设计
-- 产出存放到 `dashboards/` 目录
+---
 
-使用 AskUserQuestion 确认：
-- "高管仪表盘设计已完成，包含 {N} 个核心指标和 {M} 个 SQL 查询。请查看 `dashboards/` 目录下的文件，确认是否需要调整后再进入客户分群分析。"
+## Step 2: 完整流程串联执行
 
-## Step 2: 客户分群分析
+每阶段入口重新 Read `meta/state.md`，完成后更新。
 
-调用 `/customer-segmentation` 技能完成：
-- RFM 评分计算
-- 客户分群划分
-- 群体画像分析
-- 针对性策略建议
-- 产出存放到 `segmentation/` 目录
+| 阶段 | 调用 | 完成标志 | 门控 |
+|------|------|---------|------|
+| 高管仪表盘 | `/executive-dashboard $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
+| 客户分群 | `/customer-segmentation $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
+| 营销归因 | `/marketing-attribution $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
 
-使用 AskUserQuestion 确认：
-- "客户分群分析已完成，识别出 {N} 个客户群体。请查看 `segmentation/` 目录下的分析报告和代码，确认是否需要调整后再进入营销归因分析。"
+每阶段写入摘要到 `meta/{stage}-summary.md`（不超过 20 行）。
 
-## Step 3: 营销归因分析
+**⏸️ 每步等待用户确认。**
 
-调用 `/marketing-attribution` 技能完成：
-- 归因模型选择
-- 多触点归因 SQL 编写
-- 渠道 ROI 计算
-- 产出存放到 `attribution/` 目录
+---
 
-使用 AskUserQuestion 确认：
-- "营销归因分析已完成，覆盖 {N} 个营销渠道。请查看 `attribution/` 目录下的归因报告，确认是否满足需求。"
+## Step 3: 快速检查
 
-## Step 4: 综合报告
+编排器内轻量执行各维度速览，生成精简报告到 `_analytics/quick-scan-{日期}.md`。
 
-汇总所有分析结果，生成执行摘要：
+使用 `AskUserQuestion`：深入某项 / 进入完整流程 / 结束。
 
-1. **关键发现** — 3-5 条最重要的数据洞察
-2. **可行动建议** — 按优先级排列的业务建议
-3. **风险提示** — 数据局限性和分析假设说明
-4. **下一步行动** — 建议的后续分析方向
+---
 
-将执行摘要写入 `context/executive-summary.md`。
+## 断点恢复
 
-## 成功指标
+1. 扫描 `_analytics/` 下未完成目录
+2. Read `meta/state.md`，结合产物推断进度
+3. 使用 `AskUserQuestion`：从断点继续 / 重新开始
 
-- 所有 SQL 查询语法正确且可执行
-- Python 代码可直接运行并产出可视化
-- 分析报告包含数据来源和置信度标注
-- 业务建议具体且可行动
-
-## 失败指标
-
-- SQL 查询存在语法错误或逻辑漏洞
-- 分析结论缺乏统计支撑
-- 建议过于笼统无法执行
-- 遗漏用户指定的分析维度
-
-## IMPORTANT
-
-你是数据分析专家，不是通用助手。始终：
-1. 先验证数据质量再做分析
-2. 用数据说话，给出置信区间
-3. 建议必须具体到可执行的行动项
-4. 代码必须生产可用，不是伪代码
+<IMPORTANT>
+工作台的职责是"意图识别 + 路由 + 接续"，不是把所有请求都塞进固定管道。
+所有数据结论必须标注数据来源和时间范围。
+归因模型必须声明假设和局限性。
+不可用相关性暗示因果性。
+每个阶段完成后必须等待用户确认。
+产出文件与状态文件冲突时，以产出文件为准。
+</IMPORTANT>

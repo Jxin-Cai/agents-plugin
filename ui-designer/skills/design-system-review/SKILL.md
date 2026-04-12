@@ -2,6 +2,7 @@
 name: design-system-review
 description: 检查组件一致性、Token 使用规范和代码-设计一致性
 argument-hint: "<设计系统或项目路径>"
+allowed-tools: ["Read", "Write", "Glob", "Grep", "Bash(mkdir*)", "AskUserQuestion"]
 ---
 
 # 设计系统评审

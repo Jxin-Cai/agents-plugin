@@ -2,6 +2,7 @@
 name: prototype-feedback
 description: 评估交互流程、信息架构和用户体验完整性
 argument-hint: "<原型或页面流程描述>"
+allowed-tools: ["Read", "Write", "Glob", "Grep", "Bash(mkdir*)", "AskUserQuestion"]
 ---
 
 # 原型反馈

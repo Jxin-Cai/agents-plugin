@@ -1,68 +1,118 @@
 ---
 name: sa
-description: 软件架构设计完整流程——按顺序执行系统设计、架构评审、ADR 生成
+description: 软件架构工作台——按意图路由到对应 workflow（系统设计 / 架构评审 / ADR / 完整流程 / 快速诊断）
 argument-hint: "<架构任务描述>"
+allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Skill"]
 ---
 
-# 软件架构设计完整流程
-
-入口编排技能，串联三个阶段完成从上下文分析到架构决策记录的完整流程。
+# 软件架构工作台
 
 用户传入的参数：`$ARGUMENTS`
 
----
-
-## Step 0: 初始化
-
-1. 从 `$ARGUMENTS` 中提取架构任务描述，生成一个简短的英文缩写（2-4 个词，用连字符连接，如 `payment-gateway`、`user-auth-redesign`）
-2. 使用 `AskUserQuestion` 工具向用户确认任务简写名称，提供你建议的缩写作为选项
-3. 设定工作目录：`_architecture/{当前日期}-{任务简写}/`（如 `_architecture/2026-04-06-payment-gateway/`）
-4. 创建子目录：`context/`、`design/`、`adr/`
-5. 扫描 `_architecture/` 下已有的目录，向用户简要报告
+先判断用户此刻要完成的工作，再带他进入对应 workflow。不是所有需求都需要走完整 SD → AR → ADR 管道。
 
 ---
 
-## Step 1: 系统设计
+## 强制执行规则
 
-调用 `/system-design $ARGUMENTS`
-
-基于 C4 模型进行分层架构设计，从系统上下文到组件级别。
-
-**阶段完成标志：** `{工作目录}/design/system-design-*.md` 已生成。
-
-使用 `AskUserQuestion` 工具询问用户是否进入下一阶段（选项：继续下一阶段 / 修改设计 / 结束流程）。
-
-**⏸️ 等待用户选择后继续。**
+- ✅ 始终用中文与用户沟通
+- ✅ 先识别 workflow 类型，再进入对应流程
+- ✅ 使用 `AskUserQuestion` 让用户做选择，不假设
+- 🚫 不默认跑完整 SD → AR → ADR 管道
+- 🚫 不在入口全量加载所有 references
+- ⏸️ 每个阶段完成后等待用户确认
 
 ---
 
-## Step 2: 架构评审
+## Step 0: 意图识别与 Workflow 路由
 
-调用 `/architecture-review`
+根据 `$ARGUMENTS` 判断工作类型：
 
-基于 ATAM 方法对设计方案进行质量属性评审。
+| 意图信号 | Workflow | 动作 |
+|----------|----------|------|
+| "系统设计 / C4 / 架构设计 / 新系统" | design-only | 调用 `/system-design $ARGUMENTS` |
+| "评审 / 审查 / ATAM / 质量属性" | review-only | 调用 `/architecture-review $ARGUMENTS` |
+| "ADR / 决策记录 / 记录决策" | adr-only | 调用 `/adr-generation $ARGUMENTS` |
+| "快速诊断 / 架构体检 / 快扫" | quick-diagnosis | → Step 3 |
+| "完整流程 / 全套" 或复杂需求 | full-assessment | → Step 1 |
 
-**阶段完成标志：** `{工作目录}/design/architecture-review-*.md` 已生成。
+如果无法唯一判断，使用 `AskUserQuestion` 让用户选择：
+- 完整架构流程（推荐）— SD → AR → ADR 全链路
+- 仅系统设计（C4 模型）
+- 仅架构评审（ATAM 方法）
+- 仅 ADR 生成
+- 快速架构诊断
 
-使用 `AskUserQuestion` 工具询问用户是否进入下一阶段（选项：继续生成 ADR / 回到系统设计修改 / 结束流程）。
+**⏸️ 等待用户选择。**
 
-**⏸️ 等待用户选择后继续。**
+---
+
+## Step 1: 完整流程初始化
+
+> 仅 `full-assessment` workflow 需要此步。
+
+1. 从 `$ARGUMENTS` 提取任务描述，生成简短英文缩写（2-4 词，连字符连接）
+2. 使用 `AskUserQuestion` 确认缩写
+3. 创建 `_architecture/{当前日期}-{缩写}/` 及子目录 `context/` `design/` `adr/` `meta/`
+4. 初始化 `meta/arch-state.md`：
+
+```markdown
+workflow_mode: full-assessment
+slug: {缩写}
+completed_steps: []
+next_step: system-design
+artifact_paths: {}
+decisions: []
+```
+
+5. 扫描 `_architecture/` 已有目录，简要报告
+6. 检查 `meta/arch-state.md` 和实际产物做接续判断（产物优先）
+
+**⏸️ 使用 `AskUserQuestion` 确认从哪里开始。**
 
 ---
 
-## Step 3: ADR 生成
+## Step 2: 完整流程串联执行
 
-调用 `/adr-generation`
+每阶段入口重新 Read `meta/arch-state.md`，完成后更新状态。
 
-将架构评审中确定的关键决策写成 ADR 文档。
+| 阶段 | 调用 | 完成标志 | 门控 |
+|------|------|---------|------|
+| 系统设计 | `/system-design $ARGUMENTS` | `design/system-design-*.md` | 继续 / 修改 / 结束 |
+| 架构评审 | `/architecture-review $ARGUMENTS` | `design/architecture-review-*.md` | 继续 / 回退 / 结束 |
+| ADR 生成 | `/adr-generation $ARGUMENTS` | `adr/adr-*.md` | 继续 / 结束 |
 
-**阶段完成标志：** `{工作目录}/adr/adr-*.md` 已生成。
+每阶段完成后写入摘要到 `meta/{stage}-summary.md`（不超过 20 行），更新 state。
 
-ADR 保存后，向用户展示文件的 **绝对路径**，以便用户直接点击打开。
+**⏸️ 每步等待用户确认。**
 
 ---
+
+## Step 3: 快速架构诊断
+
+编排器内轻量执行（不调用子技能）：
+
+1. **技术栈扫描**：识别语言/框架/数据库/部署方式
+2. **架构模式识别**：单体/微服务/事件驱动/分层
+3. **关键风险速览**：单点故障、循环依赖、缺失抽象、过度耦合
+4. **质量属性速评**：性能/可用性/安全性/可维护性（各一句话）
+
+生成精简报告到 `_architecture/quick-diagnosis-{日期}.md`。
+
+使用 `AskUserQuestion` 展示后续选项：深入某项 / 进入完整流程 / 结束。
+
+---
+
+## 断点恢复
+
+当用户中途返回时：
+1. 扫描 `_architecture/` 下未完成目录
+2. Read `meta/arch-state.md`，结合实际产物推断进度
+3. 使用 `AskUserQuestion`：从断点继续 / 重新开始
 
 <IMPORTANT>
-每个阶段完成后必须等待用户确认再进入下一阶段。不要跳过任何阶段。
-如果用户中途要求调整（回到上一步、跳过某步），按用户指令执行。
+工作台的职责是"意图识别 + 路由 + 接续"，不是把所有请求都塞进 SD → AR → ADR 管道。
+快速诊断和单项子技能是独立 workflow，不经过完整管道。
+每个阶段完成后必须等待用户确认再进入下一阶段。
+产出文件与状态文件冲突时，以产出文件为准。
 </IMPORTANT>

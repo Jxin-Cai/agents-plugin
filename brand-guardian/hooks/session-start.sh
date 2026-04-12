@@ -1,10 +1,24 @@
 #!/bin/bash
 # SessionStart hook for brand-guardian plugin
-# 1. 创建顶层工作目录
-# 2. 输出 Brand Guardian Agent 提示词到 stdout（注入为会话上下文）
 
-# 创建 _brand-review 顶层目录（具体任务子目录在流程中按日期创建）
 mkdir -p _brand-review
 
-# 输出 Brand Guardian Agent 提示词作为会话上下文
+echo "## 品牌守护者工作台状态"
+echo ""
+task_count=$(find _brand-review -maxdepth 1 -mindepth 1 -type d 2>/dev/null | wc -l | tr -d ' ')
+echo "- 任务数: ${task_count}"
+if [ "$task_count" -gt 0 ]; then
+  echo "- 最近任务:"
+  ls -1t _brand-review/ 2>/dev/null | head -3 | while read d; do
+    state="_brand-review/${d}/meta/state.md"
+    if [ -f "$state" ]; then
+      next=$(grep "^next_step:" "$state" 2>/dev/null | cut -d' ' -f2)
+      echo "  - ${d} → next: ${next:-done}"
+    else
+      echo "  - ${d}"
+    fi
+  done
+fi
+echo ""
+
 cat "${CLAUDE_PLUGIN_ROOT}/skills/bg/references/brand-guardian-agent.md"

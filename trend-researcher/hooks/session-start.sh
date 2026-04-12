@@ -1,10 +1,24 @@
 #!/bin/bash
 # SessionStart hook for trend-researcher plugin
-# 1. 创建顶层工作目录
-# 2. 输出 Agent 提示词到 stdout（注入为会话上下文）
 
-# 创建 _trend-research 顶层目录（具体研究子目录在流程中按日期创建）
 mkdir -p _trend-research
 
-# 输出 Trend Researcher Agent 提示词作为会话上下文
+echo "## 趋势研究工作台状态"
+echo ""
+task_count=$(find _trend-research -maxdepth 1 -mindepth 1 -type d 2>/dev/null | wc -l | tr -d ' ')
+echo "- 任务数: ${task_count}"
+if [ "$task_count" -gt 0 ]; then
+  echo "- 最近任务:"
+  ls -1t _trend-research/ 2>/dev/null | head -3 | while read d; do
+    state="_trend-research/${d}/meta/state.md"
+    if [ -f "$state" ]; then
+      next=$(grep "^next_step:" "$state" 2>/dev/null | cut -d' ' -f2)
+      echo "  - ${d} → next: ${next:-done}"
+    else
+      echo "  - ${d}"
+    fi
+  done
+fi
+echo ""
+
 cat "${CLAUDE_PLUGIN_ROOT}/skills/trr/references/trend-researcher-agent.md"

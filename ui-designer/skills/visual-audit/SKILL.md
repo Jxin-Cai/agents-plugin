@@ -2,6 +2,7 @@
 name: visual-audit
 description: 基于 Gestalt 原则和 Nielsen 启发式对界面进行视觉层面的系统评估
 argument-hint: "<目标页面或设计稿描述>"
+allowed-tools: ["Read", "Write", "Glob", "Grep", "Bash(mkdir*)", "AskUserQuestion"]
 ---
 
 # 视觉审计

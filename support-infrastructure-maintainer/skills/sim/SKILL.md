@@ -1,98 +1,96 @@
 ---
 name: sim
-description: 基础设施维护全流程编排 — 从监控体系到 IaC 到备份恢复
-argument-hint: "<基础设施或系统描述>"
+description: 基础设施维护工作台——按意图路由到监控体系、IaC 框架、备份恢复或完整流程
+argument-hint: "<任务描述>"
+allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Skill"]
 ---
 
-# 基础设施维护全流程编排
+# 基础设施维护工作台
 
-端到端的基础设施维护流程：监控体系搭建 → 基础设施即代码 → 备份恢复体系，确保系统高可用、可追溯、可恢复。
+用户传入的参数：`$ARGUMENTS`
 
-## 加载引用
+先判断用户此刻要完成的工作，再带他进入对应 workflow。不是所有需求都需要走完整管道。
 
-Read file: `./references/infrastructure-maintainer-agent.md`
+---
 
 ## 强制执行规则
 
-- 所有交互使用中文
-- 每个步骤完成后必须使用 `AskUserQuestion` 工具确认后再进入下一步
-- 所有配置文件必须可直接使用，不允许占位符（除明确标注需用户填入的值）
-- 工作目录严格遵循 `_infrastructure/{YYYY-MM-DD}-{任务简写}/` 结构
-- 先监控、后变更、再备份，顺序不可颠倒
+- ✅ 始终用中文与用户沟通
+- ✅ 先识别 workflow 类型，再进入对应流程
+- 🚫 不默认跑完整管道
+- 🚫 不在入口全量加载所有 references
+- ⏸️ 每个阶段完成后等待用户确认
 
-## 前置条件
+---
 
-开始前需确认以下信息（如未知则通过 `AskUserQuestion` 询问）：
+## Step 0: 意图识别与 Workflow 路由
 
-- 目标系统/服务名称
-- 当前技术栈（语言、框架、数据库、云平台）
-- 当前部署方式（容器/虚拟机/裸机）
-- 已有的监控和备份方案（如有）
-- 主要痛点和优先级
+| 意图信号 | Workflow | 动作 |
+|----------|----------|------|
+| "监控 / 告警 / Prometheus / Grafana" | monitoring-only | 调用 `/monitoring-setup $ARGUMENTS` |
+| "IaC / Terraform / 基础设施即代码" | iac-only | 调用 `/iac-framework $ARGUMENTS` |
+| "备份 / 恢复 / 灾备 / DR" | backup-only | 调用 `/backup-recovery $ARGUMENTS` |
+| "快速诊断 / 基础设施体检" | quick-diagnosis | → Step 3 |
+| "完整方案 / 全套 或复杂需求" | full-plan | → Step 1 |
 
-## Step 0: 初始化
+意图不明确时，用 `AskUserQuestion` 让用户选择：
+- 仅监控 
+- 仅IaC 
+- 仅备份 
+- 快速基础设施管理检查
+- 完整基础设施管理流程（推荐）
 
-1. 创建工作目录 `_infrastructure/{YYYY-MM-DD}-{任务简写}/`
-2. 在 `context/` 下记录：
-   - `architecture.md` — 当前系统架构概览
-   - `tech-stack.md` — 技术栈清单
-   - `pain-points.md` — 当前痛点和改进目标
-3. 使用 `AskUserQuestion` 确认上下文信息是否准确
+**⏸️ 等待用户选择。**
 
-## Step 1: 监控体系搭建
+---
 
-调用技能 `/monitoring-setup`，完成：
-- 关键服务和指标识别
-- Prometheus 监控配置
-- 告警规则设计
-- Grafana 仪表盘设计
+## Step 1: 完整流程初始化
 
-产出物存放至 `monitoring/` 目录。
+1. 从 `$ARGUMENTS` 提取任务描述，生成英文缩写（2-4 词，连字符连接）
+2. 使用 `AskUserQuestion` 确认缩写
+3. 创建 `_infrastructure/{当前日期}-{缩写}/` 及子目录 `context/` `meta/` 和各阶段子目录
+4. 初始化 `meta/state.md`（workflow_mode、completed_steps、next_step）
+5. 扫描已有目录，检查接续点（产物优先于状态文件）
 
-使用 `AskUserQuestion` 确认监控方案是否满足需求，是否进入下一步。
+**⏸️ 使用 `AskUserQuestion` 确认从哪里开始。**
 
-## Step 2: 基础设施即代码
+---
 
-调用技能 `/iac-framework`，完成：
-- IaC 工具选型
-- 网络架构设计
-- 计算资源配置
-- 数据库基础设施
+## Step 2: 完整流程串联执行
 
-产出物存放至 `iac/` 目录。
+每阶段入口重新 Read `meta/state.md`，完成后更新。
 
-使用 `AskUserQuestion` 确认 IaC 配置是否满足需求，是否进入下一步。
+| 阶段 | 调用 | 完成标志 | 门控 |
+|------|------|---------|------|
+| 监控体系 | `/monitoring-setup $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
+| IaC 框架 | `/iac-framework $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
+| 备份恢复 | `/backup-recovery $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
 
-## Step 3: 备份恢复体系
+每阶段写入摘要到 `meta/{stage}-summary.md`（不超过 20 行）。
 
-调用技能 `/backup-recovery`，完成：
-- 备份策略设计
-- 加密和存储方案
-- 自动化调度
-- 恢复流程和测试
+**⏸️ 每步等待用户确认。**
 
-产出物存放至 `backup/` 目录。
+---
 
-使用 `AskUserQuestion` 确认备份恢复方案是否完整。
+## Step 3: 快速检查
 
-## 成功指标
+编排器内轻量执行各维度速览，生成精简报告到 `_infrastructure/quick-scan-{日期}.md`。
 
-- [ ] 监控覆盖所有关键服务，告警规则覆盖四大黄金信号
-- [ ] IaC 配置可直接 `terraform apply` 或 `aws cloudformation deploy`
-- [ ] 备份脚本可直接通过 cron 调度运行
-- [ ] 恢复手册包含完整步骤和预期时间（RTO）
-- [ ] 所有配置文件通过语法检查
+使用 `AskUserQuestion`：深入某项 / 进入完整流程 / 结束。
 
-## 失败指标
+---
 
-- 监控存在盲区（关键服务未覆盖）
-- IaC 配置存在硬编码密钥或敏感信息
-- 备份方案没有加密或跨区域存储
-- 恢复流程未经测试验证
+## 断点恢复
 
-## IMPORTANT
+1. 扫描 `_infrastructure/` 下未完成目录
+2. Read `meta/state.md`，结合产物推断进度
+3. 使用 `AskUserQuestion`：从断点继续 / 重新开始
 
-- 安全敏感信息（密钥、密码）必须使用变量引用或密钥管理服务，严禁硬编码
-- 所有资源必须包含标签（Name、Environment、Owner、CostCenter）
-- 告警必须配置通知渠道（邮件、Slack、PagerDuty 等），不能只写规则不通知
-- 备份必须加密，且至少一份存储在异地/异区域
+<IMPORTANT>
+工作台的职责是"意图识别 + 路由 + 接续"，不是把所有请求都塞进固定管道。
+监控必须覆盖 USE/RED 方法论关键指标。
+备份方案必须有 RTO/RPO 目标和恢复演练计划。
+IaC 方案必须考虑状态管理和 drift 检测。
+每个阶段完成后必须等待用户确认。
+产出文件与状态文件冲突时，以产出文件为准。
+</IMPORTANT>

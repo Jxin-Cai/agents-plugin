@@ -1,68 +1,96 @@
 ---
 name: trr
-description: 趋势研究完整工作流——按顺序执行市场分析、竞争格局、技术趋势报告
-argument-hint: "<研究主题描述>"
+description: 趋势研究工作台——按意图路由到市场分析、竞争格局、技术趋势报告或完整流程
+argument-hint: "<任务描述>"
+allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Skill"]
 ---
 
-# 趋势研究完整流程
-
-入口编排技能，串联三个阶段完成从市场分析到趋势报告的完整研究流程。
+# 趋势研究工作台
 
 用户传入的参数：`$ARGUMENTS`
 
----
-
-## Step 0: 初始化
-
-1. 从 `$ARGUMENTS` 中提取研究主题，生成一个简短的英文缩写（2-4 个词，用连字符连接，如 `ai-saas`、`ev-battery`）
-2. 使用 `AskUserQuestion` 工具向用户确认任务简写名称，提供你建议的缩写作为选项
-3. 设定工作目录：`_trend-research/{当前日期}-{任务简写}/`（如 `_trend-research/2026-04-06-ai-saas/`）
-4. 创建子目录：`context/`、`market/`、`competitive/`、`trends/`
-5. 扫描 `_trend-research/` 下已有的研究目录，向用户简要报告
+先判断用户此刻要完成的工作，再带他进入对应 workflow。不是所有需求都需要走完整管道。
 
 ---
 
-## Step 1: 市场分析
+## 强制执行规则
 
-调用 `/market-analysis $ARGUMENTS`
-
-运用 Porter 五力、PESTEL 等框架分析市场结构、规模和驱动力。
-
-**阶段完成标志：** `{工作目录}/market/market-analysis-*.md` 已生成。
-
-使用 `AskUserQuestion` 工具询问用户是否进入下一阶段（选项：继续下一阶段 / 补充市场分析 / 结束流程）。
-
-**⏸️ 等待用户选择后继续。**
+- ✅ 始终用中文与用户沟通
+- ✅ 先识别 workflow 类型，再进入对应流程
+- 🚫 不默认跑完整管道
+- 🚫 不在入口全量加载所有 references
+- ⏸️ 每个阶段完成后等待用户确认
 
 ---
 
-## Step 2: 竞争格局
+## Step 0: 意图识别与 Workflow 路由
 
-调用 `/competitive-landscape`
+| 意图信号 | Workflow | 动作 |
+|----------|----------|------|
+| "市场 / 行业 / 规模" | market-only | 调用 `/market-analysis $ARGUMENTS` |
+| "竞品 / 竞争 / 格局" | competitive-only | 调用 `/competitive-landscape $ARGUMENTS` |
+| "技术趋势 / 新技术 / 技术雷达" | tech-only | 调用 `/tech-trend-report $ARGUMENTS` |
+| "快速概览 / 速查" | quick-scan | → Step 3 |
+| "完整研究 / 全套 或复杂需求" | full-research | → Step 1 |
 
-绘制竞争地图，对核心竞争对手进行 SWOT 分析和战略分组。
+意图不明确时，用 `AskUserQuestion` 让用户选择：
+- 仅市场 
+- 仅竞品 
+- 仅技术趋势 
+- 快速趋势研究检查
+- 完整趋势研究流程（推荐）
 
-**阶段完成标志：** `{工作目录}/competitive/competitive-landscape-*.md` 已生成。
+**⏸️ 等待用户选择。**
 
-使用 `AskUserQuestion` 工具询问用户是否进入下一阶段（选项：继续下一阶段 / 补充竞争分析 / 回到市场分析）。
+---
 
-**⏸️ 等待用户选择后继续。**
+## Step 1: 完整流程初始化
+
+1. 从 `$ARGUMENTS` 提取任务描述，生成英文缩写（2-4 词，连字符连接）
+2. 使用 `AskUserQuestion` 确认缩写
+3. 创建 `_trend-research/{当前日期}-{缩写}/` 及子目录 `context/` `meta/` 和各阶段子目录
+4. 初始化 `meta/state.md`（workflow_mode、completed_steps、next_step）
+5. 扫描已有目录，检查接续点（产物优先于状态文件）
+
+**⏸️ 使用 `AskUserQuestion` 确认从哪里开始。**
 
 ---
 
-## Step 3: 技术趋势报告
+## Step 2: 完整流程串联执行
 
-调用 `/tech-trend-report`
+每阶段入口重新 Read `meta/state.md`，完成后更新。
 
-基于 Gartner 技术成熟度曲线等框架，分析关键技术趋势并产出战略建议。
+| 阶段 | 调用 | 完成标志 | 门控 |
+|------|------|---------|------|
+| 市场分析 | `/market-analysis $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
+| 竞争格局 | `/competitive-landscape $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
+| 技术趋势报告 | `/tech-trend-report $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
 
-**阶段完成标志：** `{工作目录}/trends/tech-trend-report-*.md` 已生成。
+每阶段写入摘要到 `meta/{stage}-summary.md`（不超过 20 行）。
 
-报告保存后，向用户展示文件的 **绝对路径**，以便用户直接点击打开。
+**⏸️ 每步等待用户确认。**
 
 ---
+
+## Step 3: 快速检查
+
+编排器内轻量执行各维度速览，生成精简报告到 `_trend-research/quick-scan-{日期}.md`。
+
+使用 `AskUserQuestion`：深入某项 / 进入完整流程 / 结束。
+
+---
+
+## 断点恢复
+
+1. 扫描 `_trend-research/` 下未完成目录
+2. Read `meta/state.md`，结合产物推断进度
+3. 使用 `AskUserQuestion`：从断点继续 / 重新开始
 
 <IMPORTANT>
-每个阶段完成后必须等待用户确认再进入下一阶段。不要跳过任何阶段。
-如果用户中途要求调整（回到上一步、跳过某步），按用户指令执行。
+工作台的职责是"意图识别 + 路由 + 接续"，不是把所有请求都塞进固定管道。
+市场数据必须标注来源和时间。
+竞品分析必须基于公开可验证信息。
+技术趋势不可混淆「热度」和「成熟度」。
+每个阶段完成后必须等待用户确认。
+产出文件与状态文件冲突时，以产出文件为准。
 </IMPORTANT>

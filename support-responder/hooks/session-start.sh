@@ -1,7 +1,24 @@
-#!/usr/bin/env bash
-set -euo pipefail
+#!/bin/bash
+# SessionStart hook for support-responder plugin
 
 mkdir -p _support
 
-PLUGIN_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-cat "$PLUGIN_DIR/skills/sr/references/support-responder-agent.md"
+echo "## 客户支持工作台状态"
+echo ""
+task_count=$(find _support -maxdepth 1 -mindepth 1 -type d 2>/dev/null | wc -l | tr -d ' ')
+echo "- 任务数: ${task_count}"
+if [ "$task_count" -gt 0 ]; then
+  echo "- 最近任务:"
+  ls -1t _support/ 2>/dev/null | head -3 | while read d; do
+    state="_support/${d}/meta/state.md"
+    if [ -f "$state" ]; then
+      next=$(grep "^next_step:" "$state" 2>/dev/null | cut -d' ' -f2)
+      echo "  - ${d} → next: ${next:-done}"
+    else
+      echo "  - ${d}"
+    fi
+  done
+fi
+echo ""
+
+cat "${CLAUDE_PLUGIN_ROOT}/skills/sr/references/support-responder-agent.md"

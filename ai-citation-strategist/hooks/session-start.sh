@@ -1,10 +1,24 @@
 #!/bin/bash
 # SessionStart hook for ai-citation-strategist plugin
-# 1. 创建顶层工作目录
-# 2. 输出 Agent 提示词到 stdout（注入为会话上下文）
 
-# 创建 _ai-citation 顶层目录（具体任务子目录在流程中按日期创建）
 mkdir -p _ai-citation
 
-# 输出 AI Citation Strategist Agent 提示词作为会话上下文
+echo "## AI 引用优化工作台状态"
+echo ""
+task_count=$(find _ai-citation -maxdepth 1 -mindepth 1 -type d 2>/dev/null | wc -l | tr -d ' ')
+echo "- 优化任务数: ${task_count}"
+if [ "$task_count" -gt 0 ]; then
+  echo "- 最近任务:"
+  ls -1t _ai-citation/ 2>/dev/null | head -3 | while read d; do
+    state="_ai-citation/${d}/meta/citation-state.md"
+    if [ -f "$state" ]; then
+      next=$(grep "^next_step:" "$state" 2>/dev/null | cut -d' ' -f2)
+      echo "  - ${d} → next: ${next:-done}"
+    else
+      echo "  - ${d}"
+    fi
+  done
+fi
+echo ""
+
 cat "${CLAUDE_PLUGIN_ROOT}/skills/acs/references/ai-citation-strategist-agent.md"

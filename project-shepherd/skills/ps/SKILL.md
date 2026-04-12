@@ -1,68 +1,96 @@
 ---
 name: ps
-description: 项目守护者完整工作流——按顺序执行健康检查、障碍清除、速率跟踪
-argument-hint: "<项目/迭代描述>"
+description: 项目守护者工作台——按意图路由到健康检查、障碍清除、速率跟踪或完整流程
+argument-hint: "<任务描述>"
+allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Skill"]
 ---
 
-# 项目守护者完整流程
-
-入口编排技能，串联三个阶段完成从项目状态评估到速率趋势分析的完整流程。
+# 项目守护者工作台
 
 用户传入的参数：`$ARGUMENTS`
 
----
-
-## Step 0: 初始化
-
-1. 从 `$ARGUMENTS` 中提取任务描述，生成简短英文缩写（2-4 词，连字符连接，如 `sprint-12-review`、`q2-health`）
-2. 使用 `AskUserQuestion` 工具向用户确认任务简写名称，提供你建议的缩写作为选项
-3. 设定工作目录：`_project-health/{当前日期}-{任务简写}/`（如 `_project-health/2026-04-06-sprint-12-review/`）
-4. 创建子目录：`context/`、`health/`、`blockers/`、`velocity/`
-5. 扫描 `_project-health/` 下已有的目录，向用户简要报告历史记录
+先判断用户此刻要完成的工作，再带他进入对应 workflow。不是所有需求都需要走完整管道。
 
 ---
 
-## Step 1: 健康检查
+## 强制执行规则
 
-调用 `/health-check $ARGUMENTS`
-
-多维度评估项目当前健康状态，生成健康报告。
-
-**阶段完成标志：** `{工作目录}/health/health-report-*.md` 已生成。
-
-使用 `AskUserQuestion` 工具询问用户是否进入下一阶段（选项：继续下一阶段 / 深入某个维度 / 结束流程）。
-
-**⏸️ 等待用户选择后继续。**
+- ✅ 始终用中文与用户沟通
+- ✅ 先识别 workflow 类型，再进入对应流程
+- 🚫 不默认跑完整管道
+- 🚫 不在入口全量加载所有 references
+- ⏸️ 每个阶段完成后等待用户确认
 
 ---
 
-## Step 2: 障碍清除
+## Step 0: 意图识别与 Workflow 路由
 
-调用 `/blocker-removal $ARGUMENTS`
+| 意图信号 | Workflow | 动作 |
+|----------|----------|------|
+| "健康 / 状态 / 检查" | health-only | 调用 `/health-check $ARGUMENTS` |
+| "障碍 / 阻塞 / blocker" | blocker-only | 调用 `/blocker-removal $ARGUMENTS` |
+| "速率 / velocity / 燃尽" | velocity-only | 调用 `/velocity-tracking $ARGUMENTS` |
+| "快速体检 / 概览" | quick-check | → Step 3 |
+| "完整评审 / 全套 或复杂需求" | full-review | → Step 1 |
 
-识别、分类和制定当前项目阻塞的解决方案。
+意图不明确时，用 `AskUserQuestion` 让用户选择：
+- 仅健康 
+- 仅障碍 
+- 仅速率 
+- 快速项目健康管理检查
+- 完整项目健康管理流程（推荐）
 
-**阶段完成标志：** `{工作目录}/blockers/blocker-log-*.md` 已生成。
+**⏸️ 等待用户选择。**
 
-使用 `AskUserQuestion` 工具询问用户是否进入下一阶段（选项：继续下一阶段 / 处理更多障碍 / 回到健康检查）。
+---
 
-**⏸️ 等待用户选择后继续。**
+## Step 1: 完整流程初始化
+
+1. 从 `$ARGUMENTS` 提取任务描述，生成英文缩写（2-4 词，连字符连接）
+2. 使用 `AskUserQuestion` 确认缩写
+3. 创建 `_project-health/{当前日期}-{缩写}/` 及子目录 `context/` `meta/` 和各阶段子目录
+4. 初始化 `meta/state.md`（workflow_mode、completed_steps、next_step）
+5. 扫描已有目录，检查接续点（产物优先于状态文件）
+
+**⏸️ 使用 `AskUserQuestion` 确认从哪里开始。**
 
 ---
 
-## Step 3: 速率跟踪
+## Step 2: 完整流程串联执行
 
-调用 `/velocity-tracking $ARGUMENTS`
+每阶段入口重新 Read `meta/state.md`，完成后更新。
 
-分析团队速率趋势，生成燃尽/燃起图分析和交付预测。
+| 阶段 | 调用 | 完成标志 | 门控 |
+|------|------|---------|------|
+| 健康检查 | `/health-check $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
+| 障碍清除 | `/blocker-removal $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
+| 速率跟踪 | `/velocity-tracking $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
 
-**阶段完成标志：** `{工作目录}/velocity/velocity-report-*.md` 已生成。
+每阶段写入摘要到 `meta/{stage}-summary.md`（不超过 20 行）。
 
-速率报告保存后，向用户展示文件的 **绝对路径**，以便用户直接点击打开。
+**⏸️ 每步等待用户确认。**
 
 ---
+
+## Step 3: 快速检查
+
+编排器内轻量执行各维度速览，生成精简报告到 `_project-health/quick-scan-{日期}.md`。
+
+使用 `AskUserQuestion`：深入某项 / 进入完整流程 / 结束。
+
+---
+
+## 断点恢复
+
+1. 扫描 `_project-health/` 下未完成目录
+2. Read `meta/state.md`，结合产物推断进度
+3. 使用 `AskUserQuestion`：从断点继续 / 重新开始
 
 <IMPORTANT>
-每个阶段完成后必须等待用户确认再进入下一阶段。不要跳过任何阶段。
-如果用户中途要求调整（回到上一步、跳过某步），按用户指令执行。
+工作台的职责是"意图识别 + 路由 + 接续"，不是把所有请求都塞进固定管道。
+健康检查必须产出可行动的待办项，不可仅列现象。
+障碍必须有升级时间线和负责人建议。
+速率趋势必须标注干扰因素。
+每个阶段完成后必须等待用户确认。
+产出文件与状态文件冲突时，以产出文件为准。
 </IMPORTANT>
