@@ -21,4 +21,4 @@ if [ "$task_count" -gt 0 ]; then
 fi
 echo ""
 
-cat "${CLAUDE_PLUGIN_ROOT}/skills/sim/references/support-infrastructure-maintainer-agent.md"
+cat "${CLAUDE_PLUGIN_ROOT}/skills/sim/references/infrastructure-maintainer-agent.md"

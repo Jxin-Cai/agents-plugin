@@ -2,6 +2,7 @@
 name: compliance-audit
 description: 合规审计评估——识别适用法规、逐项合规检查、差距分析与整改路线图
 argument-hint: "<合规审计目标描述>"
+allowed-tools: ["Read", "Write", "Glob", "Grep", "AskUserQuestion"]
 ---
 
 # 合规审计评估

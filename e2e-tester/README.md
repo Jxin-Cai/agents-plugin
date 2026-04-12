@@ -1,0 +1,142 @@
+# E2E-Tester Plugin
+
+风险驱动、证据至上的 QA 工作台。先装配任务，再选 workflow，用可信证据回答正确的问题。
+
+## 核心能力
+
+- **多场景 QA 支持** — 新功能验收、发布验证、回归测试、影响分析、缺陷复现、专项验证、脚本维护
+- **智能 Workflow 分流** — 根据任务意图自动匹配最合适的工作流程，不把所有事情都拖进完整设计模式
+- **BDD 剧本设计** — 业务场景 x Case x Oracle 矩阵的结构化测试设计
+- **三路径执行** — 已有脚本自动化 / 实时生成后执行 / Playwright 探索式验证
+- **资产沉淀与复用** — 注册表管理测试脚本元数据，支持跨任务资产复用
+- **断点恢复** — 基于文件产物自动推断接续点，支持任务中断后恢复
+
+## 快速开始
+
+### 入口命令
+
+```
+/e2e <被测功能、发布范围、缺陷现象或回归目标>
+```
+
+### 常用示例
+
+| 场景 | 命令 |
+|------|------|
+| 新功能测试 | `/e2e 帮我测新的支付流程` |
+| 发布前验证 | `/e2e 今晚发版前做验证` |
+| 批量回归 | `/e2e 跑回归` 或 `/e2e-tester:run-suite smoke` |
+| 缺陷复现 | `/e2e 复现订单重复提交问题` |
+| 影响分析 | `/e2e 这次改动影响什么` 或 `/e2e-tester:impact-analysis` |
+| 修复脚本 | `/e2e fix ts-001` 或 `/e2e-tester:fix-script ts-001` |
+| 沉淀脚本 | `/e2e-tester:test-automation-builder` |
+
+## Workflow 体系
+
+插件支持 7 种 Workflow，根据任务意图自动分流：
+
+| Workflow | 适用场景 | 执行链路 |
+|----------|---------|---------|
+| `design-full` | 新功能、复杂验证 | 装配 → 扫描 → 剧本 → 准备 → 执行 → 沉淀 |
+| `design-lite` | 专项验证（权限/数据/集成） | 只保留必要阶段的最小可信设计链 |
+| `release-gate` | 发布前验证 | 装配 → 影响分析 → 回归 → 补充验证 → GO/NO-GO |
+| `regression-batch` | 批量回归 | 直接执行已有脚本 |
+| `impact-first` | 变更影响分析 | 分析影响 → 推导回归范围 |
+| `repro-loop` | 缺陷复现 | 最小准备 → 探索执行 → 证据链 |
+| `script-maintenance` | 脚本修复/沉淀 | 诊断 → 修复 → 验证 → 更新注册表 |
+
+## Skill 清单
+
+| Skill | 说明 | 直接可用 |
+|-------|------|---------|
+| `e2e` | 入口：任务装配 + workflow 分流 | `/e2e-tester:e2e` |
+| `clarify-scope` | 任务装配与澄清，识别工作类型/目标/风险/边界 | `/e2e-tester:clarify-scope` |
+| `scan-context` | 项目上下文扫描（通过 Explore subagent 直读源码） | `/e2e-tester:scan-context` |
+| `test-scenario-gen` | BDD 剧本生成 | `/e2e-tester:test-scenario-gen` |
+| `test-prep` | 测试准备方案 + readiness gate | `/e2e-tester:test-prep` |
+| `test-runner` | 测试执行（A/B/C 三路径）+ 质量报告 | `/e2e-tester:test-runner` |
+| `test-automation-builder` | 自动化脚本沉淀（通过 subagent 生成） | `/e2e-tester:test-automation-builder` |
+| `run-suite` | 批量回归执行 | `/e2e-tester:run-suite` |
+| `fix-script` | 脚本诊断与修复 | `/e2e-tester:fix-script` |
+| `impact-analysis` | 变更影响分析 + 回归推导 | `/e2e-tester:impact-analysis` |
+
+## 工作目录结构
+
+```
+.e2e-tests/
+├── _shared/                    # 跨域共享资产
+│   ├── datasets/               # 共享数据集
+│   ├── mocks/                  # 共享 Mock 配置
+│   └── helpers/                # 共享 Helper
+├── registry/                   # 脚本注册表
+│   ├── index.yaml              # 全局索引
+│   ├── {domain}.yaml           # 域级注册
+│   └── suites.yaml             # 套件定义
+├── reports/                    # 回归报告
+├── env/                        # 环境配置（{env}.yaml）
+├── asset-catalog.md            # 资产目录
+├── quality-ledger.md           # 质量经验缓存
+└── {domain}/                   # 单次任务域
+    ├── task/
+    │   ├── index.md            # 任务索引（唯一状态文件）
+    │   └── task.md             # 任务装配卡
+    ├── context/                # 上下文扫描结果 + 阶段摘要
+    ├── scenarios/              # BDD 剧本（TS-{NNN}-{slug}.md）
+    ├── prep/                   # 准备方案（TP-{NNN}-{slug}.md）
+    ├── reports/                # 执行报告
+    ├── automation/             # 自动化脚本
+    ├── fixtures/               # 任务专用数据/Mock
+    └── evidence/               # 测试证据（截图等）
+```
+
+## 核心概念
+
+### 任务装配
+
+每次 QA 工作从"装配"开始——识别任务类型、目标、风险、边界、交付物，然后选择合适的 workflow。不默认把所有事情都拖进完整的六阶段测试设计。
+
+### Oracle 模型
+
+剧本中的每个 Case 通过多层 Oracle 验证：
+
+| Oracle 类型 | 说明 |
+|------------|------|
+| UI | 页面文案、状态、可见性 |
+| API | 接口状态码 + 响应体关键字段 |
+| Data | 数据库/查询接口验证状态流转 |
+| Side Effect | 副作用（通知、日志、外部调用） |
+| Async | 异步操作的最终一致性 |
+| Idempotency | 重复操作的幂等性 |
+
+关键原则：**只有 UI 信号没有业务结果信号 = 不可信**。
+
+### 三路径执行
+
+| 路径 | 条件 | 说明 |
+|------|------|------|
+| A: 自动化 | 已有脚本匹配 | 直接执行注册表中的脚本 |
+| B: 生成后执行 | Oracle 可机械验证 + 准备完整 | 通过 subagent 实时生成脚本再执行 |
+| C: Playwright 探索 | 其他情况 | 逐 case 手动探索，捕获 API 调用链 |
+
+### 注册表
+
+每个自动化脚本在注册表中有完整元数据（路径、覆盖场景、风险等级、API 端点、源码路径等）。`impact-analysis` 通过注册表元数据推导变更影响，`run-suite` 通过注册表定位脚本。
+
+### Quality Ledger
+
+跨任务的质量经验缓存，记录：失败模式、时序基线、环境陷阱、依赖稳定性、Flaky 治理。存在时加速决策，缺失不阻塞流程。
+
+## 脚本类型
+
+| 类型 | 文件后缀 | 执行方式 | 适用场景 |
+|------|---------|---------|---------|
+| api-script | `.test.ts` | `npx tsx` | 核心操作有 API + 状态可查询 |
+| e2e-script | `.spec.ts` | `npx playwright test` | 部分操作必须通过 UI 完成 |
+
+## 行为纪律
+
+- 所有选择走 `AskUserQuestion`，设计类逐阶段确认
+- 每阶段从文件读上下文，不依赖对话记忆
+- 重型任务（上下文扫描、脚本生成）走 subagent
+- 优先复用已有资产
+- 无准备不执行，无关键证据不判 PASS

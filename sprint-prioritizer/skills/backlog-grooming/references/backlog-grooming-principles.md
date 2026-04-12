@@ -1,7 +1,5 @@
 # Backlog 梳理原则
 
-本文档定义了 Backlog 梳理阶段必须遵循的原则。
-
 ---
 
 ## 1. 就绪定义（Definition of Ready）

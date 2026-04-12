@@ -2,6 +2,7 @@
 name: monitoring-setup
 description: 监控体系搭建 — Prometheus 配置、告警规则、Grafana 仪表盘
 argument-hint: "<监控目标描述>"
+allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion"]
 ---
 
 # 监控体系搭建
@@ -119,9 +120,9 @@ monitoring/
 - 缺少 Alertmanager 通知配置
 - 仪表盘缺少关键指标面板
 
-## IMPORTANT
-
-- Prometheus 采集间隔建议 15s，评估间隔建议 15s
-- 告警持续时间（for）不能设置为 0，至少 1m 以避免误告警
-- 所有 PromQL 表达式必须经过语法验证
-- 敏感信息（Webhook URL、邮箱密码）使用环境变量引用
+<IMPORTANT>
+Prometheus 采集间隔建议 15s，评估间隔建议 15s。
+告警持续时间（for）不能设置为 0，至少 1m 以避免误告警。
+所有 PromQL 表达式必须经过语法验证。
+敏感信息（Webhook URL、邮箱密码）使用环境变量引用。
+</IMPORTANT>

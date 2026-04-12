@@ -74,7 +74,16 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 
 ## Step 3: 快速检查
 
-编排器内轻量执行各维度速览，生成精简报告到 `_project-health/quick-scan-{日期}.md`。
+使用 `AskUserQuestion` 一次性收集以下四维度速览信息：
+
+| 维度 | 速览问题 |
+|------|---------|
+| 交付 | 最近迭代承诺达成率大约多少？发布是否按计划？ |
+| 质量 | 最近发布后有几个生产缺陷？技术债务是否可控？ |
+| 流程 | 团队同时进行中的工作项有多少？最大的流程瓶颈是什么？ |
+| 团队 | 团队整体士气如何（1-5 分）？加班是否常态化？ |
+
+将回答汇总为 `_project-health/quick-scan-{日期}.md`（不超过 30 行），每个维度标注红/黄/绿状态。
 
 使用 `AskUserQuestion`：深入某项 / 进入完整流程 / 结束。
 

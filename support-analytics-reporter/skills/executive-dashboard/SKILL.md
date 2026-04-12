@@ -2,6 +2,7 @@
 name: executive-dashboard
 description: 高管仪表盘设计——KPI 层级结构、核心 SQL 查询和仪表盘布局
 argument-hint: "<仪表盘场景描述>"
+allowed-tools: ["Read", "Write", "Glob", "Grep", "Bash(mkdir*)", "AskUserQuestion"]
 ---
 
 # Executive Dashboard — 高管仪表盘设计
@@ -11,6 +12,7 @@ argument-hint: "<仪表盘场景描述>"
 ## 加载引用
 
 Read skills/executive-dashboard/references/executive-dashboard-principles.md
+Read skills/executive-dashboard/references/dashboard-sql-patterns.md
 
 ## 强制执行规则
 
@@ -59,6 +61,11 @@ Read skills/executive-dashboard/references/executive-dashboard-principles.md
 - 更新频率
 - 正常范围和告警阈值
 
+使用 AskUserQuestion 确认：
+- "KPI 层级结构设计如上，层级划分是否覆盖核心业务维度？是否需要增减指标？"
+
+**⏸️ 等待用户确认后进入 Step 3。**
+
 ## Step 3: 编写核心 SQL 查询
 
 为每个 KPI 编写生产级 SQL：
@@ -76,6 +83,11 @@ SQL 规范：
 
 将所有 SQL 文件保存到 `dashboards/sql/` 目录。
 
+使用 AskUserQuestion 确认：
+- "核心 SQL 查询已编写完成，是否需要调整查询逻辑或补充其他指标？"
+
+**⏸️ 等待用户确认后进入 Step 4。**
+
 ## Step 4: 设计仪表盘布局
 
 设计仪表盘的可视化布局：
@@ -89,6 +101,11 @@ SQL 规范：
 - 每个图表的类型、数据源、交互行为
 - 筛选器设计（时间范围、维度筛选）
 - 钻取路径（从汇总到明细的导航）
+
+使用 AskUserQuestion 确认：
+- "仪表盘布局设计如上，信息层次和交互路径是否满足决策需求？"
+
+**⏸️ 等待用户确认后进入 Step 5 输出产出物。**
 
 ## Step 5: 输出产出物
 

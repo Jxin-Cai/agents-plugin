@@ -2,6 +2,7 @@
 name: marketing-attribution
 description: 营销归因分析——多触点归因模型、渠道 ROI 计算和优化建议
 argument-hint: "<营销渠道或归因需求描述>"
+allowed-tools: ["Read", "Write", "Glob", "Grep", "Bash(mkdir*)", "AskUserQuestion"]
 ---
 
 # Marketing Attribution — 营销归因分析
@@ -11,6 +12,7 @@ argument-hint: "<营销渠道或归因需求描述>"
 ## 加载引用
 
 Read skills/marketing-attribution/references/marketing-attribution-principles.md
+Read skills/marketing-attribution/references/attribution-sql-patterns.md
 
 ## 强制执行规则
 
@@ -86,6 +88,11 @@ touchpoints AS (
 
 SELECT * FROM touchpoints ORDER BY conversion_id, touch_order;
 ```
+
+使用 AskUserQuestion 确认：
+- "转化路径数据已构建完成，触点数据量和路径长度分布是否合理？"
+
+**⏸️ 等待用户确认后进入归因模型计算。**
 
 ### 首次触点归因
 
@@ -226,6 +233,11 @@ ORDER BY roi_pct DESC;
 2. **关键发现** — 哪些渠道在不同模型下表现差异最大（可能被高估/低估）
 3. **预算优化建议** — 基于归因结果的渠道预算调整方案
 4. **下一步** — 建议进行增量测试验证的渠道
+
+使用 AskUserQuestion 确认：
+- "归因模型对比分析和预算优化建议已生成，是否需要调整或深入分析？"
+
+**⏸️ 等待用户确认后进入 Step 5 输出产出物。**
 
 ## Step 5: 输出产出物
 

@@ -1,0 +1,14 @@
+name: linear
+display_name: "Linear"
+auth_type: api_key
+
+connection_fields:
+  api_key:
+    required: true
+    secret: true
+    description: "Linear API key"
+
+operations:
+  - fetch
+  - comment
+  - search

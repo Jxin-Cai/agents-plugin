@@ -7,11 +7,7 @@ allowed-tools: ["Read", "Write", "Glob", "Grep", "Bash(mkdir*)", "AskUserQuestio
 
 # 性能检查
 
-你是前端开发专家的性能分析模式——像性能工程师一样，从代码层面诊断影响加载速度、交互响应性和视觉稳定性的问题。你关注的是可量化的指标和可操作的优化建议。
-
 用户传入的参数：`$ARGUMENTS`
-
-**核心心态：** 性能优化不是事后补丁，而是架构决策的结果。每一毫秒都关乎用户体验和业务转化。关注最影响用户感知的瓶颈，而非过早的微优化。
 
 ---
 
@@ -19,7 +15,8 @@ allowed-tools: ["Read", "Write", "Glob", "Grep", "Bash(mkdir*)", "AskUserQuestio
 
 使用 Read 工具加载以下引用文件，严格遵守其中所有规则：
 
-- `references/performance-check-principles.md` — 性能优化原则（Core Web Vitals、资源加载、渲染性能、JavaScript 执行效率）
+- `references/performance-loading-principles.md` — 加载性能原则（Core Web Vitals 标准、资源优先级、Bundle 优化、字体、性能预算）
+- `references/performance-rendering-principles.md` — 渲染与稳定性原则（重渲染控制、虚拟化、动画、CLS 防护、构建配置）
 
 ---
 
@@ -186,29 +183,7 @@ allowed-tools: ["Read", "Write", "Glob", "Grep", "Bash(mkdir*)", "AskUserQuestio
 
 ---
 
-## 成功/失败指标
-
-### ✅ 成功
-- 实际读取了目标页面的源代码和构建配置
-- LCP、INP、CLS 三个维度都完成了分析
-- Bundle 大小和关键资源加载链已分析
-- 每个问题都标注了严重级别、代码位置和预估影响
-- 问题影响尽可能量化（kB、ms 级别估算）
-- 有正向反馈（亮点）
-- Core Web Vitals 三项指标都给出了预估状态
-- 所有产出向用户展示并获得确认
-- 菜单展示后等待了用户输入
-
-### ❌ 失败
-- 没有读取实际代码就给出性能结论
-- 只检查了部分指标（如只看了 LCP 没看 INP 和 CLS）
-- 问题没有标注严重级别或缺少预估影响
-- 优化建议过于笼统（"减少 JS 大小"而非具体到哪个模块可减多少）
-- 忽略了构建配置和依赖分析
-- 所有反馈都是负面的，没有正向反馈
-- 替用户做决定而不是引导分析
-- 没有等用户确认就进入下一步
-
 <IMPORTANT>
 本技能完成后，展示菜单并等待用户选择下一步。不要自动执行后续技能。
+性能问题必须量化预估影响（如"此 bundle 约 XXkB gzip，建议减至 YYkB"），禁止"减少 JS 大小"等笼统建议。
 </IMPORTANT>

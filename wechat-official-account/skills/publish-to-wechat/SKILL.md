@@ -2,6 +2,7 @@
 name: publish-to-wechat
 description: 发布文章到微信公众号——支持 API 方式创建草稿和浏览器自动化方式，包含 Markdown 到微信 HTML 转换
 argument-hint: "<Markdown文件路径>"
+allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*|curl*|cat*)", "AskUserQuestion"]
 ---
 
 # 发布到微信公众号
@@ -10,15 +11,17 @@ argument-hint: "<Markdown文件路径>"
 
 用户传入的参数：`$ARGUMENTS`
 
-**核心心态：** 发布是内容触达订阅者的最后一环，必须谨慎、准确。错误的发布无法撤回（已发送的推文不可删除后重发而不损失数据）。所有发布操作必须经过用户确认。
-
 ---
 
 ## 加载引用
 
-使用 Read 工具加载以下引用文件，严格遵守其中所有规则：
+根据当前步骤按需 Read 以下引用文件：
 
-- `references/wechat-publish-guide.md` — 微信公众平台 API 接入指南、内容格式规范、Markdown 转换规则
+| 步骤 | 引用文件 | 用途 |
+|------|---------|------|
+| Step 3（内容转换） | `references/wechat-content-format.md` | HTML 白名单、转换映射、外链处理 |
+| Step 4A（API 发布） | `references/wechat-api-reference.md` | API 端点、参数、错误码 |
+| Step 0/4B/错误排查 | `references/wechat-config-troubleshooting.md` | 配置模板、浏览器方式、故障排查 |
 
 ---
 
@@ -420,7 +423,8 @@ browser_navigate → https://mp.weixin.qq.com/cgi-bin/appmsg?t=media/appmsg_edit
 - 发布失败未给出清晰的错误排查指引
 
 <IMPORTANT>
-所有发布操作的结果是创建草稿，不是直接发送给订阅者。
-必须反复提醒用户：草稿需要在公众号后台手动确认后才会发送。
-如果 API 调用失败，提供清晰的错误排查步骤，不要默默重试。
+所有发布操作的结果是创建草稿，不是直接发送给订阅者——必须反复提醒用户在后台手动确认。
+外部链接必须全部转换为底部引用格式（`[1]` 脚注），不可遗留任何 `<a href>` 外链标签。
+图片 URL 必须是微信素材库域名（mmbiz.qpic.cn），外部图片 URL 在微信端可能无法加载。
+如果 API 调用失败，提供清晰的错误排查步骤（含 errcode 对照），不要默默重试。
 </IMPORTANT>

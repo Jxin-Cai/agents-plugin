@@ -1,13 +1,26 @@
 {
   "name": "product-manager",
-  "description": "Product manager: structured requirements discovery, brainstorming, clarification, and PRD generation",
-  "version": "1.0.0",
+  "description": "Product manager workbench: route across requirement delivery, discovery, portfolio roadmap, governance, enterprise NFR, review, and knowledge workflows",
+  "version": "3.0.0",
   "author": {
     "name": "jxin"
   },
   "homepage": "https://github.com/Jxin-Cai/agents-plugin",
   "repository": "https://github.com/Jxin-Cai/agents-plugin",
-  "keywords": ["product-manager", "requirements", "prd", "brainstorm"],
+  "keywords": [
+    "product-manager",
+    "pm-workbench",
+    "requirements",
+    "prd",
+    "discovery",
+    "roadmap",
+    "portfolio",
+    "governance",
+    "nfr",
+    "metrics",
+    "review",
+    "knowledge-base"
+  ],
   "agents": [],
   "skills": ["./skills/"],
   "commands": ["./commands/"]

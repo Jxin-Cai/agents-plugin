@@ -1,167 +1,52 @@
 ---
 name: test-prep
-description: 为 E2E 剧本生成测试准备方案，包括账号、数据、Mock、依赖健康、清理策略和准备度结论。当在 /e2e 流程的准备阶段，或用户要求"准备测试数据"、"准备 mock"、"准备环境"时触发。
+description: 为剧本生成测试准备方案，包含资产决策、依赖健康、readiness gate
 allowed-tools: Read, Glob, Write, AskUserQuestion
 ---
 
-# E2E 测试准备器
+# 测试准备器
 
-围绕已确认的测试剧本，生成可执行的测试准备方案，并对数据集、mock、helper 等资产做“复用 / 定制 / 新建”的决策，给执行阶段提供 readiness gate。
+围绕已确认剧本，生成可执行的准备方案，对资产做复用/定制/新建决策，给执行阶段提供 readiness gate。
 
----
+## 流程
 
-## 提问规则
+### Step 0: 检索共享资产
 
-1. 所有阶段选择使用 `AskUserQuestion`
-2. 默认允许用户用 Other 补充不在选项内的准备策略
-3. 当多个准备动作可以并行成立时，使用 `multiSelect: true`
-4. 如果已存在 TP 文件，应优先问“沿用哪些、补哪些、重做哪些”
+读取 task.md、index.md、已有 TP 文件、`_shared/`、`asset-catalog.md`、`registry/`、`quality-ledger.md`（只提取与当前 domain 相关的环境陷阱和依赖稳定性条目）。
 
----
+> 若 `task/task.md` 或 `scenarios/` 下的剧本不存在，提示用户先完成前置阶段，不凭空生成准备方案。
 
-## 执行流程
+### Step 1: 从剧本提取准备项
 
-### Step 0: 先检索共享资产
+提取 persona、preconditions、dependencies、oracle_types、reused_assets → 整理：账号、数据、Mock/Fixture、依赖健康、特性开关、隔离策略、清理策略。
 
-读取并检查：
-- `.e2e-tests/{domain}/task/task.md`
-- `.e2e-tests/{domain}/task/index.md`
-- `.e2e-tests/{domain}/prep/TP-*.md`（如存在）
-- `.e2e-tests/_shared/datasets/**`
-- `.e2e-tests/_shared/mocks/**`
-- `.e2e-tests/_shared/helpers/**`
-- `.e2e-tests/asset-catalog.md`（跨 domain 资产发现的主入口）
-- `.e2e-tests/registry/index.yaml` → 按需读取 `registry/{domain}.yaml`
-- `.e2e-tests/quality-ledger.md`（如存在）— 读取"环境陷阱"和"依赖稳定性画像"，提前规避已知问题
+### Step 2: 生成 `.e2e-tests/{domain}/prep/TP-{NNN}-{slug}.md`
 
-目标：
-- 找出现有可复用的数据集 / mock / helper
-- 判断哪些可直接复用，哪些需要复制后定制，哪些必须为本任务新建
-- 判断当前任务是否已有可接续的准备方案
-- 避免准备阶段再次让用户从零提供相同信息
-- **参考 quality-ledger 中的环境陷阱和依赖稳定性画像，为依赖策略决策提供历史依据**
+结构：关联信息、资产决策表（reuse/clone-and-tune/new-task/new-shared）、账号权限、前置数据、依赖策略、依赖健康探测、环境隔离策略、数据准备策略（api-create/db-seed/fixture-import/snapshot-restore）、清理策略、准备度结论（READY/PARTIAL/BLOCKED）。
 
-### Step 1: 读取剧本并识别准备项
+已有 TP 文件时补齐而非推倒重来。
 
-从剧本 frontmatter 和正文提取：persona、preconditions、dependencies、oracle_types、out_of_scope、测试数据占位符、Side Effect / Data / API 层验证需求、`reused_assets`。
+### Step 3: 共享资产沉淀
 
-据此整理准备项：账号与角色、数据前置状态、Mock / Fixture 文件、依赖服务健康检查、特性开关 / 环境配置、环境隔离策略、清理与回滚策略。
-
-### Step 2: 生成或更新准备方案
-
-生成 `.e2e-tests/{domain}/prep/TP-{NNN}-{slug}.md`，按以下结构：
-
-```markdown
-# 测试准备方案: TP-{NNN} — {剧本标题}
-
-## 关联信息
-- **对应剧本**: `scenarios/TS-{NNN}-{slug}.md`
-- **业务领域**: {domain}
-- **执行角色**: {persona}
-- **风险等级**: {risk_level}
-
-## 资产决策表
-| 资产类型 | 名称 | 处理方式 | 路径 | 说明 |
-|----------|------|----------|------|------|
-| dataset | {名称} | reuse / clone-and-tune / new-task / new-shared | {路径} | {说明} |
-| mock | {名称} | reuse / clone-and-tune / new-task / new-shared | {路径} | {说明} |
-| helper | {名称} | reuse / clone-and-tune / new-task / new-shared | {路径} | {说明} |
-
-## 账号与权限
-| 账号 | 角色 | 权限要求 | 来源 |
-|------|------|----------|------|
-
-## 前置数据
-| 数据项 | 目标状态 | 准备方式 | 资产来源 | 清理方式 |
-|--------|----------|---------|----------|---------|
-
-## 依赖与策略
-| 服务 | 策略 | 配置 | 健康检查 |
-|------|------|------|---------|
-
-## 依赖健康探测
-对策略为 `real` 的每个依赖服务，列出健康探测方式和预期结果：
-| 服务 | 探测方式 | 预期结果 | 不可用时的降级方案 |
-|------|----------|----------|-------------------|
-
-## 环境隔离策略
-- **流量标记**: 测试请求是否携带特殊 header/trace-tag 以区分测试流量
-- **数据隔离**: 测试数据写入独立命名空间/租户/前缀，还是共享库
-- **版本锁定**: 被测链路各服务版本是否固定，是否有其他部署可能干扰
-
-## 数据准备策略
-| 数据项 | 准备方式 | 关联数据 | 落盘位置 | 清理方式 |
-|--------|----------|----------|----------|---------|
-> **准备方式**类型：
-> - `api-create` — 通过 API 调用创建（推荐，可编程复现）
-> - `db-seed` — 通过数据库脚本注入
-> - `fixture-import` — 导入预制数据集
-> - `snapshot-restore` — 从快照还原到已知状态
-
-## 特性开关 / 环境要求
-
-## 清理 / 回滚策略
-
-## 已知限制
-
-## 准备度结论
-- **READY** / **PARTIAL** / **BLOCKED**
-- 原因: {简述}
-```
-
-如果 TP 文件已存在，应基于现有文件补齐、修订或追加，而不是默认推倒重来。
-
-### Step 3: 共享资产沉淀决策
-
-对于准备过程中新增的资产，必须明确落盘位置：
-- **任务专用资产**：`.e2e-tests/{domain}/fixtures/`
-- **可复用共享数据集**：`.e2e-tests/_shared/datasets/`
-- **可复用共享 mock**：`.e2e-tests/_shared/mocks/`
-- **可复用共享 helper**：`.e2e-tests/_shared/helpers/`
-
-判断原则：
-- 只服务当前任务、强依赖当前环境状态 → 任务专用
-- 可在相近场景复用、命名可抽象、准备方式稳定 → 共享资产
+任务专用 → `{domain}/fixtures/`；可复用 → `_shared/datasets|mocks|helpers/`
 
 ### Step 4: 准备度判定
 
-以下任一条件成立时，准备度 **不得判 READY**：
-- 核心账号未明确
-- 关键前置数据未明确
-- 关键依赖策略未明确（real/mock/fixture）
-- 关键 Mock / Fixture 文件缺失
-- 核心副作用无法观测
-- 清理 / 回滚方式不明
-- 策略为 real 的关键依赖健康探测未通过或未执行
-- 共享环境下无隔离机制且存在数据污染风险
-- 可复用资产明明存在但未说明为何不复用
+以下任一成立 → 不判 READY：核心账号未明确、关键前置数据缺失、依赖策略未明确、Mock/Fixture 缺失、副作用不可观测、清理方式不明、real 依赖健康探测未通过、共享环境无隔离机制。
 
-### Step 5: 更新任务索引并用户确认
+### Step 5: 更新索引并确认
 
-1. 在 `.e2e-tests/{domain}/task/index.md` 中登记：TP 文件、资产决策、准备度结论
-2. 使用 **AskUserQuestion** 确认：
-   - 准备充分，进入执行
-   - 仍需补充数据 / Mock / 账号
-   - 回到剧本阶段调整场景
-   - 其他自定义处理
-3. 当用户可能同时选择多项补充动作时，使用 `multiSelect: true`
-
-**⏸️ 等待用户确认后结束。**
-
----
+`AskUserQuestion` 确认准备度。
 
 ## 约束
 
-1. **准备方案必须落文件** — 不允许只在对话里口头说明
-2. **没有 readiness 结论不得进入执行**
-3. **准备项必须服务于 oracle** — 为什么要这些账号/数据/Mock，要能对应到剧本验证点
-4. **清理策略必须明确** — 涉及脏数据或副作用的场景必须说明回滚办法
-5. **数据准备必须可复现** — 优先 API 创建或快照还原，避免依赖手工操作
-6. **共享环境必须说明隔离** — 不标明隔离策略的共享环境测试方案不完整
-7. **优先复用共享资产** — 若共享目录已有可复用资产，默认先复用或复制定制，而不是从零新建
-8. **支持中断接续** — 已有 TP 文件时优先续写、补齐、重审
+1. 准备方案必须落文件
+2. 无 readiness 结论不进执行
+3. 准备项必须服务于 oracle
+4. 数据准备必须可复现
+5. 共享环境必须说明隔离
+6. 优先复用共享资产
 
 <IMPORTANT>
-测试准备不是附属品，而是执行质量的前提。
-如果准备项缺失，应阻止执行，而不是边跑边猜。
+准备项缺失应阻止执行，而不是边跑边猜。
 </IMPORTANT>

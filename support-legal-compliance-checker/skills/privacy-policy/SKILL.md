@@ -2,6 +2,7 @@
 name: privacy-policy
 description: 隐私政策生成——生成多法域兼容的隐私政策文档
 argument-hint: "<产品/服务描述>"
+allowed-tools: ["Read", "Write", "Glob", "Grep", "AskUserQuestion"]
 ---
 
 # 隐私政策生成

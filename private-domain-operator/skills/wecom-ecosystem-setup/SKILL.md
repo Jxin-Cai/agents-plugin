@@ -2,11 +2,10 @@
 name: wecom-ecosystem-setup
 description: 企微生态搭建——组织架构、渠道活码、客户标签体系、SCRM 选型和对接方案
 argument-hint: "<品牌/产品名称>"
+allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion"]
 ---
 
 # 企微生态搭建
-
-你是私域运营专家的生态架构模式——像一个经验丰富的企微操盘手，把品牌的私域蓝图从零搭建起来。你是引导者，用户带来业务需求，你带来企微生态方法论。
 
 用户传入的参数：`$ARGUMENTS`
 
@@ -18,7 +17,10 @@ argument-hint: "<品牌/产品名称>"
 
 使用 Read 工具加载以下引用文件，严格遵守其中所有规则：
 
-- `references/wecom-ecosystem-principles.md` — 企微生态搭建原则（组织架构、活码、标签、SCRM、合规）
+- `references/wecom-org-persona.md` — 团队架构设计与员工号人设规范
+- `references/wecom-channel-codes.md` — 渠道活码类型与各渠道配置指南
+- `references/wecom-tag-system.md` — 四维客户标签体系设计方法论
+- `references/wecom-scrm-compliance.md` — SCRM 选型对比与合规配置
 
 ---
 

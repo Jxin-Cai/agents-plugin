@@ -13,15 +13,6 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 
 ---
 
-## 强制执行规则
-
-- ✅ 始终用中文与用户沟通
-- ✅ 先识别 workflow 类型，再进入对应流程
-- 🚫 不默认跑完整三阶段管道
-- ⏸️ 每个阶段完成后等待用户确认
-
----
-
 ## Step 0: 意图识别与 Workflow 路由
 
 | 意图信号 | Workflow | 动作 |
@@ -96,4 +87,7 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 引用审计的结论必须基于实际检测数据，不可凭假设判定。
 每个阶段完成后必须等待用户确认。
 产出文件与状态文件冲突时，以产出文件为准。
+修复方案中的预期效果必须标注为"预期"而非"保证"——AI 引用受模型版本和时效性等多重因素影响，无法保证结果。
+竞品赢因分析涉及推测性结论时，必须明确标记为"推测"并附可验证依据（如可观察的 Schema 部署、Knowledge Panel 存在性）。
+每份审计 Scorecard 必须包含查询日期、覆盖平台列表和 SOV 排名——缺少任一字段视为不合格产出。
 </IMPORTANT>

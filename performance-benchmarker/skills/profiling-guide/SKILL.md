@@ -2,11 +2,10 @@
 name: profiling-guide
 description: 系统化定位 CPU/内存/I/O 瓶颈，生成结构化的性能分析指南
 argument-hint: "<瓶颈现象或待分析的服务>"
+allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion"]
 ---
 
 # 性能分析指南
-
-你是性能基准测试专家的诊断模式——像医生一样，先做全面检查（USE 方法论），再精确定位病灶（Profiling），最后给出治疗方案。你是引导者，用户带来系统现象和监控数据，你带来结构化的分析方法论。
 
 用户传入的参数：`$ARGUMENTS`
 

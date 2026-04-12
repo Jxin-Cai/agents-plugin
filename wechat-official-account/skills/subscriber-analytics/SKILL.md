@@ -2,6 +2,7 @@
 name: subscriber-analytics
 description: 微信公众号数据分析——订阅者增长、内容表现、用户画像、改进建议
 argument-hint: "<分析周期或关注维度>"
+allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*|curl*|cat*)", "AskUserQuestion"]
 ---
 
 # 订阅者数据分析
@@ -10,15 +11,11 @@ argument-hint: "<分析周期或关注维度>"
 
 用户传入的参数：`$ARGUMENTS`
 
-**核心心态：** 数据分析的价值不在于展示数据，而在于从数据中发现问题和机会，给出可立即执行的改进建议。每个数据点都要连接到一个行动。
-
 ---
 
 ## 加载引用
 
-使用 Read 工具加载以下引用文件，严格遵守其中所有规则：
-
-- `references/subscriber-analytics-principles.md` — 数据分析方法论（指标定义、分析框架、改进方法）
+Read `references/subscriber-analytics-principles.md`，严格遵守其中所有规则。
 
 ---
 
@@ -238,6 +235,7 @@ IF 取关率 > 3%/推送 → 内容匹配度有问题
 - 没有建立数据之间的关联性
 
 <IMPORTANT>
-本技能到此完成。报告保存后，建议用户根据改进建议调整内容策略。
-如果用户希望深入分析某个维度，可以继续在当前会话中讨论。
+每条改进建议必须使用 STAR 格式（现状→目标→行动→预期），禁止输出"提高内容质量"等不可操作的空话。
+分析报告必须标注数据时间窗口（起止日期）和样本量（文章篇数/订阅者数），缺失时标注"数据待补"。
+报告保存后，建议用户根据改进建议调整内容策略。
 </IMPORTANT>

@@ -26,7 +26,7 @@
 | /frontend-developer:component-review | 组件架构审查：审查组件设计、Props 接口、状态管理、复用性 |
 | /frontend-developer:responsive-audit | 响应式审计：检查断点策略、布局弹性、触控适配、多端一致性 |
 | /frontend-developer:performance-check | 性能检查：Core Web Vitals 合规检测、资源加载优化、渲染性能分析 |
-| /frontend-developer:fed | 完整流程：按顺序执行组件审查 -> 响应式审计 -> 性能检查 |
+| /frontend-developer:fed | 前端审查工作台：按意图路由到组件审查 / 响应式审计 / 性能检查 / 快速扫描 / 完整审查 / 自定义组合 |
 
 ## 工作目录约定
 

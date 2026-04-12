@@ -21,4 +21,4 @@ if [ "$task_count" -gt 0 ]; then
 fi
 echo ""
 
-cat "${CLAUDE_PLUGIN_ROOT}/skills/woa/references/wechat-official-account-agent.md"
+cat "${CLAUDE_PLUGIN_ROOT}/skills/woa/references/wechat-oa-agent.md"

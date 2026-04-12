@@ -101,6 +101,7 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 <IMPORTANT>
 工作台的职责是"意图识别 + 路由 + 接续"，不是把所有请求都塞进固定管道。
 WCAG Level A 违规必须标记为 Blocker，不可降级。
+合规状态声明必须有审计证据支撑，绝不虚标"支持"。
 每个阶段完成后必须等待用户确认再进入下一阶段。
 产出文件与状态文件冲突时，以产出文件为准。
 </IMPORTANT>

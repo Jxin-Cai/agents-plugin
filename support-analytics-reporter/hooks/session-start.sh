@@ -21,4 +21,4 @@ if [ "$task_count" -gt 0 ]; then
 fi
 echo ""
 
-cat "${CLAUDE_PLUGIN_ROOT}/skills/sar/references/support-analytics-reporter-agent.md"
+cat "${CLAUDE_PLUGIN_ROOT}/skills/sar/references/analytics-reporter-agent.md"

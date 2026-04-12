@@ -37,6 +37,7 @@
 _project-health/
 └── {YYYY-MM-DD}-{任务简写}/
     ├── context/    # 项目上下文（团队结构、迭代信息、干系人等）
+    ├── meta/       # 状态文件（workflow_mode、completed_steps、next_step）
     ├── health/     # 健康报告（多维度评估结果、趋势分析）
     ├── blockers/   # 障碍记录（阻塞清单、根因分析、解决方案）
     └── velocity/   # 速率数据（速率趋势、燃尽图分析、预测报告）

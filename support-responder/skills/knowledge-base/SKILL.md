@@ -2,6 +2,7 @@
 name: knowledge-base
 description: 知识库建设——文章结构设计、分类体系、文章模板和自助资源优化
 argument-hint: "<知识库需求描述>"
+allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion"]
 ---
 
 # 知识库建设

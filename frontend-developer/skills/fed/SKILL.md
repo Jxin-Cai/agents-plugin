@@ -96,10 +96,10 @@ decisions: []
 
 编排器内轻量执行（不调用子技能）：
 
-1. **技术栈扫描**：识别框架/构建工具/CSS 方案/状态管理方案
-2. **组件概览**：组件总数、平均行数、超过 200 行的大组件清单
-3. **响应式速评**：断点定义位置、媒体查询方向（min-width / max-width）、是否统一
-4. **性能速评**：入口 bundle 预估大小、首屏关键资源数、明显的大依赖
+1. **技术栈扫描**：Read 项目根目录 `package.json`，提取 `dependencies` 和 `devDependencies` 中的框架（react / vue / svelte / angular）、构建工具（vite / webpack / next / nuxt）、CSS 方案（tailwind / styled-components / sass）、状态管理（redux / zustand / pinia / mobx）
+2. **组件概览**：用 Glob 扫描 `src/**/*.{tsx,jsx,vue,svelte}` 获取组件文件列表，用 Bash `wc -l` 统计各文件行数，列出总数、平均行数、超过 200 行的大组件清单
+3. **响应式速评**：用 Grep 搜索 `@media` 和 `@container` 查询，统计断点定义位置和数量；检查媒体查询方向（`min-width` vs `max-width`），判断是否统一
+4. **性能速评**：Read 构建配置文件（`vite.config.*` / `next.config.*` / `webpack.config.*`），检查代码分割配置；用 Grep 搜索 `import(` 统计动态导入数量；Read `package.json` 检查是否存在已知大依赖（moment / lodash / chart.js）
 
 生成精简报告到 `_frontend-review/quick-scan-{日期}.md`。
 
@@ -129,5 +129,8 @@ decisions: []
 快速扫描和单项子技能是独立 workflow，不经过完整管道。
 每个阶段完成后必须等待用户确认再进入下一阶段。
 产出文件与状态文件冲突时，以产出文件为准。
-绝不在没有读取实际代码的情况下给出审查结论。
+绝不在没有 Read 实际源代码文件的情况下给出审查结论——所有发现必须附带文件路径和行号。
+组件审查必须覆盖四个维度（层级职责 / Props 接口 / 状态管理 / 可复用性），缺一视为未完成。
+性能问题必须量化预估影响（kB / ms 级别），禁止"减少 JS 大小"等无量化结论。
+响应式审计必须从 320px 起覆盖全断点范围，不可只检查桌面端。
 </IMPORTANT>

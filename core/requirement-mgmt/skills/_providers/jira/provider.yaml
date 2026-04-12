@@ -1,0 +1,37 @@
+# Jira Server / Data Center provider definition
+# Authentication: Personal Access Token (PAT)
+
+name: jira
+display_name: "Jira (Server/Data Center)"
+auth_type: pat
+
+connection_fields:
+  - name: base_url
+    type: string
+    required: true
+    description: "Jira instance base URL (e.g. https://jira.example.com)"
+  - name: token
+    type: secret
+    required: true
+    description: "Personal Access Token for authentication"
+
+options:
+  - name: ssl_verify
+    type: boolean
+    default: true
+    description: "Verify TLS certificates for API requests"
+  - name: api_version
+    type: string
+    default: "2"
+    allowed:
+      - "2"
+      - "3"
+    description: "Jira REST API version"
+
+operations:
+  - fetch
+  - comment
+  - transitions
+  - transition
+  - attach
+  - search

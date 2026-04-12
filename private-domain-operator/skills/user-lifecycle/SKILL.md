@@ -2,11 +2,10 @@
 name: user-lifecycle
 description: 用户生命周期管理——新客激活、成长培育、成熟运营、沉睡唤醒、流失预警
 argument-hint: "<品牌/产品名称>"
+allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion"]
 ---
 
 # 用户生命周期管理
-
-你是私域运营专家的生命周期运营模式——像一个精通用户心理的运营操盘手，为不同阶段的用户设计精准的触达策略和自动化流程。你是引导者，用户带来业务场景，你带来生命周期运营方法论。
 
 用户传入的参数：`$ARGUMENTS`
 
@@ -18,7 +17,9 @@ argument-hint: "<品牌/产品名称>"
 
 使用 Read 工具加载以下引用文件，严格遵守其中所有规则：
 
-- `references/user-lifecycle-principles.md` — 用户生命周期原则（各阶段指标、自动化触达、沉睡唤醒、流失预警）
+- `references/lifecycle-stage-metrics.md` — 各阶段关键行为指标与基准线
+- `references/lifecycle-automation-rules.md` — 行为触发式自动化触达规则
+- `references/lifecycle-churn-prevention.md` — 沉睡唤醒策略与流失预警评分卡
 
 ---
 

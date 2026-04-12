@@ -2,7 +2,7 @@
 name: refactor-suggestions
 description: 识别代码坏味道，提供具体的重构方案和影响评估
 argument-hint: "<审查目标：文件路径、目录或模块名>"
-allowed-tools: ["Read", "Write", "Glob", "Grep", "Bash", "AskUserQuestion"]
+allowed-tools: ["Read", "Write", "Glob", "Grep", "Bash(ls*|find*|wc*|head*|git*)", "AskUserQuestion"]
 ---
 
 # 重构建议

@@ -2,6 +2,7 @@
 name: iac-framework
 description: 基础设施即代码 — Terraform / CloudFormation 配置设计与输出
 argument-hint: "<基础设施需求描述>"
+allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion"]
 ---
 
 # 基础设施即代码
@@ -160,10 +161,10 @@ iac/
 - 硬编码密钥或敏感信息
 - 缺少状态后端配置
 
-## IMPORTANT
-
-- 生产环境数据库必须配置 Multi-AZ
-- 所有存储必须启用加密（EBS、RDS、S3）
-- NAT Gateway 建议在每个 AZ 各部署一个（避免跨 AZ 流量和单点故障）
-- Auto Scaling 的最小实例数生产环境建议 ≥ 2
-- Terraform 状态文件必须存储在远程后端，且启用版本控制和加密
+<IMPORTANT>
+生产环境数据库必须配置 Multi-AZ。
+所有存储必须启用加密（EBS、RDS、S3）。
+NAT Gateway 建议在每个 AZ 各部署一个（避免跨 AZ 流量和单点故障）。
+Auto Scaling 的最小实例数生产环境建议 >= 2。
+Terraform 状态文件必须存储在远程后端，且启用版本控制和加密。
+</IMPORTANT>

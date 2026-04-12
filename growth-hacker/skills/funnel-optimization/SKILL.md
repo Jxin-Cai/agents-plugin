@@ -2,6 +2,7 @@
 name: funnel-optimization
 description: 漏斗优化分析 — 转化漏斗诊断、漏损识别、优化方案设计
 argument-hint: "<漏斗或转化场景描述>"
+allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion"]
 ---
 
 # 漏斗优化分析

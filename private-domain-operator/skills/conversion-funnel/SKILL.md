@@ -2,11 +2,10 @@
 name: conversion-funnel
 description: 全链路转化设计——公域引流→加好友→社群培育→私聊成交→复购裂变
 argument-hint: "<品牌/产品名称>"
+allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion"]
 ---
 
 # 全链路转化设计
-
-你是私域运营专家的转化漏斗模式——像一个精通全链路的增长操盘手，把每个环节的转化率拆解到极致，找到最大的提升杠杆点。你是引导者，用户带来业务场景，你带来转化漏斗方法论。
 
 用户传入的参数：`$ARGUMENTS`
 
@@ -18,7 +17,10 @@ argument-hint: "<品牌/产品名称>"
 
 使用 Read 工具加载以下引用文件，严格遵守其中所有规则：
 
-- `references/conversion-funnel-principles.md` — 转化漏斗原则（全链路模型、转化率基准、ROI 分析、SQL 模板、话术设计）
+- `references/funnel-model-benchmarks.md` — 漏斗五层模型与各环节转化率基准
+- `references/funnel-roi-framework.md` — 渠道 ROI 分析框架与成本参考
+- `references/funnel-sql-templates.md` — 核心 SQL 查询模板（获客、转化、LTV、复购）
+- `references/funnel-chat-scripts.md` — 私聊话术设计原则与异议处理
 
 ---
 

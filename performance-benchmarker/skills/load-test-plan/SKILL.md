@@ -2,11 +2,10 @@
 name: load-test-plan
 description: 设计分阶段负载测试方案，定义工作负载模型、SLO 目标和测试场景
 argument-hint: "<系统/服务名称及测试目标>"
+allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion"]
 ---
 
 # 负载测试计划
-
-你是性能基准测试专家的规划模式——像架构师一样，把性能测试拆解为可执行的阶段和场景。你是引导者，用户带来系统架构知识，你带来结构化的测试方法论。
 
 用户传入的参数：`$ARGUMENTS`
 

@@ -31,6 +31,7 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 | "文章 / 创作 / 写作" | article-only | 调用 `/article-creation $ARGUMENTS` |
 | "发布 / 推送 / 排版" | publish-only | 调用 `/publish-to-wechat $ARGUMENTS` |
 | "分析 / 数据 / 粉丝" | analytics-only | 调用 `/subscriber-analytics $ARGUMENTS` |
+| "快速检查 / 概览 / 现状" | quick-scan | → Step 3 |
 | "完整流程 / 全套 或复杂需求" | full-workflow | → Step 1 |
 
 意图不明确时，用 `AskUserQuestion` 让用户选择：

@@ -2,15 +2,12 @@
 name: workflow-design
 description: 分析团队现状，设计或优化 Jira 工作流方案，输出状态图和转换规则
 argument-hint: "<团队或项目描述>"
+allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion"]
 ---
 
 # 工作流设计
 
-你是 Jira 工作流管理员的架构师模式——像一个流程工程师，先理解团队真实的工作方式，再用 Jira 工作流把它可视化和规范化。你是引导者，用户带来团队现状，你带来工作流设计的结构化方法论。
-
 用户传入的参数：`$ARGUMENTS`
-
-**核心心态：** 工作流必须映射现实，而非现实迁就工作流。最好的工作流设计让团队觉得"这就是我们一直在做的事情，只是现在可视化了"。
 
 ---
 
@@ -18,7 +15,8 @@ argument-hint: "<团队或项目描述>"
 
 使用 Read 工具加载以下引用文件，严格遵守其中所有规则：
 
-- `references/workflow-design-principles.md` — 工作流设计原则（状态设计、转换规则、模板库、字段方案、自动化规则）
+- `references/workflow-state-principles.md` — 状态设计原则、转换规则、工作流模板库
+- `references/workflow-config-principles.md` — 字段方案、工作流方案共享、自动化规则
 
 ---
 
@@ -210,4 +208,8 @@ argument-hint: "<团队或项目描述>"
 
 <IMPORTANT>
 本技能完成后，展示菜单并等待用户选择下一步。不要自动执行后续技能。
+状态数量必须控制在 5-7 个，超过 10 个的设计必须合并后才能保存。
+每个状态转换必须定义触发角色和前置条件，禁止出现无条件的全连接转换。
+工作流必须包含回退路径（退回/重开），纯单向线性流不合格。
+自动化规则必须可追踪（触发人、时间、动作），禁止静默自动关闭 Issue。
 </IMPORTANT>

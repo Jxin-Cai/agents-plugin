@@ -2,15 +2,12 @@
 name: board-optimization
 description: 优化 Scrum/Kanban 看板配置、泳道、WIP 限制和度量仪表盘
 argument-hint: "<看板或团队描述>"
+allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion"]
 ---
 
 # 看板优化
 
-你是 Jira 工作流管理员的优化模式——像一个精益教练，通过看板配置让工作流动可视化、瓶颈可发现、改进可度量。你是引导者，用户带来团队痛点，你带来看板优化的结构化方法。
-
 用户传入的参数：`$ARGUMENTS`
-
-**核心心态：** 看板不是任务列表的美化版——它是一个流量管理系统。WIP 限制是纪律不是建议，度量是改进的指南针不是考核工具。最好的看板让团队一眼看出"现在最该做什么"。
 
 ---
 
@@ -18,7 +15,8 @@ argument-hint: "<看板或团队描述>"
 
 使用 Read 工具加载以下引用文件，严格遵守其中所有规则：
 
-- `references/board-optimization-principles.md` — 看板优化原则（看板类型选择、列配置、WIP 限制、泳道、卡片配置、度量与仪表盘、过滤器）
+- `references/board-config-principles.md` — 看板类型选择、列配置、WIP 限制、泳道
+- `references/board-metrics-principles.md` — 卡片配置、度量与仪表盘、过滤器
 
 ---
 
@@ -242,4 +240,8 @@ WIP 限制：{具体数值}
 
 <IMPORTANT>
 本技能完成后，展示菜单并等待用户选择下一步。不要自动执行后续技能。
+每列必须有明确的 WIP 数值上限，禁止只写"建议设置 WIP"而不给具体数字。
+列数量必须控制在 5-7 列，超过 10 列的方案必须合并后才能保存。
+度量指标聚焦 2-3 个，禁止推荐 5 个以上指标导致团队无法聚焦。
+仪表盘每个组件必须标注"回答什么问题"，禁止只列图表类型不说目的。
 </IMPORTANT>

@@ -2,7 +2,7 @@
 name: cr
 description: 代码审查编排器——按意图路由到安全审查、质量审计、重构建议或完整流程
 argument-hint: "<审查目标描述，如 PR 链接、文件路径或功能模块名>"
-allowed-tools: ["Read", "Write", "Glob", "Bash", "AskUserQuestion"]
+allowed-tools: ["Read", "Write", "Glob", "Grep", "Bash(mkdir*|ls*|find*|wc*|head*|git*)", "AskUserQuestion"]
 ---
 
 # 代码审查编排器
@@ -15,9 +15,7 @@ allowed-tools: ["Read", "Write", "Glob", "Bash", "AskUserQuestion"]
 
 ## Step 0: 意图识别
 
-Read `references/workflow-playbook.md`
-
-根据 `$ARGUMENTS` 和 playbook 中的路由矩阵匹配 workflow：
+根据 `$ARGUMENTS` 匹配 workflow：
 
 | workflow | 触发关键词 | 执行内容 |
 |----------|-----------|---------|
@@ -34,11 +32,13 @@ Read `references/workflow-playbook.md`
 
 ## Step 1: 初始化工作区
 
+> 仅 `full-review` 和 `custom` workflow 执行此步骤。single-focus 和 quick-scan 跳过直接到 Step 2/Step 3。
+
 1. 从 `$ARGUMENTS` 提取审查目标，生成英文缩写（2-4 词，连字符连接）
 2. 使用 `AskUserQuestion` 确认任务简写名
 3. 创建工作目录 `_code-review/{日期}-{简写}/` 及子目录 `context/` `security/` `quality/` `refactoring/` `meta/`
 4. Read `references/review-state-template.md`，初始化 `meta/review-state.md`（写入 workflow 类型和初始状态）
-5. 扫描 `_code-review/` 下已有目录，向用户简报
+5. 用 `ls -dt _code-review/*/` 扫描已有审查目录，向用户简报
 6. 确定审查范围（PR 链接提取变更文件 / 文件路径扫描 / 模块名定位），保存到 `context/scope.md`
 
 ---
@@ -48,6 +48,8 @@ Read `references/workflow-playbook.md`
 每个阶段入口重新 Read `meta/review-state.md`，完成后更新状态文件。
 
 ### full-review
+
+Read `references/workflow-playbook.md` 获取执行规范和门控模板。
 
 | 阶段 | 调用 | 完成标志 | 门控选项 |
 |------|------|---------|---------|
@@ -63,17 +65,21 @@ Read `references/workflow-playbook.md`
 
 ### quick-scan
 
-编排器内执行轻量级全维度速览：
+编排器内执行轻量级全维度速览（不调用子技能）：
 
-1. 安全速览：硬编码凭据、明显注入、危险函数（约 3 分钟）
-2. 质量速览：文件大小、最高圈复杂度、重复代码块（约 3 分钟）
-3. 重构速览：标记最突出的 2-3 个坏味道（约 3 分钟）
+| 维度 | 具体动作 | 输出 |
+|------|---------|------|
+| 安全速览 | Grep 扫描硬编码凭据（password/secret/api_key）、危险函数（eval/exec/innerHTML）、明显注入点 | 问题列表（文件:行号） |
+| 质量速览 | 用 `wc -l` 统计文件行数，Grep 扫描嵌套 >3 层的代码块，识别重复代码段 | 超标文件清单 + 度量数值 |
+| 重构速览 | 标记行数最长的 3 个函数/方法，识别最明显的 2-3 个坏味道 | 坏味道清单（类型 + 位置） |
 
-生成精简报告到 `meta/quick-scan-{日期}.md`。
+生成精简报告（不超过 50 行）到 `meta/quick-scan-{日期}.md`。
 
 ---
 
 ## Step 3: 综合报告与收尾
+
+> 仅 `full-review` 和 `custom` workflow 执行此步骤。
 
 Read `references/report-template.md`
 
@@ -106,4 +112,11 @@ Read `references/report-template.md`
 3. 不得跳过已选 workflow 中的任何阶段（用户主动要求除外）
 4. 每个阶段入口重读状态文件 `meta/review-state.md`，防止状态漂移
 5. 产出文件与状态文件冲突时，以产出文件为准
+
+## 代码审查领域硬规则
+
+6. 每条审查意见必须关联具体代码引用（文件路径:行号），禁止无代码定位的泛泛描述
+7. 安全发现必须标注 OWASP 类别编号（A01-A10），质量发现必须附带度量数值（如圈复杂度=18）
+8. 审查意见必须明确区分 Blocker（阻断发布，必须修改）和 Suggestion（建议改进，可选）——禁止使用模糊的"建议修复"
+9. 重构建议必须包含具体手法名称（如"提取函数""卫语句取代嵌套"），禁止"需要重构"的空泛描述
 </IMPORTANT>

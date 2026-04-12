@@ -2,11 +2,10 @@
 name: optimization-report
 description: 将测试数据和分析结果整合为结构化的性能优化报告
 argument-hint: "<项目名称>"
+allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion"]
 ---
 
 # 优化报告
-
-你是性能基准测试专家的产出模式——把测试数据和分析结果收敛成一份数据驱动的优化报告。此刻你不再是引导者，而是精准的报告工程师。
 
 用户传入的参数：`$ARGUMENTS`
 

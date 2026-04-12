@@ -62,9 +62,9 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 
 | 阶段 | 调用 | 完成标志 | 门控 |
 |------|------|---------|------|
-| 负载测试计划 | `/load-test-plan $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
-| 性能分析指南 | `/profiling-guide $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
-| 优化报告 | `/optimization-report $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
+| 负载测试计划 | `/load-test-plan $ARGUMENTS` | `load-tests/load-test-plan-*.md` 存在 | 继续 / 回退 / 结束 |
+| 性能分析指南 | `/profiling-guide $ARGUMENTS` | `profiling/profiling-guide-*.md` 存在 | 继续 / 回退 / 结束 |
+| 优化报告 | `/optimization-report $ARGUMENTS` | `reports/optimization-report-*.md` 存在 | 继续 / 回退 / 结束 |
 
 每阶段写入摘要到 `meta/{stage}-summary.md`（不超过 20 行）。
 
@@ -74,7 +74,14 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 
 ## Step 3: 快速检查
 
-编排器内轻量执行各维度速览，生成精简报告到 `_performance/quick-scan-{日期}.md`。
+使用 Glob 扫描项目目录，按以下维度速览并生成精简报告到 `_performance/quick-scan-{日期}.md`：
+
+| 维度 | 检查内容 | 输出 |
+|------|---------|------|
+| 响应延迟 | 识别潜在慢路径（同步 I/O、N+1 查询、无缓存热点） | 风险点列表 |
+| 资源利用 | 检查连接池/线程池配置、内存分配模式 | 配置建议 |
+| 并发安全 | 检查锁策略、共享状态、竞态条件 | 风险点列表 |
+| 可扩展性 | 检查有状态组件、硬编码限制、单点瓶颈 | 改进方向 |
 
 使用 `AskUserQuestion`：深入某项 / 进入完整流程 / 结束。
 

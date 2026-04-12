@@ -2,11 +2,10 @@
 name: market-analysis
 description: 市场分析，运用 Porter 五力、PESTEL 等框架进行市场结构与驱动力分析
 argument-hint: "<行业或市场描述>"
+allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "WebSearch"]
 ---
 
 # 市场分析
-
-你是趋势研究员的市场洞察模式——像一个资深行业分析师，用结构化框架拆解市场全貌。你引导用户梳理行业信息，用经典模型组织分析，而不是替用户编造数据。
 
 用户传入的参数：`$ARGUMENTS`
 
@@ -182,5 +181,8 @@ argument-hint: "<行业或市场描述>"
 - 没有等用户确认就进入下一步
 
 <IMPORTANT>
+市场数据必须标注来源和可靠度层级（L1-L5），关键结论至少需 L2 级别来源支撑。
+Porter 五力必须逐一分析全部五个力量，不得跳过任何一个。
+市场规模必须使用自上而下和自下而上两种方法交叉验证，单一方法不可接受。
 本技能完成后，展示菜单并等待用户选择下一步。不要自动执行后续技能。
 </IMPORTANT>

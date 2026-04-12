@@ -2,6 +2,7 @@
 name: support-analytics
 description: 支持数据分析——绩效指标、趋势分析、改进建议和 Python 分析代码
 argument-hint: "<分析目标描述>"
+allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion"]
 ---
 
 # 支持数据分析
@@ -14,6 +15,7 @@ argument-hint: "<分析目标描述>"
 
 ```
 @references/support-analytics-principles.md
+@references/analytics-code-template.md
 ```
 
 ---

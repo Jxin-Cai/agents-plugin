@@ -2,6 +2,7 @@
 name: customer-segmentation
 description: 客户分群分析——RFM 评分、聚类分群、群体画像和策略建议
 argument-hint: "<客户数据或分群需求描述>"
+allowed-tools: ["Read", "Write", "Glob", "Grep", "Bash(mkdir*)", "AskUserQuestion"]
 ---
 
 # Customer Segmentation — 客户分群分析
@@ -101,6 +102,11 @@ df['m_score'] = pd.qcut(df['monetary'].rank(method='first'), 5, labels=[1, 2, 3,
 df['rfm_score'] = df['r_score'].astype(str) + df['f_score'].astype(str) + df['m_score'].astype(str)
 ```
 
+使用 AskUserQuestion 确认：
+- "RFM 评分完成，是否需要调整评分分位数或确认评分分布合理？"
+
+**⏸️ 等待用户确认后进入 Step 3。**
+
 ## Step 3: 客户群体划分
 
 根据 RFM 评分组合定义客户群体：
@@ -135,6 +141,11 @@ def assign_segment(row):
 
 df['segment'] = df.apply(assign_segment, axis=1)
 ```
+
+使用 AskUserQuestion 确认：
+- "客户群体划分逻辑如上，分群规则是否符合业务预期？"
+
+**⏸️ 等待用户确认后进入 Step 4。**
 
 ## Step 4: 群体画像分析
 
@@ -192,6 +203,11 @@ plt.show()
 | New Customers | 培养购买习惯 | 新手引导 + 首单后跟进 | 新人礼包、教程推送、满减券 |
 | At Risk | 唤回防流失 | 流失预警 + 挽回优惠 | 个性化召回邮件、限时大额优惠 |
 | Hibernating | 低成本激活 | 自动化唤醒 + 清仓促销 | 批量触达、低成本短信/邮件 |
+
+使用 AskUserQuestion 确认：
+- "各群体运营策略如上，是否需要调整方向或补充具体行动项？"
+
+**⏸️ 等待用户确认后进入 Step 6 输出产出物。**
 
 ## Step 6: 输出产出物
 

@@ -2,6 +2,7 @@
 name: ticket-resolution
 description: 工单处理——全渠道支持框架设计、SLA 配置、分层路由和标准处理流程
 argument-hint: "<工单处理需求描述>"
+allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion"]
 ---
 
 # 工单处理框架设计

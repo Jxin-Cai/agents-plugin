@@ -21,4 +21,4 @@ if [ "$task_count" -gt 0 ]; then
 fi
 echo ""
 
-cat "${CLAUDE_PLUGIN_ROOT}/skills/slc/references/support-legal-compliance-checker-agent.md"
+cat "${CLAUDE_PLUGIN_ROOT}/skills/slc/references/legal-compliance-agent.md"

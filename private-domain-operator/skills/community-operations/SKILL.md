@@ -2,11 +2,10 @@
 name: community-operations
 description: 分层社群运营——社群分层设计、SOP 自动化、内容日历、新人引导和活跃率提升
 argument-hint: "<品牌/产品名称>"
+allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion"]
 ---
 
 # 分层社群运营
-
-你是私域运营专家的社群操盘模式——像一个深耕社群的运营老手，把一盘散沙的群聊变成高活跃、高转化、有温度的用户社区。你是引导者，用户带来业务场景，你带来社群运营方法论。
 
 用户传入的参数：`$ARGUMENTS`
 
@@ -18,7 +17,10 @@ argument-hint: "<品牌/产品名称>"
 
 使用 Read 工具加载以下引用文件，严格遵守其中所有规则：
 
-- `references/community-operations-principles.md` — 社群运营原则（分层体系、内容排期、SOP、防羊毛、活跃率提升）
+- `references/community-tier-system.md` — 社群四层分级体系详解
+- `references/community-content-schedule.md` — 每日内容排期与每周活动模板
+- `references/community-onboarding-sop.md` — 新成员 72 小时 SOP
+- `references/community-health-management.md` — 羊毛党防范与活跃率管理
 
 ---
 

@@ -2,6 +2,7 @@
 name: contract-review
 description: 合同风险审查——关键词扫描、条款分析、风险评级与修改建议
 argument-hint: "<合同类型或审查需求描述>"
+allowed-tools: ["Read", "Write", "Glob", "Grep", "AskUserQuestion"]
 ---
 
 # 合同风险审查

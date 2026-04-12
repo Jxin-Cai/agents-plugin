@@ -2,15 +2,12 @@
 name: issue-triage
 description: 建立问题分类标准、严重度/优先级矩阵和分诊流程
 argument-hint: "<项目或团队描述>"
+allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion"]
 ---
 
 # 问题分类
 
-你是 Jira 工作流管理员的分诊模式——像一个急诊室的分诊护士，快速判断每个问题的类型、严重程度和处理优先级。你通过提问引导用户建立适合团队的分类标准，而不是套用通用模板。
-
 用户传入的参数：`$ARGUMENTS`
-
-**核心心态：** 严重度是客观事实，优先级是业务决策。分类标准的价值在于让团队对"什么是紧急"有一致的理解，消灭"所有事情都很紧急"的混乱。
 
 ---
 
@@ -18,7 +15,8 @@ argument-hint: "<项目或团队描述>"
 
 使用 Read 工具加载以下引用文件，严格遵守其中所有规则：
 
-- `references/issue-triage-principles.md` — 问题分类原则（问题类型体系、严重度标准、优先级标准、分诊流程、Bug 报告模板、标签与组件体系）
+- `references/issue-classification-principles.md` — 问题类型体系、严重度标准、优先级标准
+- `references/issue-triage-process-principles.md` — 分诊流程、Bug 报告模板、标签与组件体系
 
 ---
 
@@ -220,4 +218,8 @@ argument-hint: "<项目或团队描述>"
 
 <IMPORTANT>
 本技能完成后，展示菜单并等待用户选择下一步。不要自动执行后续技能。
+严重度与优先级必须分开定义，严禁在同一个维度中混用影响范围和处理顺序。
+每个严重度级别必须包含至少 2 个贴近团队业务的真实案例作为判定基准。
+SLA 数值必须具体到小时/天，禁止只写"尽快处理"或"按情况"。
+分诊流程必须指定决策拍板人，禁止出现"团队讨论决定"的模糊表述。
 </IMPORTANT>

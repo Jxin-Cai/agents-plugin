@@ -1,0 +1,19 @@
+name: github-issues
+display_name: "GitHub Issues"
+auth_type: gh_cli
+
+connection_fields:
+  token:
+    required: false
+    secret: true
+    description: "GitHub personal access token (optional; falls back to gh CLI auth)"
+  repo:
+    required: false
+    secret: false
+    type: string
+    description: "Default repo in owner/repo format"
+
+operations:
+  - fetch
+  - comment
+  - search

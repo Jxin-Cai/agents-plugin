@@ -91,6 +91,7 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 A/B 测试必须包含样本量计算和统计显著性标准。
 结果分析必须区分统计显著与业务显著。
 不可在实验未达到最小样本量时下结论。
+所有实验必须执行 SRM（Sample Ratio Mismatch）检查，发现 SRM 必须暂停分析排查原因。
 每个阶段完成后必须等待用户确认。
 产出文件与状态文件冲突时，以产出文件为准。
 </IMPORTANT>

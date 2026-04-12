@@ -2,6 +2,7 @@
 name: content-strategy
 description: 微信公众号内容策略制定——订阅者画像、内容支柱、编辑日历、菜单架构
 argument-hint: "<公众号定位或策略方向>"
+allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion"]
 ---
 
 # 内容策略制定
@@ -10,15 +11,11 @@ argument-hint: "<公众号定位或策略方向>"
 
 用户传入的参数：`$ARGUMENTS`
 
-**核心心态：** 内容策略不是填模板，而是基于对订阅者的深度理解构建可持续的内容体系。60% 价值内容让订阅者留下来，30% 互动内容让订阅者活跃起来，10% 推广内容让公众号商业化。
-
 ---
 
 ## 加载引用
 
-使用 Read 工具加载以下引用文件，严格遵守其中所有规则：
-
-- `references/content-strategy-principles.md` — 内容策略方法论（60/30/10 法则、内容支柱、发布节奏）
+Read `references/content-strategy-principles.md`，严格遵守其中所有规则。
 
 ---
 
@@ -143,5 +140,7 @@ argument-hint: "<公众号定位或策略方向>"
 - 未等用户确认就保存
 
 <IMPORTANT>
-本技能到此完成。策略保存后，向用户展示后续建议（如进入文章创作阶段）。
+内容支柱必须覆盖 60/30/10 配比——至少 1 个互动型支柱和 1 个价值型支柱，不可全是推广。
+编辑日历中每个选题必须能追溯到具体的内容支柱编号，不可出现"游离选题"。
+策略保存后，向用户展示后续建议（如进入文章创作阶段）。
 </IMPORTANT>

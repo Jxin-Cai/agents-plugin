@@ -2,6 +2,7 @@
 name: article-creation
 description: 微信公众号文章创作——选题确定、文章撰写、排版优化、SEO 适配
 argument-hint: "<选题方向或文章主题>"
+allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion"]
 ---
 
 # 文章创作
@@ -10,15 +11,11 @@ argument-hint: "<选题方向或文章主题>"
 
 用户传入的参数：`$ARGUMENTS`
 
-**核心心态：** 公众号文章的阅读场景是手机屏幕，读者的耐心有限。开头 3 秒决定是否继续读，每个段落都要给读者"继续往下读"的理由。信息密度和阅读体验并重。
-
 ---
 
 ## 加载引用
 
-使用 Read 工具加载以下引用文件，严格遵守其中所有规则：
-
-- `references/article-creation-principles.md` — 文章创作规范（结构、排版、移动端优化）
+Read `references/article-structure.md` 和 `references/article-formatting.md`，严格遵守其中所有规则。
 
 ---
 
@@ -180,5 +177,7 @@ publish_date: "{计划发布日期}"
 - 未等用户确认就保存
 
 <IMPORTANT>
-本技能到此完成。文章保存后，建议用户进入发布阶段（/publish-to-wechat）。
+每段不超过 3-4 行（手机约一屏），连续纯文字不超过 3 段——必须用小标题、引用块或图片打断。
+数据引用必须标注来源（报告名称或链接），不可出现无出处的"据统计""研究表明"。
+文章保存后，建议用户进入发布阶段（/publish-to-wechat）。
 </IMPORTANT>
