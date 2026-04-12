@@ -62,9 +62,9 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 
 | 阶段 | 调用 | 完成标志 | 门控 |
 |------|------|---------|------|
-| 监控体系 | `/monitoring-setup $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
-| IaC 框架 | `/iac-framework $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
-| 备份恢复 | `/backup-recovery $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
+| 监控体系 | `/monitoring-setup $ARGUMENTS` | `monitoring/prometheus.yml` 存在 | 继续 / 回退 / 结束 |
+| IaC 框架 | `/iac-framework $ARGUMENTS` | `iac/main.tf` 存在 | 继续 / 回退 / 结束 |
+| 备份恢复 | `/backup-recovery $ARGUMENTS` | `backup/scripts/db-backup.sh` 存在 | 继续 / 回退 / 结束 |
 
 每阶段写入摘要到 `meta/{stage}-summary.md`（不超过 20 行）。
 
@@ -74,7 +74,16 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 
 ## Step 3: 快速检查
 
-编排器内轻量执行各维度速览，生成精简报告到 `_infrastructure/quick-scan-{日期}.md`。
+在编排器内按以下检查表逐项执行速览，生成精简报告到 `_infrastructure/quick-scan-{日期}.md`。
+
+| 检查维度 | 具体检查项 | 方法 |
+|----------|-----------|------|
+| 监控覆盖 | 关键服务是否有 Prometheus scrape 配置、告警规则是否覆盖四大黄金信号 | Glob `**/prometheus.yml` 和 `**/alert-rules.yml`，Read 检查 scrape_configs 数量和 rules 覆盖面 |
+| IaC 状态 | 是否有 Terraform 配置、远程后端是否配置、资源是否包含标准标签 | Glob `**/*.tf`，Read 检查 backend 块和 tags 块是否存在 |
+| 备份健康 | 备份脚本是否存在、加密是否启用、保留策略是否配置 | Glob `**/backup*.sh`，Read 检查 gpg/openssl 加密调用和 cleanup 逻辑 |
+| 安全基线 | 安全组是否存在 `0.0.0.0/0` 入站、敏感信息是否硬编码 | Grep `0.0.0.0/0` 和 Grep `password\|secret\|api_key` 排查硬编码 |
+
+每项标记 pass（已覆盖）/ warn（需改进）/ fail（缺失），汇总输出到报告文件。
 
 使用 `AskUserQuestion`：深入某项 / 进入完整流程 / 结束。
 
@@ -82,9 +91,13 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 
 ## 断点恢复
 
-1. 扫描 `_infrastructure/` 下未完成目录
-2. Read `meta/state.md`，结合产物推断进度
-3. 使用 `AskUserQuestion`：从断点继续 / 重新开始
+1. Glob `_infrastructure/*/meta/state.md` 找到所有未完成目录
+2. Read 每个 `meta/state.md`，获取 `workflow_mode`、`completed_steps`、`next_step`
+3. 按如下优先级确认实际进度（产物优先于状态文件声明）：
+   - 检查 `monitoring/prometheus.yml` 是否存在 → 监控阶段已完成
+   - 检查 `iac/main.tf` 是否存在 → IaC 阶段已完成
+   - 检查 `backup/scripts/db-backup.sh` 是否存在 → 备份阶段已完成
+4. 使用 `AskUserQuestion`：从断点继续 / 重新开始
 
 <IMPORTANT>
 工作台的职责是"意图识别 + 路由 + 接续"，不是把所有请求都塞进固定管道。

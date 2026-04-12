@@ -52,7 +52,7 @@ allowed-tools: ["Read", "Write", "Glob", "Grep", "Bash(mkdir*)", "AskUserQuestio
 - **深度**：快速扫描（仅顶层结构）还是深度审查（逐文件分析）？
 - **关注点**：是否有特定关注点？（如"状态管理混乱"、"组件太大"、"Props 透传过多"）
 
-使用 Read 工具和 Glob 工具扫描目标目录，列出组件清单和文件结构树。
+使用 Glob 扫描 `{目标路径}/**/*.{tsx,jsx,vue,svelte}` 获取组件文件清单，使用 Bash `wc -l` 统计各文件行数，标注超过 200 行的大组件。Read 重点组件文件分析结构。
 
 **⏸️ 等待用户确认后继续。**
 
@@ -66,6 +66,7 @@ allowed-tools: ["Read", "Write", "Glob", "Grep", "Bash(mkdir*)", "AskUserQuestio
 - 每个组件是否单一职责？超过 200 行的组件是否需要拆分？
 - 展示逻辑（UI）和业务逻辑是否分离？
 - 是否存在"上帝组件"（God Component）——承担了太多职责？
+- （React/Next.js）Client/Server 组件边界是否合理？`'use client'` 是否仅标注在真正需要客户端交互的组件上？
 
 #### 2b. Props 接口设计
 

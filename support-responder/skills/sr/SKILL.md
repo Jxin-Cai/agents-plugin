@@ -50,7 +50,7 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 2. 使用 `AskUserQuestion` 确认缩写
 3. 创建 `_support/{当前日期}-{缩写}/` 及子目录 `context/` `meta/` 和各阶段子目录
 4. 初始化 `meta/state.md`（workflow_mode、completed_steps、next_step）
-5. 扫描已有目录，检查接续点（产物优先于状态文件）
+5. Glob `_support/{目录名}/tickets/` `kb/` `analytics/` 检查各阶段产出文件是否存在；Read `meta/state.md` 获取 next_step；若产物已存在但 state 未更新，以产物为准推进到下一阶段
 
 **⏸️ 使用 `AskUserQuestion` 确认从哪里开始。**
 
@@ -82,7 +82,7 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 | 知识库 | 是否有文章结构、分类体系、高频问题覆盖 | 有/无 + 覆盖率估算 |
 | 数据分析 | 是否有 KPI 定义、趋势报告、改进机制 | 有/无 + 关键指标现状 |
 
-扫描方式：Read 各子目录已有产物，按上表逐项给出"有/无 + 一句话说明"。
+扫描方式：Glob `_support/*/tickets/` `_support/*/kb/` `_support/*/analytics/` 定位已有产物；Read 找到的文件，按上表逐项检查对应内容是否存在，输出"有/无 + 一句话缺口说明"。
 
 使用 `AskUserQuestion`：深入某项 / 进入完整流程 / 结束。
 
@@ -90,9 +90,10 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 
 ## 断点恢复
 
-1. 扫描 `_support/` 下未完成目录
-2. Read `meta/state.md`，结合产物推断进度
-3. 使用 `AskUserQuestion`：从断点继续 / 重新开始
+1. Glob `_support/*/meta/state.md` 获取所有任务目录列表
+2. 逐个 Read `meta/state.md`，提取 `workflow_mode`、`completed_steps`、`next_step`
+3. Glob `_support/{目录名}/tickets/` `kb/` `analytics/` 检查各阶段产出文件是否存在；若产物文件已存在但 `completed_steps` 未包含该阶段，以产物为准，将 next_step 推进到下一阶段
+4. 向用户展示未完成任务列表（目录名 + 当前进度 + 下一步），使用 `AskUserQuestion`：从断点继续 / 重新开始 / 放弃该任务
 
 <IMPORTANT>
 工作台的职责是"意图识别 + 路由 + 接续"，不是把所有请求都塞进固定管道。

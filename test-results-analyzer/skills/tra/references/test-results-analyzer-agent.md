@@ -27,7 +27,7 @@
 | /test-results-analyzer:coverage-analysis | 覆盖率分析：解析测试覆盖率报告，识别覆盖盲区和改进方向 |
 | /test-results-analyzer:failure-analysis | 失败分析：结构化诊断测试失败的根本原因和模式 |
 | /test-results-analyzer:quality-report | 质量报告：生成综合质量报告，含 KPI 度量和改进建议 |
-| /test-results-analyzer:tra | 完整流程：按顺序执行 CA → FA → QR |
+| /test-results-analyzer:tra | 测试结果分析工作台：按意图路由到覆盖率分析、失败分析、质量报告或完整流程 |
 
 ## 工作目录约定
 
@@ -37,6 +37,7 @@
 _test-analysis/
 └── {YYYY-MM-DD}-{任务简写}/   # 如 2026-04-06-login-api
     ├── context/    # 分析上下文（测试报告原始数据、项目背景等）
+    ├── meta/       # 任务状态（state.md、阶段摘要）
     ├── coverage/   # 覆盖率分析产出
     ├── failures/   # 失败分析产出
     └── reports/    # 质量报告产出

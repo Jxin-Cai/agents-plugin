@@ -76,9 +76,28 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 
 ## Step 3: 快速检查
 
-编排器内轻量执行各维度速览，生成精简报告到 `_wechat-oa/quick-scan-{日期}.md`。
+在编排器内对以下维度逐一扫描：
 
-使用 `AskUserQuestion`：深入某项 / 进入完整流程 / 结束。
+| 维度 | 检查动作 | 数据来源 |
+|------|---------|---------|
+| 内容策略 | Glob `_wechat-oa/*/strategy/content-strategy-*.md`，Read 最新文件提取支柱数和编辑日历覆盖月份 | strategy 目录 |
+| 文章库存 | Glob `_wechat-oa/*/articles/article-*.md`，统计已创作篇数和最近创作日期 | articles 目录 |
+| 发布状态 | Glob `_wechat-oa/*/articles/publish-report-*.md`，Read 最近一次发布结果和草稿 media_id | 发布报告 |
+| 数据分析 | Glob `_wechat-oa/*/analytics/analytics-report-*.md`，Read 关键指标趋势（打开率、净增关注） | analytics 目录 |
+
+将结果汇总为精简报告，保存到 `_wechat-oa/quick-scan-{日期}.md`，格式：
+
+```
+快速检查报告 — {日期}
+======================
+内容策略：{有/无} — {最近更新日期或"未建立"}
+文章库存：{N} 篇已创作，最近 {日期}
+发布状态：最近发布 {日期}，频率约 {X} 篇/周
+数据分析：最近分析 {日期}，打开率 {趋势}
+建议下一步：{最薄弱或最久未更新的维度}
+```
+
+使用 `AskUserQuestion`（选项：深入某项 / 进入完整流程 / 结束）。
 
 ---
 

@@ -2,7 +2,7 @@
 name: architecture-review
 description: 基于 ATAM 方法的架构质量属性评审，识别风险、敏感点和权衡点
 argument-hint: "<评审目标描述>"
-allowed-tools: ["Read", "Write", "Glob", "Grep", "AskUserQuestion"]
+allowed-tools: ["Read", "Write", "Glob", "Grep", "Bash(mkdir*)", "AskUserQuestion"]
 ---
 
 # 架构评审

@@ -50,7 +50,7 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 2. 使用 `AskUserQuestion` 确认缩写
 3. 创建 `_private-domain/{当前日期}-{缩写}/` 及子目录 `context/` `meta/` 和各阶段子目录
 4. 初始化 `meta/state.md`（workflow_mode、completed_steps、next_step）
-5. 扫描已有目录，检查接续点（产物优先于状态文件）
+5. 使用 Glob 扫描 `_private-domain/{当前日期}-{缩写}/` 下已有文件，依次检查 `ecosystem/scrm-blueprint.yaml`、`community/community-playbook.md`、`lifecycle/lifecycle-automation.py`、`funnel/funnel-strategy.md`，存在即标记对应阶段为已完成（产物优先于 state.md）
 
 **⏸️ 使用 `AskUserQuestion` 确认从哪里开始。**
 
@@ -75,7 +75,16 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 
 ## Step 3: 快速检查
 
-编排器内轻量执行各维度速览，生成精简报告到 `_private-domain/quick-scan-{日期}.md`。
+按以下维度逐项速览，每项用一句话总结现状：
+
+| 维度 | 检查动作 | 输出 |
+|------|---------|------|
+| 企微基建 | Glob `_private-domain/*/ecosystem/scrm-blueprint.yaml`，存在则 Read 统计员工号数、活码数、标签维度数 | 有/无 + 关键配置数 |
+| 社群健康 | Glob `_private-domain/*/community/community-playbook.md`，存在则 Read 统计社群层数和活跃率目标 | 社群层数 + 活跃率目标 |
+| 生命周期 | Glob `_private-domain/*/lifecycle/lifecycle-automation.py`，存在则 Read 统计阶段数和触达规则数 | 阶段数 + 自动化规则数 |
+| 转化漏斗 | Glob `_private-domain/*/funnel/funnel-strategy.md`，存在则 Read 统计渠道数和各环节转化率目标 | 渠道数 + 整体转化率目标 |
+
+将速览结果保存到 `_private-domain/quick-scan-{当前日期}.md`，每个维度不超过 5 行。
 
 使用 `AskUserQuestion`：深入某项 / 进入完整流程 / 结束。
 
@@ -83,9 +92,14 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 
 ## 断点恢复
 
-1. 扫描 `_private-domain/` 下未完成目录
-2. Read `meta/state.md`，结合产物推断进度
-3. 使用 `AskUserQuestion`：从断点继续 / 重新开始
+1. 使用 Glob 扫描 `_private-domain/*/meta/state.md`，列出所有任务目录
+2. 对每个任务目录，Read `meta/state.md` 获取 `next_step`，然后检查四个阶段产出文件是否存在：
+   - `ecosystem/scrm-blueprint.yaml` → 企微搭建已完成
+   - `community/community-playbook.md` → 社群运营已完成
+   - `lifecycle/lifecycle-automation.py` → 生命周期已完成
+   - `funnel/funnel-strategy.md` → 转化漏斗已完成
+   - 若产出文件存在但 state.md 未标记完成，以产出文件为准
+3. 使用 `AskUserQuestion` 展示未完成任务及其断点位置，选项：从断点继续 / 重新开始
 
 <IMPORTANT>
 工作台的职责是"意图识别 + 路由 + 接续"，不是把所有请求都塞进固定管道。

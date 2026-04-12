@@ -57,18 +57,10 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion"]
 | ... | ... | ... |
 ```
 
-<AskUserQuestion>
-开始增长实验设计前，我需要确认：
-1. 你的产品北极星指标是什么？（如果不确定，我可以帮你定义）
-2. 当前这个指标的数值是多少？目标是多少？
-3. 本轮实验想聚焦 AARRR 的哪个阶段？
-   - A) Acquisition 获客
-   - B) Activation 激活
-   - C) Retention 留存
-   - D) Revenue 变现
-   - E) Referral 推荐
-   - F) 不确定，帮我分析
-</AskUserQuestion>
+⏸️ 使用 `AskUserQuestion` 收集以下信息：
+- 产品的北极星指标是什么？（不确定时帮助定义）
+- 当前该指标数值和目标值？
+- 本轮实验聚焦 AARRR 哪个阶段？A) Acquisition 获客 B) Activation 激活 C) Retention 留存 D) Revenue 变现 E) Referral 推荐 F) 不确定
 
 ---
 
@@ -92,13 +84,10 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion"]
 | 1 | ...     | ...     | 8      | 7         | 9    | 504  | TOP 1  |
 ```
 
-<AskUserQuestion>
-以下是基于你的产品情况生成的实验想法和 ICE 评分排序。
-请确认：
+⏸️ 展示 ICE 评分排序后，使用 `AskUserQuestion` 确认：
 - A) 认可排序，继续设计 Top 3 实验方案
 - B) 调整某些实验的评分（请指出）
 - C) 补充新的实验想法
-</AskUserQuestion>
 
 ---
 
@@ -123,12 +112,10 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion"]
 6. **成功标准**：具体数字阈值
 7. **风险评估**：可能的副作用和缓解措施
 
-<AskUserQuestion>
-Top 3 实验的 A/B 测试方案已设计完成。请审阅：
+⏸️ 展示 A/B 测试方案后，使用 `AskUserQuestion` 确认：
 - A) 方案可行，输出最终实验计划文档
 - B) 需要调整某个实验方案（请指出）
 - C) 增加更多实验的详细方案
-</AskUserQuestion>
 
 ---
 
@@ -145,20 +132,18 @@ Top 3 实验的 A/B 测试方案已设计完成。请审阅：
 
 ---
 
-## 成功指标
+## 产出质量检查
 
-- 产出 8+ 个实验想法，全部有 ICE 评分
-- Top 3 实验有完整的 A/B 测试方案（含样本量计算）
-- 实验计划文档结构清晰，可直接交付执行
-- 每个实验都有明确的假设声明和成功标准
+| 检查项 | 合格标准 |
+|--------|---------|
+| 实验想法 | ≥8 个，全部有 ICE 评分 + 一句话理由 |
+| A/B 方案 | Top 3 含样本量计算（基线 + MDE + 置信度） |
+| 假设声明 | 每个用"如果[做X]，那么[指标Y]将[变化Z]，因为[原因W]"结构 |
+| 可交付性 | 实验计划文档有执行时间线和日历 |
 
-## 失败指标
-
-- 实验想法少于 5 个
-- 缺少 ICE 评分或评分无依据
-- A/B 测试方案缺少样本量计算
-- 假设声明模糊，无法验证
-
----
-
-**IMPORTANT**: 绝不跳过 ICE 评估直接设计实验方案。每个 A/B 测试必须有样本量计算和统计学设计。实验假设必须是可证伪的。
+<IMPORTANT>
+绝不跳过 ICE 评估直接设计实验方案。
+每个 A/B 测试必须有样本量计算和统计学设计。
+实验假设必须是可证伪的——用"如果...那么..."结构。
+ICE 评分必须独立评分并附理由，防止偏见。
+</IMPORTANT>

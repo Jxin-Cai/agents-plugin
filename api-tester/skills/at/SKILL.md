@@ -2,7 +2,7 @@
 name: at
 description: API 测试工作台——按意图路由到契约测试、集成测试、健康检查或完整流程
 argument-hint: "<API 或服务名称及测试目标描述>"
-allowed-tools: ["Read", "Write", "Glob", "Grep", "Bash(mkdir*)", "AskUserQuestion", "Skill"]
+allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Skill"]
 ---
 
 # API 测试工作台
@@ -73,14 +73,13 @@ allowed-tools: ["Read", "Write", "Glob", "Grep", "Bash(mkdir*)", "AskUserQuestio
 
 ## Step 3: 快速 API 扫描
 
-编排器内轻量执行，不调用子技能：
+编排器内轻量执行：
+1. **端点发现**：扫描 OpenAPI/Swagger 或代码中的路由定义
+2. **契约速查**：请求/响应 schema 完整性
+3. **安全速查**：认证机制、敏感数据暴露、CORS 配置
+4. **健康速查**：是否有健康检查端点、超时配置
 
-1. **端点发现**：用 Glob 搜索 `**/openapi*.{json,yaml,yml}` 和 `**/swagger*.{json,yaml,yml}`；若无，用 Grep 在源码中搜索路由注册模式（如 `@GetMapping`、`router.get`、`app.route`）。列出所有发现的端点。
-2. **契约速查**：对发现的 API 定义文件，检查每个端点是否有请求参数 schema 和响应 schema 定义。标记缺失项。
-3. **安全速查**：用 Grep 搜索认证中间件配置（如 `auth`、`jwt`、`bearer`）、CORS 配置（`cors`、`Access-Control`）、敏感字段暴露（`password`、`secret`、`token` 出现在响应 schema 中）。
-4. **健康速查**：用 Grep 搜索 `/health`、`/ready`、`/live` 端点定义，检查是否存在超时配置。
-
-将扫描结果写入 `_api-tests/quick-scan-{日期}.md`（包含发现的端点清单、缺失项和风险项）。
+生成精简报告到 `_api-tests/quick-scan-{日期}.md`。
 
 ---
 
@@ -92,10 +91,7 @@ allowed-tools: ["Read", "Write", "Glob", "Grep", "Bash(mkdir*)", "AskUserQuestio
 
 <IMPORTANT>
 工作台的职责是"意图识别 + 路由 + 接续"，不是把所有请求都塞进固定管道。
-每个阶段完成后必须等待用户确认，不可自动推进到下一阶段。
 契约测试必须验证 schema 合规性，不可仅测试 HTTP 状态码。
-集成测试必须覆盖错误场景和超时场景，仅测正向路径不达标。
-Mock 行为必须与契约定义一致——Mock 通过但真实服务失败是最危险的集成 bug。
-健康检查必须分级设计（Liveness/Readiness/Startup），单一 /health 返回 200 不达标。
+集成测试必须覆盖错误场景和超时场景。
 产出文件与状态文件冲突时，以产出文件为准。
 </IMPORTANT>

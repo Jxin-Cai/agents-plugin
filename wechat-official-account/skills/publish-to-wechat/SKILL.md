@@ -172,68 +172,15 @@ WECHAT_APP_SECRET=your_app_secret_here
 
 ## Step 3: 内容转换和元数据
 
-### Markdown → 微信兼容 HTML 转换
+Read `references/wechat-content-format.md`，按其中白名单标签和映射规则执行以下转换流程。
 
-#### 转换规则
+### 转换流程
 
-**基础元素：**
-
-| Markdown | 微信 HTML |
-|----------|----------|
-| `# 标题` | `<h2 style="...">标题</h2>`（微信中 h1 过大，推荐从 h2 开始） |
-| `## 小标题` | `<h3 style="...">小标题</h3>` |
-| `**加粗**` | `<strong style="color:{主色调}">加粗</strong>` |
-| `*斜体*` | `<em>斜体</em>` |
-| `> 引用` | `<blockquote style="border-left:3px solid {主色调};padding:10px 15px;background:#f7f7f7;margin:15px 0;">引用</blockquote>` |
-| `- 列表` | `<ul style="..."><li>列表</li></ul>` |
-| `` `代码` `` | `<code style="background:#f5f5f5;padding:2px 6px;border-radius:3px;font-size:14px;color:#c7254e;">代码</code>` |
-
-**代码块：**
-````
-```language
-code
-```
-````
-→ `<section style="background:#f8f8f8;border-radius:5px;padding:15px;margin:15px 0;font-size:14px;line-height:1.6;overflow-x:auto;"><pre><code>code</code></pre></section>`
-
-**外部链接处理（关键）：**
-微信公众号不支持外部链接点击，必须转换为底部引用格式：
-
-```
-正文中：文本[1]
-底部：
----
-引用链接：
-[1] 链接标题: https://example.com
-[2] 链接标题: https://example.com
-```
-
-具体转换步骤：
-1. 扫描所有 `[text](url)` 格式的链接
-2. 给每个外部链接分配编号 `[1]`, `[2]`...
-3. 正文中替换为 `文本<sup>[1]</sup>`
-4. 文末添加引用链接列表
-5. 微信认证公众号的公众号文章链接可以保留为超链接
-
-**图片处理：**
-- 本地图片：需要先上传到微信素材库（Step 4 处理）
-- 外部图片 URL：需要下载后上传到微信素材库
-- 图片占位符 `![描述](image-placeholder)`：提示用户提供实际图片
-
-**表格处理：**
-- 3 列及以内：转换为 HTML 表格，添加移动端适配样式
-- 超过 3 列：转换为多行键值对列表（手机端表格太窄）
-
-#### 主题样式
-
-根据配置的主题应用全局样式：
-
-| 主题 | 正文色 | 背景色 | 强调色 | 适用场景 |
-|------|--------|--------|--------|---------|
-| default | #3f3f3f | #ffffff | #1a73e8 | 通用 |
-| dark | #d4d4d4 | #1e1e1e | #4fc3f7 | 科技/极客 |
-| elegant | #555555 | #fafafa | #8b6914 | 文艺/品质 |
-| minimal | #333333 | #ffffff | #333333 | 极简/专业 |
+1. **基础元素**：按 reference 映射表逐一将 Markdown 元素转为带内联样式的 HTML（注意 h1→h2，加粗加主色调）
+2. **外部链接**：扫描全文 `[text](url)` → 每个外链分配脚注编号 → 正文替换为 `文本<sup>[N]</sup>` → 文末添加引用链接列表（微信认证号的公众号文章链接可保留超链接，其余一律脚注）
+3. **图片**：本地图片和外部 URL 标记为待上传（Step 4 处理）；占位符 `![描述](image-placeholder)` 提示用户提供实际图片
+4. **表格**：3 列及以内转 HTML 表格 + 移动端适配样式；超过 3 列改为键值对列表
+5. **主题样式**：根据 EXTEND.md 配置（默认 default 主题）应用全局色值，参见 reference 主题色表
 
 ### 生成预览
 
@@ -253,120 +200,43 @@ code
 
 ### 方式 A: API 方式发布
 
+Read `references/wechat-api-reference.md`，按其端点和参数规范执行以下步骤。
+
 #### Step 4A-1: 获取 access_token
 
-```bash
-curl -s "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=${WECHAT_APP_ID}&secret=${WECHAT_APP_SECRET}"
-```
-
-返回：
-```json
-{"access_token": "ACCESS_TOKEN", "expires_in": 7200}
-```
-
-**错误处理：**
-- `errcode: 40001` → AppSecret 无效，引导用户重新配置
-- `errcode: 40164` → IP 未加入白名单，引导用户到公众号后台添加服务器 IP
-- `errcode: 45009` → API 调用次数超限，建议等待或使用浏览器方式
+调用 `GET /cgi-bin/token`，缓存 token（有效期 7200 秒）。失败时按 reference 错误码表排查（40001→重新配置 AppSecret；40164→添加 IP 白名单；45009→等待或改用浏览器方式）。
 
 #### Step 4A-2: 上传封面图
 
-如果有封面图文件，上传为永久素材：
-
-```bash
-curl -F media=@cover.jpg "https://api.weixin.qq.com/cgi-bin/material/add_material?access_token=${ACCESS_TOKEN}&type=image"
-```
-
-返回 `media_id` 作为 `thumb_media_id`。
-
-如果没有封面图，提示用户提供或跳过（草稿可以后续在后台添加封面）。
+若有封面图文件，调用永久素材上传 API，获取 `media_id` 作为 `thumb_media_id`。若无封面图，提示用户提供或跳过（草稿可后续在后台补封面）。
 
 #### Step 4A-3: 上传内容图片
 
-扫描 HTML 内容中的本地图片引用，逐一上传：
-
-```bash
-curl -F media=@image.jpg "https://api.weixin.qq.com/cgi-bin/media/uploadimg?access_token=${ACCESS_TOKEN}"
-```
-
-返回永久图片 URL，替换内容中的本地路径。
+扫描 HTML 中本地图片引用，逐一调用图文内容图片上传 API，用返回的永久 URL（mmbiz.qpic.cn）替换本地路径。
 
 #### Step 4A-4: 创建草稿
 
-```bash
-curl -X POST "https://api.weixin.qq.com/cgi-bin/draft/add?access_token=${ACCESS_TOKEN}" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "articles": [{
-      "title": "文章标题",
-      "author": "作者名",
-      "digest": "摘要",
-      "content": "<转换后的HTML内容>",
-      "thumb_media_id": "封面图media_id",
-      "need_open_comment": 0,
-      "only_fans_can_comment": 0
-    }]
-  }'
-```
-
-返回：
-```json
-{"media_id": "MEDIA_ID"}
-```
-
-**错误处理：**
-- `errcode: 45008` → 文章内容过长（超过 2 万字），需要拆分
-- `errcode: 45005` → 内容包含不允许的链接
-- `errcode: 40004` → 素材格式不对
+调用 `POST /cgi-bin/draft/add`，传入 title、author、digest、content（转换后 HTML）、thumb_media_id。失败时按 reference 错误码表排查（45008→拆分文章；45005→检查残留外链；40004→素材格式）。
 
 #### Step 4A-5: 确认结果
 
-发布成功后，记录：
-- `media_id`：草稿的唯一标识
-- 发布时间
-- 使用的配置（主题、作者等）
+记录 `media_id`、发布时间、使用的主题配置，进入 Step 5。
 
 ### 方式 B: 浏览器方式发布
 
-#### Step 4B-1: 导航到公众号后台
+Read `references/wechat-config-troubleshooting.md` 中"浏览器方式要点"。
 
-使用 Playwright MCP 工具：
+#### Step 4B-1: 导航并登录
 
-```
-browser_navigate → https://mp.weixin.qq.com
-```
+使用 Playwright MCP `browser_navigate` 打开 `https://mp.weixin.qq.com`，检查登录状态。未登录则提示用户扫码，等待登录完成。
 
-检查登录状态：
-- 如果已登录：继续操作
-- 如果未登录：提示用户扫码登录，等待登录完成
+#### Step 4B-2: 进入编辑器并填入内容
 
-#### Step 4B-2: 进入图文编辑器
+导航到图文编辑器入口（参见 reference 中 URL），依次填入标题、作者、转换后 HTML 正文（通过 `browser_evaluate` 注入）、封面图、摘要。
 
-```
-browser_navigate → https://mp.weixin.qq.com/cgi-bin/appmsg?t=media/appmsg_edit&action=edit&type=77
-```
+#### Step 4B-3: 保存草稿
 
-或通过界面操作：
-1. 点击左侧菜单"内容管理"
-2. 点击"发表内容" → "编辑图文"
-
-#### Step 4B-3: 填入内容
-
-1. **标题**：在标题输入框中填入文章标题
-2. **作者**：填入作者名
-3. **正文**：将转换后的 HTML 内容粘贴到编辑器
-   - 使用 `browser_evaluate` 执行 JavaScript 设置编辑器内容
-   - 或通过剪贴板粘贴
-4. **封面图**：如果有，上传封面图
-5. **摘要**：填入文章摘要
-
-#### Step 4B-4: 保存草稿
-
-点击"保存草稿"按钮，等待保存完成。
-
-#### Step 4B-5: 确认结果
-
-截图保存成功页面，记录草稿信息。
+点击"保存草稿"按钮，等待保存完成，截图确认结果。
 
 ---
 

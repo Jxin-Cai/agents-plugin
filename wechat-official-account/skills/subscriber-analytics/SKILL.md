@@ -15,7 +15,12 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*|curl*|cat*)", "AskUserQues
 
 ## 加载引用
 
-Read `references/subscriber-analytics-principles.md`，严格遵守其中所有规则。
+根据当前步骤按需 Read 以下引用文件：
+
+| 步骤 | 引用文件 | 用途 |
+|------|---------|------|
+| Step 2-4（分析阶段） | `references/metrics-definitions.md` | 指标定义、基准值、四象限分类 |
+| Step 5（生成报告） | `references/analysis-framework.md` | 分析方法、STAR 建议框架、目标设定 |
 
 ---
 

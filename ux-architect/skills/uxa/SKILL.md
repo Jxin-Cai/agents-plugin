@@ -50,7 +50,7 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 2. 使用 `AskUserQuestion` 确认缩写
 3. 创建 `_ux-arch/{当前日期}-{缩写}/` 及子目录 `context/` `meta/` 和各阶段子目录
 4. 初始化 `meta/state.md`（workflow_mode、completed_steps、next_step）
-5. 扫描已有目录，检查接续点（产物优先于状态文件）
+5. 使用 Glob 扫描 `_ux-arch/{当前日期}-{缩写}/` 下已有产出文件（`ia/ia-*.md`、`flows/flow-*.md`、`interaction/audit-*.md`），Read `meta/state.md` 检查 `completed_steps`，若产出文件已存在则标记对应阶段为已完成（产物优先于状态文件）
 
 **⏸️ 使用 `AskUserQuestion` 确认从哪里开始。**
 
@@ -78,9 +78,9 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 
 | 维度 | 速览动作 | 输出 |
 |------|---------|------|
-| 信息架构 | 扫描项目路由/页面结构，列出一级导航入口和层级深度 | IA 速览（≤10 行） |
-| 用户流程 | 识别 Top 3 核心任务，映射 Happy Path 步骤数 | 流程速览（≤10 行） |
-| 交互设计 | 对照 Nielsen H1-H4（可见性/匹配/控制/一致性）做快速扫描 | 交互速览（≤10 行） |
+| 信息架构 | 使用 Glob 扫描 `src/**/route*`、`src/**/page*`、`src/**/nav*`、`src/**/layout*` 等文件，Read 提取一级导航入口并统计层级深度 | IA 速览（≤10 行） |
+| 用户流程 | 基于导航入口识别 Top 3 核心任务，逐一列出 Happy Path 步骤数和关键决策点 | 流程速览（≤10 行） |
+| 交互设计 | 对照 Nielsen H1-H4（可见性/匹配/控制/一致性），逐条检查首页或核心页面的交互反馈、术语使用、撤销能力、样式一致性 | 交互速览（≤10 行） |
 
 使用 `AskUserQuestion`：深入某项 / 进入完整流程 / 结束。
 
@@ -88,9 +88,9 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 
 ## 断点恢复
 
-1. 扫描 `_ux-arch/` 下未完成目录
-2. Read `meta/state.md`，结合产物推断进度
-3. 使用 `AskUserQuestion`：从断点继续 / 重新开始
+1. 使用 Glob 扫描 `_ux-arch/*/meta/state.md`，Read 每个 state.md 检查 `next_step` 字段
+2. 若 `next_step` 不为 `done`，使用 Glob 检查对应阶段产出文件（`ia/ia-*.md`、`flows/flow-*.md`、`interaction/audit-*.md`）是否存在；产出文件存在则视为该阶段已完成（产物优先）
+3. 使用 `AskUserQuestion` 向用户展示进度，选择：从断点继续 / 重新开始
 
 <IMPORTANT>
 工作台的职责是"意图识别 + 路由 + 接续"，不是把所有请求都塞进固定管道。

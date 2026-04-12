@@ -42,12 +42,12 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion"]
 
 ## 前置条件
 
-确定当前研究目录：检查 `_ux-research/` 下最近创建的日期目录。若无，询问用户研究简写并创建 `_ux-research/{当前日期}-{研究简写}/` 目录结构。
+确定当前研究目录：使用 Glob `_ux-research/*/` 列出所有任务目录，选取最近的一个作为当前研究目录。若无任何目录，使用 `AskUserQuestion` 询问研究简写，然后执行 `Bash(mkdir -p _ux-research/{当前日期}-{研究简写}/{context,meta,interviews,tests,personas})`。
 
 加载以下上下文（如果存在）：
-- `{研究目录}/context/**` — 研究背景资料
-- `{研究目录}/interviews/**` — 访谈指南和发现
-- `{研究目录}/tests/**` — 测试计划和发现
+- Read `{研究目录}/context/**` — 研究背景资料
+- Read `{研究目录}/interviews/**` — 访谈指南和发现
+- Read `{研究目录}/tests/**` — 测试计划和发现
 - 当前对话中已有的研究讨论
 
 ---
@@ -167,7 +167,7 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion"]
 
 ## Step 7: 保存产出
 
-将每个画像分别保存到 `{研究目录}/personas/persona-{画像简写}-{日期}.md`
+使用 Write 将每个画像分别保存到 `{研究目录}/personas/persona-{画像简写}-{当前日期}.md`，每个文件按 `assets/persona-template.md` 模板结构输出。
 
 保存后，**必须向用户展示文件的绝对路径**（使用 `$(pwd)` 拼接完整路径），以便用户直接点击打开文件。
 

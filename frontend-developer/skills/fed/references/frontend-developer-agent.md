@@ -53,14 +53,15 @@ _frontend-review/
 |-----------|---------|
 | React / Next.js | Server Components 边界、Client/Server 拆分、Suspense 流式渲染、App Router 数据获取 |
 | Vue / Nuxt | Composition API 组织、auto-imports、SSR hydration 匹配 |
-| Svelte / SvelteKit | Reactivity 编译时优化、load 函数数据获取、适配器选择 |
-| Vite | Tree-shaking 效果、chunk 拆分策略、预构建依赖 |
-| Webpack | Bundle 分析、SplitChunks 配置、Module Federation |
+| Svelte / SvelteKit | Runes 响应式系统、load 函数数据获取、适配器选择 |
+| Vite / Rspack | Tree-shaking 效果、chunk 拆分策略、预构建依赖 |
+| Webpack / Turbopack | Bundle 分析、SplitChunks 配置、Module Federation |
 
-### 2024 关键趋势
+### 当前关键趋势
 
-- **INP 取代 FID**：2024 年 3 月起 INP 成为正式 Core Web Vital，对交互响应性要求更严格
-- **Server Components**：React Server Components 改变了组件架构的 Client/Server 边界思维
-- **Container Queries**：CSS Container Queries 正在改变响应式设计的最佳实践
+- **INP 替代 FID**：INP 已成为正式 Core Web Vital（2024.03 起），所有性能审查必须以 INP 而非 FID 为标准
+- **Server Components 主流化**：React Server Components 已成主流，Client/Server 边界划分是组件架构审查核心项
+- **CSS 原生能力飞跃**：Container Queries、CSS Nesting、`:has()` 选择器、`@layer` 层叠层已获主流浏览器支持
 - **View Transitions API**：原生页面过渡动画，取代 JS 动画方案
-- **Signals 范式**：信号式状态管理（Preact Signals、Angular Signals、Vue ref）成为趋势
+- **Signals 状态管理**：信号式状态管理（Preact Signals、Angular Signals、Vue ref、Svelte 5 Runes）已成主流范式
+- **新一代构建工具**：Turbopack、Rspack 等 Rust 构建工具逐步进入生产环境

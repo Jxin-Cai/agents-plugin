@@ -18,6 +18,9 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*|find*|ls*)", "AskUserQuest
 使用 Read 工具加载以下引用文件，严格遵守其中所有规则：
 
 - `references/insight-extraction-principles.md` — 洞察公式、影响-费力矩阵、根因分析方法
+
+以下引用在 Step 4（影响-费力矩阵）阶段按需加载：
+
 - `references/insight-decision-framework.md` — 机会解决方案树、决策建议分层、反洞察陷阱
 
 ---
@@ -117,6 +120,8 @@ Read 以下文件（如果存在）：
 **⏸️ 等待用户确认后继续。**
 
 ## Step 4: 影响-费力矩阵
+
+Read `references/insight-decision-framework.md` 加载决策框架（机会解决方案树、决策建议分层、反洞察陷阱）。
 
 将所有洞察的建议行动放入影响-费力矩阵（Impact-Effort Matrix）：
 

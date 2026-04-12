@@ -53,13 +53,13 @@ allowed-tools: ["Read", "Write", "Glob", "Grep", "Bash(mkdir*)", "AskUserQuestio
 - **关注端**：主要关注哪些端？（移动端 / 平板 / 桌面端 / 全部）
 - **已知问题**：是否有已知的响应式问题？
 
-使用 Glob 和 Grep 工具扫描项目中的样式文件（CSS / SCSS / Tailwind 类 / styled-components），了解当前断点策略。
+使用 Glob 扫描 `src/**/*.{css,scss,less}` 和 `src/**/*.{tsx,jsx,vue,svelte}` 获取样式与组件文件列表。使用 Grep 搜索 `@media` 和 `@container` 提取断点定义，搜索 `breakpoint|screen` 定位断点变量声明。Read 断点配置文件（`tailwind.config.*` / `variables.scss` / `theme.ts`）。
 
 **⏸️ 等待用户确认后继续。**
 
 ## Step 2: 断点策略审计
 
-扫描项目中所有媒体查询和断点定义：
+使用 Grep 搜索 `@media\s*\(` 提取全部媒体查询，搜索 `min-width|max-width` 统计查询方向分布，Read 断点变量定义文件：
 
 #### 2a. 断点一致性
 
@@ -104,6 +104,13 @@ allowed-tools: ["Read", "Write", "Glob", "Grep", "Bash(mkdir*)", "AskUserQuestio
 - 是否存在任何视口宽度下的水平滚动条？
 - 长文本是否正确处理？（text-overflow、word-break）
 - 表格在小屏下的处理策略？（横向滚动 / 卡片化 / 折叠列）
+
+#### 3d. 现代 CSS 特性
+
+- 是否使用了 Container Queries（`@container`）实现组件级响应式？
+- 是否使用了 CSS Nesting 简化媒体查询嵌套？
+- 是否利用了 `:has()` 选择器替代部分 JS 逻辑判断？
+- 是否使用了 `@layer` 管理样式优先级层叠？
 
 ## Step 4: 触控与交互适配
 

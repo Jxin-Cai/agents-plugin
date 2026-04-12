@@ -2,7 +2,7 @@
 name: pb
 description: 性能基准测试工作台——按意图路由到负载测试计划、性能分析指南、优化报告或完整流程
 argument-hint: "<任务描述>"
-allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Skill"]
+allowed-tools: ["Read", "Write", "Edit", "Glob", "Grep", "Bash(mkdir*|find*|ls*|wc*)", "AskUserQuestion", "Skill"]
 ---
 
 # 性能基准测试工作台
@@ -15,11 +15,11 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 
 ## 强制执行规则
 
-- ✅ 始终用中文与用户沟通
-- ✅ 先识别 workflow 类型，再进入对应流程
-- 🚫 不默认跑完整管道
-- 🚫 不在入口全量加载所有 references
-- ⏸️ 每个阶段完成后等待用户确认
+- 始终用中文与用户沟通
+- 先识别 workflow 类型，再进入对应流程
+- 不默认跑完整管道
+- 不在入口全量加载所有 references
+- 每个阶段完成后等待用户确认
 
 ---
 
@@ -50,7 +50,7 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 2. 使用 `AskUserQuestion` 确认缩写
 3. 创建 `_performance/{当前日期}-{缩写}/` 及子目录 `context/` `meta/` 和各阶段子目录
 4. 初始化 `meta/state.md`（workflow_mode、completed_steps、next_step）
-5. 扫描已有目录，检查接续点（产物优先于状态文件）
+5. 用 Glob 扫描 `_performance/{目录}/` 下 `load-tests/`、`profiling/`、`reports/` 中的产物文件，判断接续点——产物存在则跳过对应阶段
 
 **⏸️ 使用 `AskUserQuestion` 确认从哪里开始。**
 
@@ -74,14 +74,14 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 
 ## Step 3: 快速检查
 
-使用 Glob 扫描项目目录，按以下维度速览并生成精简报告到 `_performance/quick-scan-{日期}.md`：
+使用 Glob 扫描项目源码目录（`**/*.{java,py,go,ts,js,rs}`），按以下维度逐项检查并生成精简报告到 `_performance/quick-scan-{日期}.md`：
 
-| 维度 | 检查内容 | 输出 |
-|------|---------|------|
-| 响应延迟 | 识别潜在慢路径（同步 I/O、N+1 查询、无缓存热点） | 风险点列表 |
-| 资源利用 | 检查连接池/线程池配置、内存分配模式 | 配置建议 |
-| 并发安全 | 检查锁策略、共享状态、竞态条件 | 风险点列表 |
-| 可扩展性 | 检查有状态组件、硬编码限制、单点瓶颈 | 改进方向 |
+| 维度 | 具体检查动作 | 输出 |
+|------|-------------|------|
+| 响应延迟 | 用 Grep 搜索同步 I/O 调用（`readFileSync`/`requests.get`/`jdbc.execute` 等）、N+1 查询模式（循环内 DB 调用）、无缓存热点（重复计算/重复查询） | 风险点列表（文件:行号 + 影响评估） |
+| 资源利用 | 用 Grep 搜索连接池/线程池配置（`pool.size`/`max-connections`/`thread-pool`），Read 配置文件检查内存分配参数 | 配置建议（当前值 → 建议值 + 理由） |
+| 并发安全 | 用 Grep 搜索共享可变状态（`static mut`/全局变量写入/`synchronized`），检查锁策略和竞态条件 | 风险点列表（严重度 + 修复方向） |
+| 可扩展性 | 用 Grep 搜索硬编码限制（`MAX_`/`LIMIT_`/魔数），检查有状态组件和单点瓶颈 | 改进方向（短期 + 长期） |
 
 使用 `AskUserQuestion`：深入某项 / 进入完整流程 / 结束。
 
@@ -89,15 +89,20 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 
 ## 断点恢复
 
-1. 扫描 `_performance/` 下未完成目录
-2. Read `meta/state.md`，结合产物推断进度
-3. 使用 `AskUserQuestion`：从断点继续 / 重新开始
+1. 用 Glob 扫描 `_performance/` 下各任务目录，识别未完成任务
+2. Read `meta/state.md`，获取 `completed_steps` 和 `next_step`
+3. 用 Glob 检查各阶段产物文件是否存在——**产物优先于状态文件**（如 `load-tests/*.md` 存在则视为该阶段已完成，即使 state.md 未更新）
+4. 使用 `AskUserQuestion`：从断点继续 / 重新开始
 
 <IMPORTANT>
+## 不可违反的规则
 工作台的职责是"意图识别 + 路由 + 接续"，不是把所有请求都塞进固定管道。
-负载测试必须有明确的验收标准（响应时间/吞吐量/错误率）。
-优化必须有 before/after 量化对比。
-不可在无基线数据时声称「性能提升 X%」。
 每个阶段完成后必须等待用户确认。
 产出文件与状态文件冲突时，以产出文件为准。
+
+## 性能工程硬规则
+1. 延迟指标必须使用百分位（P50/P95/P99），禁止使用均值——均值掩盖长尾问题
+2. 负载测试必须有可量化的验收标准（响应时间阈值 + 吞吐量下限 + 错误率上限），缺一不可
+3. 不可在无基线数据时声称"性能提升 X%"——优化前后必须在相同条件下对比
+4. 资源利用率数据必须标注采样窗口和统计口径（如"5 分钟平均 CPU 利用率 72%"），禁止无上下文裸数字
 </IMPORTANT>

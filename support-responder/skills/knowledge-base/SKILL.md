@@ -31,15 +31,14 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion"]
 
 ## 前置条件
 
-- 已完成业务上下文收集（`context/business-context.md` 存在）
-- 已知 Top 5 高频客户问题
-- 已完成工单分类体系（`tickets/` 目录存在，优先；无也可独立执行）
+- Read `context/business-context.md`（必须存在），提取产品名称、核心功能列表、用户群体特征
+- Glob `tickets/` 检查是否有工单分类体系产出，有则 Read 获取 Top 问题分类
 
 ---
 
 ## Step 1: 知识库文章结构设计
 
-定义标准文章结构，确保每篇文章风格统一、信息完整：
+Read `context/business-context.md` 提取产品名称和核心功能。按以下五层递进结构（问题描述→常见原因→分步解决→高级排错→联系支持）设计标准化文章模板，Write 输出到 `kb/article-structure.md`：
 
 ### 标准文章结构
 
@@ -84,7 +83,7 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion"]
 
 ## Step 2: 常见问题分类体系
 
-基于工单数据和业务特点，建立分类体系：
+Read `kb/article-structure.md`（Step 1 产出）确认文章结构。若 `tickets/routing-rules.yaml` 存在则 Read 获取工单分类维度。按"互斥/穷尽/均衡/扁平（最多三级）"四原则设计分类框架，Write 输出到 `kb/category-taxonomy.yaml`：
 
 ### 推荐分类框架
 
@@ -122,7 +121,7 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion"]
 
 ## Step 3: 文章模板生成
 
-为三种典型问题类型创建详细模板：
+Read `kb/article-structure.md` 和 `kb/category-taxonomy.yaml`（前两步产出）。为三种典型问题类型分别生成详细模板（含标准化标题、必填字段、步骤模板、截图占位符、SEO 关键词、关联文章），Write 输出到 `kb/templates/` 目录：
 
 ### 模板 A：技术故障排除
 适用于：系统错误、功能异常、性能问题
@@ -146,7 +145,7 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion"]
 
 ## Step 4: 交互式故障排除流程
 
-为高频复杂问题设计决策树式排除流程：
+Read `kb/category-taxonomy.yaml` 提取 Top 3 高频复杂问题分类。为每个高频问题设计决策树式排除流程（是/否分支→子分支→解决/升级），Write 输出到 `kb/troubleshooting-flows.yaml`：
 
 ```
 用户报告问题
@@ -171,7 +170,7 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion"]
 
 ## Step 5: 自助资源优化
 
-设计提升知识库使用率和解决率的策略：
+Read `kb/article-structure.md` 和 `kb/category-taxonomy.yaml` 获取知识库整体结构。针对搜索优化（同义词映射、热门置顶、无结果引导）、文章推荐（上下文帮助、智能推荐）、效果评估（有用率、跳出率、工单转化率）三个维度制定策略，Write 输出到 `kb/optimization-strategy.md`：
 
 1. **搜索优化**
    - 关键词同义词映射
@@ -208,14 +207,11 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion"]
 - [ ] 文章结构标准化，新文章可在 30 分钟内按模板完成
 - [ ] 分类体系覆盖 90%+ 高频问题
 - [ ] 故障排除流程覆盖 Top 3 复杂问题
-- [ ] 优化策略包含可量化的效果评估方法
-- [ ] 所有模板经用户确认符合产品特点
 
 ## 失败指标
 
 - 文章标题使用内部术语而非客户语言
 - 分类层级超过三级
-- 文章缺少"下一步"引导
 - 没有效果评估机制
 
 ---

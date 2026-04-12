@@ -56,7 +56,7 @@ allowed-tools: ["Read", "Write", "Glob", "Grep", "Bash(mkdir*)", "AskUserQuestio
 - **关注点**：首屏加载 / 交互响应 / 视觉稳定性 / 全部
 - **构建分析**：是否可以运行构建命令查看 bundle 分析？
 
-扫描项目的构建配置（webpack / vite / next.config 等）和依赖清单（package.json）。
+Read `package.json` 提取 `dependencies` 和 `devDependencies`；使用 Glob 搜索 `{vite,next,webpack,rspack}.config.*` 和 `tsconfig.json` 定位构建配置，逐一 Read 检查代码分割和优化配置。
 
 **⏸️ 等待用户确认后继续。**
 

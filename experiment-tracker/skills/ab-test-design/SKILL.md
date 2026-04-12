@@ -192,4 +192,7 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*|find*|ls*)", "AskUserQuest
 
 <IMPORTANT>
 本技能完成后，展示菜单并等待用户选择下一步。不要自动执行后续技能。
+每个假设必须包含具体变化、可观测指标、方向、预期幅度（MDE）和因果机制五要素，缺任何一项不可进入下一步。
+样本量必须基于 alpha、beta、MDE、基线值和方差进行统计计算，禁止拍脑袋定样本量。
+多变体实验（A/B/n）必须在设计阶段明确多重比较校正方法（Bonferroni/Holm/BH），不可留到分析阶段再决定。
 </IMPORTANT>

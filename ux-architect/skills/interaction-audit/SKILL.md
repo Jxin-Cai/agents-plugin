@@ -2,7 +2,7 @@
 name: interaction-audit
 description: 交互设计审计，基于启发式原则系统评估交互设计质量
 argument-hint: "<产品或功能范围描述>"
-allowed-tools: ["Read", "Write", "Glob", "Grep", "AskUserQuestion"]
+allowed-tools: ["Read", "Write", "Glob", "Grep", "Bash(mkdir*)", "AskUserQuestion"]
 ---
 
 # 交互设计审计
@@ -36,7 +36,7 @@ allowed-tools: ["Read", "Write", "Glob", "Grep", "AskUserQuestion"]
 
 ## 前置条件
 
-确定当前工作目录：检查 `_ux-arch/` 下最近创建的日期目录。若无，询问用户任务简写并创建 `_ux-arch/{当前日期}-{任务简写}/` 目录结构。
+确定当前工作目录：使用 Glob 扫描 `_ux-arch/*/meta/state.md`，按目录名日期排序取最近的。若无匹配目录，使用 `AskUserQuestion` 询问用户任务简写，然后使用 Bash 创建 `_ux-arch/{当前日期}-{任务简写}/` 及子目录 `context/`、`meta/`、`ia/`、`flows/`、`interaction/`。
 
 加载以下上下文（如果存在）：
 - `{工作目录}/ia/ia-*.md` — 信息架构产出
@@ -56,7 +56,12 @@ allowed-tools: ["Read", "Write", "Glob", "Grep", "AskUserQuestion"]
 - **重点关注**：是否有已知的可用性问题或用户投诉？
 - **用户群体**：目标用户的技术水平如何？（新手 / 中级 / 专家混合）
 
-如果用户提供了代码路径，尝试扫描项目中的前端页面组件、路由配置、样式文件，提取界面结构信息。
+如果用户提供了代码路径，使用 Glob 扫描以下文件提取界面结构信息：
+- 前端页面组件：`src/pages/**`、`src/views/**`、`src/components/**`
+- 路由配置：`src/**/route*`、`src/**/router*`
+- 样式文件：`src/**/*.css`、`src/**/*.scss`、`src/**/*.less`
+
+Read 匹配文件，提取页面结构、组件层级和交互元素清单。
 
 **⏸️ 等待用户确认审计范围后继续。**
 
@@ -115,7 +120,12 @@ allowed-tools: ["Read", "Write", "Glob", "Grep", "AskUserQuestion"]
 | 焦点可见 | Tab 切换时焦点指示清晰可见 |
 | 操作目标尺寸 | 可点击区域 ≥ 44x44 CSS 像素 |
 
-如果是代码审计，尝试扫描前端组件中的无障碍相关属性（aria-*、alt、role 等）。
+如果是代码审计，使用 Grep 扫描前端组件中的无障碍属性：
+- 搜索 `aria-` 前缀属性：`Grep "aria-" --glob "*.{tsx,jsx,vue,html}"`
+- 搜索 alt 属性：`Grep "alt=" --glob "*.{tsx,jsx,vue,html}"`
+- 搜索 role 属性：`Grep "role=" --glob "*.{tsx,jsx,vue,html}"`
+
+统计覆盖率，标注缺失无障碍属性的组件。
 
 ## Step 5: 问题汇总与优先排序
 

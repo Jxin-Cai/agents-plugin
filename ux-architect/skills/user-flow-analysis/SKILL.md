@@ -2,7 +2,7 @@
 name: user-flow-analysis
 description: 用户流程分析，映射关键任务路径，识别摩擦点和断裂点
 argument-hint: "<产品或核心任务描述>"
-allowed-tools: ["Read", "Write", "Glob", "AskUserQuestion"]
+allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion"]
 ---
 
 # 用户流程分析
@@ -35,7 +35,7 @@ allowed-tools: ["Read", "Write", "Glob", "AskUserQuestion"]
 
 ## 前置条件
 
-确定当前工作目录：检查 `_ux-arch/` 下最近创建的日期目录。若无，询问用户任务简写并创建 `_ux-arch/{当前日期}-{任务简写}/` 目录结构。
+确定当前工作目录：使用 Glob 扫描 `_ux-arch/*/meta/state.md`，按目录名日期排序取最近的。若无匹配目录，使用 `AskUserQuestion` 询问用户任务简写，然后使用 Bash 创建 `_ux-arch/{当前日期}-{任务简写}/` 及子目录 `context/`、`meta/`、`flows/`、`interaction/`。
 
 加载以下上下文（如果存在）：
 - `{工作目录}/ia/ia-*.md` — 信息架构产出（导航结构、核心对象）

@@ -62,11 +62,14 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 
 | 阶段 | 调用 | 完成标志 | 门控 |
 |------|------|---------|------|
-| 反馈收集 | `/feedback-collection $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
-| 情感分析 | `/sentiment-analysis $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
-| 洞察提取 | `/insight-extraction $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
+| 反馈收集 | `/feedback-collection $ARGUMENTS` | `raw-feedback/feedback-*.md` 存在 | 继续 / 回退 / 结束 |
+| 情感分析 | `/sentiment-analysis $ARGUMENTS` | `analysis/sentiment-*.md` 存在 | 继续 / 回退 / 结束 |
+| 洞察提取 | `/insight-extraction $ARGUMENTS` | `insights/insights-*.md` 存在 | 继续 / 回退 / 结束 |
 
-每阶段写入摘要到 `meta/{stage}-summary.md`（不超过 20 行）。
+每阶段完成后：
+1. Read 子技能产出文件，Write 不超过 20 行的摘要到 `meta/{stage}-summary.md`
+2. 更新 `meta/state.md` 的 completed_steps 和 next_step
+3. 使用 `AskUserQuestion` 展示选项：继续下一阶段 / 回退重做 / 结束
 
 **⏸️ 每步等待用户确认。**
 
@@ -74,9 +77,18 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 
 ## Step 3: 快速检查
 
-编排器内轻量执行各维度速览，生成精简报告到 `_feedback/quick-scan-{日期}.md`。
+使用 Glob 扫描 `_feedback/` 下最近的工作目录（如无则请用户提供数据源），按以下维度执行速览：
 
-使用 `AskUserQuestion`：深入某项 / 进入完整流程 / 结束。
+| 维度 | 检查动作 | 输出 |
+|------|---------|------|
+| 渠道覆盖 | 统计反馈来源渠道数和各渠道占比 | 单渠道偏差预警 |
+| 情感分布 | 抽样 10-15 条反馈快速标注正/负/中 | 整体情感倾向 |
+| 高频主题 | 识别出现 ≥3 次的关键词或主题 | Top 3 高频主题 |
+| 紧急信号 | 检查是否有功能故障、数据丢失等严重负面 | 红旗标记 |
+
+将速览结果 Write 到 `_feedback/quick-scan-{日期}.md`（渠道覆盖 + 情感分布 + Top 主题 + 紧急信号 + 建议下一步）。
+
+使用 `AskUserQuestion` 展示速览结果并提供选项：深入某个维度 / 进入完整流程 / 结束。
 
 ---
 

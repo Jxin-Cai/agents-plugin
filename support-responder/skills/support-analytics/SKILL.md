@@ -32,15 +32,14 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion"]
 
 ## 前置条件
 
-- 已完成业务上下文收集（`context/business-context.md` 存在）
-- 了解当前使用的工单系统和数据可获取性
-- 已完成工单处理框架设计（`tickets/` 目录存在，优先；无也可独立执行）
+- Read `context/business-context.md`（必须存在），提取产品类型、团队规模、当前使用的工单系统
+- Glob `tickets/` 检查是否有工单处理框架产出，有则 Read `tickets/sla-config.yaml` 获取 SLA 基准
 
 ---
 
 ## Step 1: 支持绩效指标定义
 
-定义核心 KPI 及其计算方法：
+Read `context/business-context.md` 提取团队规模和工单系统类型。按客户体验（CSAT/NPS/CES）、效率（FRT/ART/FCR/SLA%）、运营（Backlog/SSR/Reopen%）三个维度，逐个定义指标名称、计算公式、数据来源字段、目标值和警戒线，Write 输出到 `analytics/kpi-definitions.md`：
 
 ### 客户体验指标
 
@@ -78,7 +77,7 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion"]
 
 ## Step 2: 工单量趋势分析
 
-设计工单量多维度趋势分析模型：
+Read `analytics/kpi-definitions.md`（Step 1 产出）获取指标定义。按时间趋势（日/周/月+工作日/周末+小时级分布）、分类趋势（各类型占比变化+新增类型）、渠道趋势（各渠道分布+迁移）、相关性分析（产品发布关联+季节性+异常检测）四个维度建模，Write 输出到 `analytics/trend-analysis-model.md`：
 
 ### 分析维度
 
@@ -108,7 +107,7 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion"]
 
 ## Step 3: 常见问题分类统计
 
-建立问题分类自动化统计体系：
+Read `analytics/trend-analysis-model.md`（Step 2 产出）获取分析维度。若 `tickets/routing-rules.yaml` 存在则 Read 获取工单分类。为每个分类统计工单数量/占比/平均解决时间/FCR/CSAT，并设计异常检测规则（量突增→Bug、时间变长→培训缺口、满意度下降→话术问题），Write 输出到 `analytics/category-stats-framework.md`：
 
 ### 分类统计框架
 
@@ -133,7 +132,7 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion"]
 
 ## Step 4: 客服绩效分析
 
-设计个人和团队绩效评估模型：
+Read `analytics/kpi-definitions.md` 获取指标定义。设计个人绩效看板（处理量20%+响应速度20%+解决速度15%+FCR 20%+CSAT 25% 加权评分）和团队绩效看板（KPI达成+成员对比雷达图+负载均衡基尼系数+技能覆盖热力图），Write 输出到 `analytics/performance-model.md`：
 
 ### 个人绩效看板
 
@@ -158,7 +157,7 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion"]
 
 ## Step 5: 改进建议生成
 
-基于数据分析自动生成改进建议：
+Read `analytics/kpi-definitions.md` 和 `analytics/category-stats-framework.md` 获取指标和分类数据。按"触发指标→当前值→目标值→根因分析→行动项(负责人/截止)→预期效果→验证方式"格式生成建议规则引擎，Write 输出到 `analytics/improvement-engine.md`：
 
 ### 建议生成规则
 
@@ -192,7 +191,7 @@ if csat < 4.5:
 
 ## Step 6: Python 分析代码生成
 
-提供完整的 Python 分析代码，包含：
+Read `analytics/kpi-definitions.md` 和 `analytics/performance-model.md` 获取指标定义和绩效模型。基于 `@references/analytics-code-template.md` 中的 `SupportAnalytics` 类，生成完整可运行的 Python 脚本，包含数据加载/清洗、指标计算、matplotlib 可视化、Markdown 报告输出和示例数据演示，Write 输出到 `analytics/support_analytics.py`：
 
 - `SupportAnalytics` 类定义
 - 数据加载和清洗
@@ -219,18 +218,15 @@ if csat < 4.5:
 
 ## 成功指标
 
-- [ ] 所有 KPI 有明确的计算公式和数据来源
-- [ ] 趋势分析覆盖时间、分类、渠道三个维度
+- [ ] 所有 KPI 有明确的计算公式和数据来源字段
 - [ ] Python 代码可直接运行，输入示例数据能产出报告
-- [ ] 改进建议具体可执行，不是空泛的"需要改进"
-- [ ] 分析体系经用户确认匹配其数据可用性
+- [ ] 改进建议包含负责人、截止日期和验证方式
 
 ## 失败指标
 
 - 定义了无法从现有系统获取数据的指标
 - Python 代码缺少依赖说明或无法运行
-- 改进建议不可操作
-- 忽略团队规模和能力约束
+- 改进建议不可操作（缺少具体行动项）
 
 ---
 

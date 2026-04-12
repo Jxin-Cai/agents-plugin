@@ -2,7 +2,7 @@
 name: information-architecture
 description: 信息架构分析，梳理内容结构、导航体系、分类法和标签系统
 argument-hint: "<产品或功能描述>"
-allowed-tools: ["Read", "Write", "Glob", "AskUserQuestion"]
+allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion"]
 ---
 
 # 信息架构分析
@@ -35,7 +35,7 @@ allowed-tools: ["Read", "Write", "Glob", "AskUserQuestion"]
 
 ## 前置条件
 
-确定当前工作目录：检查 `_ux-arch/` 下最近创建的日期目录。若无，询问用户任务简写并创建 `_ux-arch/{当前日期}-{任务简写}/` 目录结构。
+确定当前工作目录：使用 Glob 扫描 `_ux-arch/*/meta/state.md`，按目录名日期排序取最近的。若无匹配目录，使用 `AskUserQuestion` 询问用户任务简写，然后使用 Bash 创建 `_ux-arch/{当前日期}-{任务简写}/` 及子目录 `context/`、`meta/`、`ia/`、`flows/`、`interaction/`。
 
 加载以下上下文（如果存在）：
 - `{工作目录}/context/**` — 项目上下文资料
@@ -56,7 +56,12 @@ allowed-tools: ["Read", "Write", "Glob", "AskUserQuestion"]
 - **现有问题**：当前架构存在什么问题？用户反馈有哪些痛点？（如有现有产品）
 - **规模预期**：内容量和功能数量的未来增长预期？
 
-如果是已有产品，尝试扫描项目中的路由配置、页面目录结构、导航组件，提取现有信息架构。
+如果是已有产品，使用 Glob 扫描以下路径提取现有信息架构：
+- 路由配置：`src/**/route*`、`src/**/router*`、`app/**/page.*`、`pages/**/*`
+- 页面目录：`src/pages/**`、`src/views/**`、`app/**/layout.*`
+- 导航组件：`src/**/*nav*`、`src/**/*sidebar*`、`src/**/*menu*`
+
+Read 匹配文件，提取路由定义和导航结构，整理为当前信息架构概览。
 
 **⏸️ 等待用户确认后继续。**
 

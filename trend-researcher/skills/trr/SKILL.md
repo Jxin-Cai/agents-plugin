@@ -60,11 +60,11 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 
 每阶段入口重新 Read `meta/state.md`，完成后更新。
 
-| 阶段 | 调用 | 完成标志 | 门控 |
-|------|------|---------|------|
-| 市场分析 | `/market-analysis $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
-| 竞争格局 | `/competitive-landscape $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
-| 技术趋势报告 | `/tech-trend-report $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
+| 阶段 | 调用 | 完成标志（Glob 检查） | 门控 |
+|------|------|----------------------|------|
+| 市场分析 | `/market-analysis $ARGUMENTS` | `market/market-analysis-*.md` 存在 | 继续 / 回退 / 结束 |
+| 竞争格局 | `/competitive-landscape $ARGUMENTS` | `competitive/competitive-landscape-*.md` 存在 | 继续 / 回退 / 结束 |
+| 技术趋势报告 | `/tech-trend-report $ARGUMENTS` | `trends/tech-trend-report-*.md` 存在 | 继续 / 回退 / 结束 |
 
 每阶段写入摘要到 `meta/{stage}-summary.md`（不超过 20 行）。
 
@@ -74,7 +74,17 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 
 ## Step 3: 快速检查
 
-编排器内轻量执行各维度速览，生成精简报告到 `_trend-research/quick-scan-{日期}.md`。
+编排器内轻量执行，不调用子技能。基于用户提供的信息和对话上下文，逐项输出以下五个维度，每个维度完成后展示再继续下一个：
+
+| 维度 | 输出要求 | 篇幅 |
+|------|---------|------|
+| 市场概况 | 市场规模量级 + 近 3 年增长率 + 生命周期阶段判断，标注数据来源 | 2-3 句 |
+| 竞争格局速览 | 前 3 名玩家名称 + 各自一句话定位 + 集中度判断（高/中/低） | 3-5 行 |
+| 关键技术趋势 | 3-5 个技术趋势 + 各自 Hype Cycle 阶段（萌芽/膨胀/低谷/爬升/高峰） | 列表 |
+| 风险与机会 | Top 2 风险 + Top 2 机会，每条一句话说明 | 4 行 |
+| 建议下一步 | 基于以上速览，建议优先深入哪个维度及原因 | 1-2 句 |
+
+全部维度完成后，将速览报告保存到 `_trend-research/quick-scan-{日期}.md`。
 
 使用 `AskUserQuestion`：深入某项 / 进入完整流程 / 结束。
 

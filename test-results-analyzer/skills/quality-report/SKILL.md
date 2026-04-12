@@ -35,25 +35,25 @@ allowed-tools: ["Read", "Write", "Glob", "AskUserQuestion"]
 
 ## 前置条件
 
-确定当前工作目录：检查 `_test-analysis/` 下最近创建的日期目录。若无，询问用户并创建。
+确定当前工作目录：使用 Glob 搜索 `_test-analysis/*/meta/state.md`，按目录名中的日期排序取最新一个作为当前工作目录。若无匹配结果，使用 `AskUserQuestion` 询问用户任务名称并创建目录。
 
-加载以下上下文（如果存在）：
-- `{工作目录}/coverage/**` — 覆盖率分析产出
-- `{工作目录}/failures/**` — 失败分析产出
-- `{工作目录}/context/**` — 原始测试数据
+使用 Glob 和 Read 加载以下上下文（如果存在）：
+- 使用 Glob 搜索 `{工作目录}/coverage/**`，逐个 Read 找到的文件 — 覆盖率分析产出
+- 使用 Glob 搜索 `{工作目录}/failures/**`，逐个 Read 找到的文件 — 失败分析产出
+- 使用 Glob 搜索 `{工作目录}/context/**`，逐个 Read 找到的文件 — 原始测试数据
 - 当前对话中已有的分析讨论
 
 ---
 
 ## Step 1: 数据完备性检查
 
-检查质量报告所需的数据是否完备：
+检查质量报告所需的数据是否完备。使用 Glob 搜索以下路径，判断对应产出是否存在：
 
-| 数据来源 | 状态 | 说明 |
-|---------|------|------|
-| 覆盖率分析产出 | ✅/❌ | |
-| 失败分析产出 | ✅/❌ | |
-| 历史对比数据（如有） | ✅/❌/N/A | |
+| 数据来源 | Glob 搜索路径 | 状态 | 说明 |
+|---------|--------------|------|------|
+| 覆盖率分析产出 | `{工作目录}/coverage/*.md` | ✅/❌ | |
+| 失败分析产出 | `{工作目录}/failures/*.md` | ✅/❌ | |
+| 历史对比数据（如有） | `_test-analysis/*/reports/*.md`（排除当前目录） | ✅/❌/N/A | |
 
 如果缺少关键数据，使用 `AskUserQuestion` 工具询问用户：
 
@@ -173,7 +173,7 @@ allowed-tools: ["Read", "Write", "Glob", "AskUserQuestion"]
 
 ## Step 7: 保存产出
 
-将质量报告保存到 `{工作目录}/reports/quality-report-{日期}.md`
+使用 Write 将质量报告保存到 `{工作目录}/reports/quality-report-{日期}.md`，内容基于 `assets/quality-report-template.md` 骨架填充 Step 2-6 的所有分析结果。
 
 保存后，向用户展示文件的 **绝对路径**，以便直接点击打开。
 

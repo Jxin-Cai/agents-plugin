@@ -34,11 +34,11 @@ allowed-tools: ["Read", "Write", "Glob", "Grep", "AskUserQuestion"]
 
 ## 前置条件
 
-确定当前工作目录：检查 `_test-analysis/` 下最近创建的日期目录。若无，询问用户并创建。
+确定当前工作目录：使用 Glob 搜索 `_test-analysis/*/meta/state.md`，按目录名中的日期排序取最新一个作为当前工作目录。若无匹配结果，使用 `AskUserQuestion` 询问用户任务名称并创建目录。
 
-加载以下上下文（如果存在）：
-- `{工作目录}/context/**` — 原始测试数据
-- `{工作目录}/coverage/**` — 覆盖率分析产出（如已完成）
+使用 Glob 和 Read 加载以下上下文（如果存在）：
+- 使用 Glob 搜索 `{工作目录}/context/**`，逐个 Read 找到的文件 — 原始测试数据
+- 使用 Glob 搜索 `{工作目录}/coverage/**`，逐个 Read 找到的文件 — 覆盖率分析产出（如已完成）
 - 当前对话中已有的讨论
 
 ---
@@ -52,11 +52,11 @@ allowed-tools: ["Read", "Write", "Glob", "Grep", "AskUserQuestion"]
 - **手动描述** — 口述失败的测试用例和错误信息
 
 收到数据后：
-1. 统计失败总数和通过率
-2. 按模块/文件分类失败分布
-3. 按错误类型分类（断言失败、异常抛出、超时、编译错误等）
-4. 识别是否存在 Flaky 测试（同一测试反复出现在失败列表）
-5. 将失败摘要保存到 `{工作目录}/context/` 下
+1. 使用 Read 读取用户提供的报告文件，统计失败总数和通过率
+2. 使用 Grep 按模块/文件名搜索失败条目，分类失败分布
+3. 使用 Grep 按错误类型关键词（如 `AssertionError`、`Timeout`、`Exception`、`FAIL`）搜索，分类错误类型
+4. 对比多次运行结果（如用户提供），识别同一测试反复出现在失败列表的 Flaky 测试
+5. 使用 Write 将失败摘要保存到 `{工作目录}/context/failure-data-summary.md`
 
 向用户展示失败数据概览，确认数据完整性。
 
@@ -164,7 +164,7 @@ allowed-tools: ["Read", "Write", "Glob", "Grep", "AskUserQuestion"]
 
 ## Step 6: 保存产出
 
-将失败分析报告保存到 `{工作目录}/failures/failure-{日期}.md`
+使用 Write 将失败分析报告保存到 `{工作目录}/failures/failure-{日期}.md`，内容包含 Step 2-5 的所有分类结果、根因诊断和修复建议。
 
 ## Step 7: 菜单
 

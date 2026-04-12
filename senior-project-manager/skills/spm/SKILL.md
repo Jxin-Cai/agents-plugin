@@ -50,7 +50,7 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 2. 使用 `AskUserQuestion` 确认缩写
 3. 创建 `_project-mgmt/{当前日期}-{缩写}/` 及子目录 `context/` `meta/` 和各阶段子目录
 4. 初始化 `meta/state.md`（workflow_mode、completed_steps、next_step）
-5. 扫描已有目录，检查接续点（产物优先于状态文件）
+5. 用 Glob 扫描 `_project-mgmt/` 下已有日期目录；若存在同名目录，Read `meta/state.md` 获取 `next_step`，再用 Glob 检查各阶段产出文件（`risks/*.md`、`stakeholders/*.md`、`timeline/*.md`）——产出文件存在则视为该阶段已完成，覆盖 state.md 中的记录
 
 **⏸️ 使用 `AskUserQuestion` 确认从哪里开始。**
 
@@ -62,9 +62,9 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 
 | 阶段 | 调用 | 完成标志 | 门控 |
 |------|------|---------|------|
-| 风险评估 | `/risk-assessment $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
-| 干系人地图 | `/stakeholder-map $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
-| 时间线规划 | `/timeline-planning $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
+| 风险评估 | `/risk-assessment $ARGUMENTS` | `risks/risk-register-*.md` 存在 | 继续 / 回退 / 结束 |
+| 干系人地图 | `/stakeholder-map $ARGUMENTS` | `stakeholders/stakeholder-map-*.md` 存在 | 继续 / 回退 / 结束 |
+| 时间线规划 | `/timeline-planning $ARGUMENTS` | `timeline/timeline-plan-*.md` 存在 | 继续 / 回退 / 结束 |
 
 每阶段写入摘要到 `meta/{stage}-summary.md`（不超过 20 行）。
 
@@ -74,17 +74,26 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 
 ## Step 3: 快速检查
 
-编排器内轻量执行各维度速览，生成精简报告到 `_project-mgmt/quick-scan-{日期}.md`。
+对 `$ARGUMENTS` 中描述的项目，在编排器内逐维度生成速览表，不调用子技能。
 
-使用 `AskUserQuestion`：深入某项 / 进入完整流程 / 结束。
+| 维度 | 检查项 | 输出内容 |
+|------|--------|---------|
+| 风险 | 从项目描述推断 Top 3 风险 | 风险名称 + 概率/影响初步判断（高/中/低） |
+| 干系人 | 从项目描述推断关键角色 | 角色名称 + 权力/利益象限（密切管理/保持满意/保持知情/持续监控） |
+| 进度 | 从项目描述推断阶段划分 | 阶段名称 + 预估周期 + 是否在关键路径 |
+
+输出：Write 到 `_project-mgmt/quick-scan-{日期}.md`，每个维度不超过 10 行，总计不超过 40 行。
+
+使用 `AskUserQuestion` 向用户展示选项：深入某个维度（调用对应子技能）/ 进入完整流程 / 结束。
 
 ---
 
 ## 断点恢复
 
-1. 扫描 `_project-mgmt/` 下未完成目录
-2. Read `meta/state.md`，结合产物推断进度
-3. 使用 `AskUserQuestion`：从断点继续 / 重新开始
+1. 用 Glob 列出 `_project-mgmt/*/meta/state.md`，Read 每个文件筛选 `next_step` 不为 `done` 的目录
+2. 对该目录 Read `meta/state.md`，获取 `workflow_mode`、`completed_steps`、`next_step`
+3. 用 Glob 检查阶段产出文件（`risks/risk-register-*.md`、`stakeholders/stakeholder-map-*.md`、`timeline/timeline-plan-*.md`），若产出文件存在但 `completed_steps` 未记录，以产出文件为准修正进度
+4. 使用 `AskUserQuestion` 向用户展示当前进度和选项：从断点继续 / 重新开始 / 选择其他任务
 
 <IMPORTANT>
 工作台的职责是"意图识别 + 路由 + 接续"，不是把所有请求都塞进固定管道。

@@ -31,15 +31,14 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion"]
 
 ## 前置条件
 
-- 已完成业务上下文收集（`context/business-context.md` 存在）
-- 了解产品的用户触达渠道
-- 了解支持团队规模和技能分布
+- Read `context/business-context.md`（必须存在），提取产品类型、用户触达渠道、支持团队规模和技能分布
+- Glob `tickets/` 检查是否有历史产出，有则 Read 获取上下文
 
 ---
 
 ## Step 1: 全渠道支持框架设计
 
-根据业务上下文，为每个渠道设计支持策略：
+Read `context/business-context.md` 提取用户常用联系渠道和团队规模。根据以下矩阵评估每个渠道的适用性，输出启用/不启用决策及理由：
 
 ### 渠道评估矩阵
 
@@ -68,7 +67,7 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion"]
 
 ## Step 2: SLA 配置
 
-为不同优先级和渠道制定 SLA 策略：
+Read `tickets/channel-framework.yaml`（Step 1 产出）获取已启用渠道列表。根据团队规模校准以下默认 SLA 值，Write 输出到 `tickets/sla-config.yaml`：
 
 ```yaml
 sla_policies:
@@ -100,7 +99,7 @@ sla_policies:
 
 ## Step 3: 分层路由规则
 
-设计工单自动分配和升级路由：
+Read `tickets/sla-config.yaml`（Step 2 产出）获取优先级定义。为 T1/T2/T3 三层设计路由规则，每层明确处理范围、技能要求、工具权限和升级条件；Write 输出到 `tickets/routing-rules.yaml`：
 
 ### T1 基础支持（一线客服）
 - **处理范围**：FAQ 类问题、账号操作、基础设置指导
@@ -132,7 +131,7 @@ sla_policies:
 
 ## Step 4: 工单处理标准流程
 
-定义工单全生命周期流程：
+Read `tickets/routing-rules.yaml`（Step 3 产出）获取分层定义。按工单生命周期 8 个环节（接收→分类→优先级判定→路由分配→诊断→解决→验证→关闭）逐一定义标准操作，Write 输出到 `tickets/ticket-lifecycle.yaml`：
 
 ```
 接收 → 分类 → 优先级判定 → 路由分配 → 诊断 → 解决 → 验证 → 关闭
@@ -157,7 +156,7 @@ sla_policies:
 
 ## Step 5: 升级和协作机制
 
-定义跨层级、跨团队的协作规则：
+Read `tickets/routing-rules.yaml` 和 `tickets/sla-config.yaml` 获取分层 + SLA 信息。为以下 5 项逐一制定规则，Write 输出到 `tickets/escalation-playbook.yaml`：
 
 - 升级触发条件和通知链
 - 协作工单的责任归属
@@ -182,16 +181,13 @@ sla_policies:
 
 ## 成功指标
 
+- [ ] 所有 YAML 配置语法正确、可直接导入工单系统
 - [ ] 渠道选择覆盖 80%+ 用户常用联系方式
-- [ ] SLA 目标经用户确认可达
 - [ ] 路由规则无歧义，每条工单有且仅有一条路径
-- [ ] 处理流程每一步有明确的操作标准
-- [ ] 所有 YAML 配置语法正确、可直接导入
 
 ## 失败指标
 
-- 渠道配置不考虑团队承载能力
-- SLA 设定无法落地
+- SLA 设定未经团队能力校准
 - 路由规则存在死循环或无匹配分支
 - 缺少升级机制导致困难工单无人处理
 

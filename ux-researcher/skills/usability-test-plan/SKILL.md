@@ -38,11 +38,11 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion"]
 
 ## 前置条件
 
-确定当前研究目录：检查 `_ux-research/` 下最近创建的日期目录。若无，询问用户研究简写并创建 `_ux-research/{当前日期}-{研究简写}/` 目录结构。
+确定当前研究目录：使用 Glob `_ux-research/*/` 列出所有任务目录，选取最近的一个作为当前研究目录。若无任何目录，使用 `AskUserQuestion` 询问研究简写，然后执行 `Bash(mkdir -p _ux-research/{当前日期}-{研究简写}/{context,meta,interviews,tests,personas})`。
 
 加载以下上下文（如果存在）：
-- `{研究目录}/context/**` — 研究背景资料
-- `{研究目录}/interviews/**` — 访谈指南和发现（如有）
+- Read `{研究目录}/context/**` — 研究背景资料
+- Read `{研究目录}/interviews/**` — 访谈指南和发现（如有）
 - 当前对话中已有的研究讨论
 
 ---
@@ -150,7 +150,7 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion"]
 
 ## Step 6: 保存产出
 
-将完整测试计划保存到 `{研究目录}/tests/test-plan-{日期}.md`
+使用 Write 将完整测试计划保存到 `{研究目录}/tests/test-plan-{当前日期}.md`，文件须包含：测试目标摘要、任务清单（含度量指标和成功标准）、Think Aloud 协议、测试流程时间线、数据收集模板。
 
 ## Step 7: 菜单
 

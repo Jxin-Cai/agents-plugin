@@ -181,4 +181,7 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion"]
 
 <IMPORTANT>
 本技能完成后，展示菜单并等待用户选择下一步。不要自动执行后续技能。
+每个 Backlog 条目必须包含完整的用户故事三要素（角色/能力/价值），缺失任何一项视为不合格。
+超过 13 故事点的条目必须提供拆分建议，不可直接通过就绪度检查。
+就绪度红灯条目不得进入 Sprint，必须退回梳理或补充信息后重新评审。
 </IMPORTANT>

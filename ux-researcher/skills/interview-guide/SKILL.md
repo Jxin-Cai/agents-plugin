@@ -38,10 +38,10 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion"]
 
 ## 前置条件
 
-确定当前研究目录：检查 `_ux-research/` 下最近创建的日期目录。若无，询问用户研究简写并创建 `_ux-research/{当前日期}-{研究简写}/` 目录结构。
+确定当前研究目录：使用 Glob `_ux-research/*/` 列出所有任务目录，选取最近的一个作为当前研究目录。若无任何目录，使用 `AskUserQuestion` 询问研究简写，然后执行 `Bash(mkdir -p _ux-research/{当前日期}-{研究简写}/{context,meta,interviews,tests,personas})`。
 
 加载以下上下文（如果存在）：
-- `{研究目录}/context/**` — 研究背景资料
+- Read `{研究目录}/context/**` — 研究背景资料
 - 当前对话中已有的研究讨论
 
 ---
@@ -58,7 +58,7 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion"]
 - **预期产出**：研究结果将用于什么决策？（功能取舍、设计方向、优先级排序？）
 - **已有认知**：团队目前对用户有什么假设？哪些需要验证？
 
-将研究目标整理为结构化摘要，保存到 `{研究目录}/context/research-objectives.md`。
+将研究目标整理为结构化摘要，使用 Write 保存到 `{研究目录}/context/research-objectives.md`，包含以下章节：`## 研究动机`、`## 目标用户`、`## 核心问题`、`## 预期产出`、`## 待验证假设`。
 
 **⏸️ 等待用户确认后继续。**
 
@@ -127,7 +127,7 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion"]
 
 ## Step 5: 保存产出
 
-将完整访谈指南保存到 `{研究目录}/interviews/interview-guide-{日期}.md`
+使用 Write 将完整访谈指南保存到 `{研究目录}/interviews/interview-guide-{当前日期}.md`，文件须包含：知情同意说明、暖场问题、背景探索、核心问题（含追问）、深挖追问、收尾问题、访谈员注意事项。
 
 ## Step 6: 菜单
 

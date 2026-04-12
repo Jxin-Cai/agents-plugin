@@ -48,9 +48,9 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 
 1. 从 `$ARGUMENTS` 提取任务描述，生成英文缩写（2-4 词，连字符连接）
 2. 使用 `AskUserQuestion` 确认缩写
-3. 创建 `_test-analysis/{当前日期}-{缩写}/` 及子目录 `context/` `meta/` 和各阶段子目录
-4. 初始化 `meta/state.md`（workflow_mode、completed_steps、next_step）
-5. 扫描已有目录，检查接续点（产物优先于状态文件）
+3. 使用 Bash(mkdir*) 创建 `_test-analysis/{当前日期}-{缩写}/` 及子目录 `context/`、`meta/`、`coverage/`、`failures/`、`reports/`
+4. 使用 Write 初始化 `meta/state.md`（字段：workflow_mode=full-analysis、completed_steps=[]、next_step=coverage-analysis）
+5. 使用 Glob 搜索 `_test-analysis/{当前日期}-{缩写}/coverage/*.md`、`failures/*.md`、`reports/*.md`，若某阶段产出文件已存在则标记该阶段为已完成；再 Read `meta/state.md` 交叉验证，产出文件与 state.md 冲突时以产出文件为准
 
 **⏸️ 使用 `AskUserQuestion` 确认从哪里开始。**
 
@@ -60,11 +60,11 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 
 每阶段入口重新 Read `meta/state.md`，完成后更新。
 
-| 阶段 | 调用 | 完成标志 | 门控 |
+| 阶段 | 调用 | 完成标志（产出文件） | 门控 |
 |------|------|---------|------|
-| 覆盖率分析 | `/coverage-analysis $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
-| 失败分析 | `/failure-analysis $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
-| 质量报告 | `/quality-report $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
+| 覆盖率分析 | `/coverage-analysis $ARGUMENTS` | `{工作目录}/coverage/coverage-{日期}.md` 存在 | 使用 AskUserQuestion：继续 / 回退 / 结束 |
+| 失败分析 | `/failure-analysis $ARGUMENTS` | `{工作目录}/failures/failure-{日期}.md` 存在 | 使用 AskUserQuestion：继续 / 回退 / 结束 |
+| 质量报告 | `/quality-report $ARGUMENTS` | `{工作目录}/reports/quality-report-{日期}.md` 存在 | 使用 AskUserQuestion：继续 / 回退 / 结束 |
 
 每阶段写入摘要到 `meta/{stage}-summary.md`（不超过 20 行）。
 
@@ -74,7 +74,7 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 
 ## Step 3: 快速检查
 
-在编排器内直接执行以下速览，不调用子技能：
+使用 `AskUserQuestion` 引导用户提供测试覆盖率报告和测试结果报告（文件路径或口述关键数据）。收到数据后，在编排器内直接执行以下速览，不调用子技能：
 
 | 维度 | 检查项 | 数据来源 |
 |------|--------|---------|
@@ -91,9 +91,9 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 
 ## 断点恢复
 
-1. 扫描 `_test-analysis/` 下未完成目录
-2. Read `meta/state.md`，结合产物推断进度
-3. 使用 `AskUserQuestion`：从断点继续 / 重新开始
+1. 使用 Glob 搜索 `_test-analysis/*/meta/state.md`，对每个匹配目录 Read 其 `state.md`，筛选 `next_step` 不为 `done` 的目录即为未完成任务
+2. 对每个未完成目录，使用 Glob 检查 `coverage/*.md`、`failures/*.md`、`reports/*.md` 是否存在，以产出文件实际存在情况确定已完成阶段（产出文件与 state.md 冲突时以产出文件为准）
+3. 向用户展示未完成任务列表及各任务进度，使用 `AskUserQuestion`：从断点继续 / 重新开始 / 忽略
 
 <IMPORTANT>
 工作台的职责是"意图识别 + 路由 + 接续"，不是把所有请求都塞进固定管道。

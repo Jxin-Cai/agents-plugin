@@ -27,17 +27,17 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 
 | 意图信号 | Workflow | 动作 |
 |----------|----------|------|
-| "A/B 测试 / 实验设计 / 假设" | design-only | 调用 `/ab-test-design $ARGUMENTS` |
-| "指标 / KPI / 北极星" | metrics-only | 调用 `/metrics-definition $ARGUMENTS` |
-| "结果 / 分析 / 显著性" | analysis-only | 调用 `/results-analysis $ARGUMENTS` |
-| "快速检查 / 实验状态" | quick-check | → Step 3 |
+| "A/B 测试 / 实验设计 / 假设 / 对照组 / 实验组 / 变体 / 分组" | design-only | 调用 `/ab-test-design $ARGUMENTS` |
+| "指标 / KPI / 北极星 / 转化率 / CTR / 留存 / 口径" | metrics-only | 调用 `/metrics-definition $ARGUMENTS` |
+| "结果 / 分析 / 显著性 / p值 / 置信区间 / 推全 / 回滚" | analysis-only | 调用 `/results-analysis $ARGUMENTS` |
+| "快速检查 / 实验状态 / 进度" | quick-check | → Step 3 |
 | "完整流程 / 全套 或复杂需求" | full-workflow | → Step 1 |
 
 意图不明确时，用 `AskUserQuestion` 让用户选择：
-- 仅A
-- 仅指标 
-- 仅结果 
-- 快速实验管理检查
+- 仅 A/B 测试设计
+- 仅指标定义
+- 仅结果分析
+- 快速实验状态检查
 - 完整实验管理流程（推荐）
 
 **⏸️ 等待用户选择。**
@@ -48,7 +48,7 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 
 1. 从 `$ARGUMENTS` 提取任务描述，生成英文缩写（2-4 词，连字符连接）
 2. 使用 `AskUserQuestion` 确认缩写
-3. 创建 `_experiments/{当前日期}-{缩写}/` 及子目录 `context/` `meta/` 和各阶段子目录
+3. 创建 `_experiments/{当前日期}-{缩写}/` 及子目录 `context/` `meta/` `designs/` `metrics/` `results/`
 4. 初始化 `meta/state.md`（workflow_mode、completed_steps、next_step）
 5. 扫描已有目录，检查接续点（产物优先于状态文件）
 
@@ -74,7 +74,17 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 
 ## Step 3: 快速检查
 
-编排器内轻量执行各维度速览，生成精简报告到 `_experiments/quick-scan-{日期}.md`。
+编排器内轻量执行，不调用子技能。用 Glob 扫描 `_experiments/` 目录，按以下维度生成速览报告：
+
+| 维度 | 检查动作 | 输出 |
+|------|---------|------|
+| 实验总览 | 列出所有实验目录及创建日期 | 实验列表 + 状态（进行中/已完成） |
+| 设计完整性 | 检查 `designs/` 是否有设计文件 | 有/缺失 |
+| 指标定义 | 检查 `metrics/` 是否有指标文件 | 有/缺失 |
+| 结果分析 | 检查 `results/` 是否有分析文件 | 有/缺失 |
+| 进度状态 | Read `meta/state.md` 获取 next_step | 当前阶段 + 下一步 |
+
+将速览结果写入 `_experiments/quick-scan-{日期}.md`。
 
 使用 `AskUserQuestion`：深入某项 / 进入完整流程 / 结束。
 
@@ -92,6 +102,7 @@ A/B 测试必须包含样本量计算和统计显著性标准。
 结果分析必须区分统计显著与业务显著。
 不可在实验未达到最小样本量时下结论。
 所有实验必须执行 SRM（Sample Ratio Mismatch）检查，发现 SRM 必须暂停分析排查原因。
+完整流程中，实验假设和分析计划必须在数据收集前预注册（写入 designs/ 目录），分析阶段必须严格对照预注册计划执行，禁止事后修改假设或选择性报告。
 每个阶段完成后必须等待用户确认。
 产出文件与状态文件冲突时，以产出文件为准。
 </IMPORTANT>

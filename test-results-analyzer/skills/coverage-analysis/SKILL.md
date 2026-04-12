@@ -34,10 +34,10 @@ allowed-tools: ["Read", "Write", "Glob", "Grep", "AskUserQuestion"]
 
 ## 前置条件
 
-确定当前工作目录：检查 `_test-analysis/` 下最近创建的日期目录。若无，询问用户并创建。
+确定当前工作目录：使用 Glob 搜索 `_test-analysis/*/meta/state.md`，按目录名中的日期排序取最新一个作为当前工作目录。若无匹配结果，使用 `AskUserQuestion` 询问用户任务名称并创建目录。
 
-加载以下上下文（如果存在）：
-- `{工作目录}/context/**` — 原始测试数据和项目背景
+使用 Glob 和 Read 加载以下上下文（如果存在）：
+- 使用 Glob 搜索 `{工作目录}/context/**`，逐个 Read 找到的文件 — 原始测试数据和项目背景
 - 当前对话中已有的讨论
 
 ---
@@ -51,10 +51,10 @@ allowed-tools: ["Read", "Write", "Glob", "Grep", "AskUserQuestion"]
 - **手动输入** — 口述关键覆盖率数字
 
 收到数据后：
-1. 识别技术栈和覆盖率工具类型
-2. 提取关键指标：整体行覆盖率、分支覆盖率、函数覆盖率
-3. 识别模块粒度的覆盖率分布
-4. 将原始数据摘要保存到 `{工作目录}/context/` 下
+1. 使用 Read 读取用户提供的报告文件，识别技术栈和覆盖率工具类型
+2. 使用 Grep 在报告中搜索关键指标关键词（如 `line`、`branch`、`function`、`statement`），提取整体行覆盖率、分支覆盖率、函数覆盖率
+3. 使用 Grep 按模块/包名搜索，提取模块粒度的覆盖率分布
+4. 使用 Write 将原始数据摘要保存到 `{工作目录}/context/coverage-data-summary.md`
 
 向用户展示提取的关键数据，确认准确性。
 
@@ -129,7 +129,7 @@ allowed-tools: ["Read", "Write", "Glob", "Grep", "AskUserQuestion"]
 
 ## Step 5: 保存产出
 
-将覆盖率分析报告保存到 `{工作目录}/coverage/coverage-{日期}.md`
+使用 Write 将覆盖率分析报告保存到 `{工作目录}/coverage/coverage-{日期}.md`，内容包含 Step 2-4 的所有评估结果和改进清单。
 
 ## Step 6: 菜单
 

@@ -50,7 +50,7 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 3. 创建 `_jira-workflow/{当前日期}-{缩写}/` 及子目录 `context/` `workflows/` `triage/` `boards/` `meta/`
 4. **需求平台连接检查**：检查 `.requirement-mgmt/config.yaml`，若不存在，询问是否配置（调用 `/req-setup`）
 5. 初始化 `meta/workflow-state.md`（workflow_mode、completed_steps、next_step）
-6. 扫描已有目录，检查接续点（产物优先）
+6. 用 Glob 扫描 `{任务目录}/workflows/*.md`、`triage/*.md`、`boards/*.md`，按已有产物判定完成阶段（产物文件存在即视为该阶段已完成）
 
 **⏸️ 确认从哪里开始。**
 
@@ -74,12 +74,13 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 
 ## Step 3: 快速工作流诊断
 
-编排器内轻量执行：
-1. 当前工作流状态数和转换规则概览
-2. WIP 限制合理性检查
-3. 常见瓶颈状态识别（堆积最多的状态）
+编排器内轻量执行（不调用子技能）：
 
-生成精简报告到 `_jira-workflow/quick-check-{日期}.md`。
+1. **状态与转换盘点**：用 `AskUserQuestion` 请用户提供当前 Jira 项目的状态列表和转换规则；统计状态总数（>10 标记为"过多"）；检查是否存在死锁状态（无出口转换的非完成态）
+2. **WIP 合理性检查**：询问各列当前在制品数量与 WIP 限制值，用公式 `WIP ≈ 成员数 × 1.5` 对比，标记偏差超 50% 的列
+3. **瓶颈识别**：询问各状态当前 Issue 堆积数量，标记占比 >30% 的状态为疑似瓶颈，检查其出口转换是否存在阻塞条件
+
+将诊断结果写入 `_jira-workflow/quick-check-{日期}.md`（不超过 30 行），包含：状态总数、疑似瓶颈、WIP 偏差、改进建议（每条关联具体子技能路径）。
 
 ---
 
@@ -91,8 +92,10 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 
 <IMPORTANT>
 工作台的职责是"意图识别 + 路由 + 接续"，不是把所有请求都塞进固定管道。
-工作流设计必须验证转换规则的完整性（无死锁状态）。
-看板优化必须包含 WIP 限制建议。
+工作流设计必须验证转换规则的完整性（无死锁状态、无孤立状态）。
+看板优化必须包含每列的 WIP 数值上限，禁止只写"建议设置 WIP"而无具体数字。
+严重度（影响范围）与优先级（处理顺序）必须作为独立维度分别定义，禁止在单一字段中混用。
+所有方案必须基于团队真实数据或案例验证，禁止套用通用模板直接输出。
 每个阶段完成后必须等待用户确认。
 产出文件与状态文件冲突时，以产出文件为准。
 </IMPORTANT>
