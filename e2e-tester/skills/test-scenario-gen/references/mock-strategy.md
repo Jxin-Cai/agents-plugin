@@ -45,7 +45,7 @@ endpoints:
 | 多服务联调 | 外部 Mock Server |
 | 1-2 个端点 | 脚本内硬编码 |
 
-mock-loader 不存在时由 `test-automation-builder` subagent 一并生成，登记到 `asset-catalog.md`。
+mock-loader 不存在时由 `test-automation-builder` subagent 一并生成，登记到 `.e2e-tests/asset-catalog.md`。
 
 ## 剧本中声明
 

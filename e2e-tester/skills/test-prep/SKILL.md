@@ -12,15 +12,17 @@ allowed-tools: Read, Glob, Write, AskUserQuestion
 
 ### Step 0: 检索共享资产
 
-读取 task.md、index.md、已有 TP 文件、`_shared/`、`asset-catalog.md`、`registry/`、`quality-ledger.md`（只提取与当前 domain 相关的环境陷阱和依赖稳定性条目）。
+读取 `.e2e-tests/{domain}/task/task.md`、`.e2e-tests/{domain}/task/index.md`、已有 TP 文件、`.e2e-tests/_shared/`、`.e2e-tests/asset-catalog.md`、`.e2e-tests/registry/`、`.e2e-tests/quality-ledger.md`（只提取与当前 domain 相关的环境陷阱和依赖稳定性条目）。
 
-> 若 `task/task.md` 或 `scenarios/` 下的剧本不存在，提示用户先完成前置阶段，不凭空生成准备方案。
+> 若 `.e2e-tests/{domain}/task/task.md` 或 `.e2e-tests/{domain}/scenarios/` 下的剧本不存在，提示用户先完成前置阶段，不凭空生成准备方案。
 
 ### Step 1: 从剧本提取准备项
 
 提取 persona、preconditions、dependencies、oracle_types、reused_assets → 整理：账号、数据、Mock/Fixture、依赖健康、特性开关、隔离策略、清理策略。
 
-### Step 2: 生成 `.e2e-tests/{domain}/prep/TP-{NNN}-{slug}.md`
+### Step 2: 生成准备方案
+
+写入 `.e2e-tests/{domain}/prep/TP-{NNN}-{slug}.md`。
 
 结构：关联信息、资产决策表（reuse/clone-and-tune/new-task/new-shared）、账号权限、前置数据、依赖策略、依赖健康探测、环境隔离策略、数据准备策略（api-create/db-seed/fixture-import/snapshot-restore）、清理策略、准备度结论（READY/PARTIAL/BLOCKED）。
 
@@ -28,7 +30,7 @@ allowed-tools: Read, Glob, Write, AskUserQuestion
 
 ### Step 3: 共享资产沉淀
 
-任务专用 → `{domain}/fixtures/`；可复用 → `_shared/datasets|mocks|helpers/`
+任务专用 → `.e2e-tests/{domain}/fixtures/`；可复用 → `.e2e-tests/_shared/datasets/`、`.e2e-tests/_shared/mocks/`、`.e2e-tests/_shared/helpers/`
 
 ### Step 4: 准备度判定
 
@@ -36,11 +38,19 @@ allowed-tools: Read, Glob, Write, AskUserQuestion
 
 ### Step 5: 更新索引并确认
 
-`AskUserQuestion` 确认准备度。
+更新 `.e2e-tests/{domain}/task/index.md`，登记 prep 信息和 readiness 状态。`AskUserQuestion` 确认准备度。
+
+### 落盘检查
+
+确认以下文件已写入：
+- `.e2e-tests/{domain}/prep/TP-{NNN}-{slug}.md`（本次生成的每个方案）
+- `.e2e-tests/{domain}/task/index.md`（已更新）
+
+缺失则补写。
 
 ## 约束
 
-1. 准备方案必须落文件
+1. 准备方案必须落文件（写入 `.e2e-tests/{domain}/prep/`）
 2. 无 readiness 结论不进执行
 3. 准备项必须服务于 oracle
 4. 数据准备必须可复现

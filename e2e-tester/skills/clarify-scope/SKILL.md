@@ -14,7 +14,7 @@ allowed-tools: Read, Write, Glob, AskUserQuestion
 
 ### Step 0: 先扫资产，再决定问什么
 
-扫描 `asset-catalog.md`、`registry/`、`_shared/`、`{domain}/task/task.md`（如存在）。
+扫描 `.e2e-tests/asset-catalog.md`、`.e2e-tests/registry/`、`.e2e-tests/_shared/`、`.e2e-tests/{domain}/task/task.md`（如存在）。
 识别可复用资产和可接续任务，只追问缺口。
 
 ### Step 1: 装配任务类型与目标
@@ -29,6 +29,7 @@ allowed-tools: Read, Write, Glob, AskUserQuestion
 | 成功判据 | 具体到业务承诺或放行条件 |
 | 不可接受结果 | 一出现就判失败的信号 |
 | 交付物 | 报告 / 证据 / 脚本 |
+| 证据级别 | light / standard / strict（默认建议：release-gate→strict，design-lite→light，其他→standard） |
 
 ### Step 2: 边界、角色、依赖
 
@@ -52,7 +53,7 @@ allowed-tools: Read, Write, Glob, AskUserQuestion
 # 当前 QA 任务
 
 ## 任务装配卡
-- task_type / workflow / 触发原因 / 目标 / 交付物
+- task_type / workflow / 触发原因 / 目标 / 交付物 / evidence_level
 
 ## 基本信息
 - 被测对象 / 风险等级 / 入口 / 环境
@@ -70,14 +71,22 @@ allowed-tools: Read, Write, Glob, AskUserQuestion
 
 ### Step 5: 更新索引并确认
 
-在 `task/index.md` 登记 task_type、workflow、Intent Assembly Card、Workflow Decision Log。
+在 `.e2e-tests/{domain}/task/index.md` 登记 task_type、workflow、Intent Assembly Card、Workflow Decision Log。
 `AskUserQuestion` 确认后结束。
+
+### 落盘检查
+
+确认以下文件已写入：
+- `.e2e-tests/{domain}/task/task.md`
+- `.e2e-tests/{domain}/task/index.md`
+
+缺失则补写。
 
 ---
 
 ## 约束
 
-1. 必须产出 `task/task.md`，不是口头摘要
+1. 必须产出 `.e2e-tests/{domain}/task/task.md`，不是口头摘要
 2. 先装配工作类型，再设计测试——不默认进新功能六阶段
 3. 无成功判据和不可接受结果 → 不进入后续 workflow
 4. 角色、状态、边界、依赖策略必须明确

@@ -44,7 +44,9 @@
 
 ## 交付物
 
-- 最小验证集说明
-- 回归执行摘要
-- 未覆盖高风险项
-- 放行建议与限制说明
+所有产物写入 `.e2e-tests/{domain}/` 下对应子目录：
+- 任务装配 → `.e2e-tests/{domain}/task/task.md`
+- 影响分析报告 → `.e2e-tests/reports/impact-{date}-{slug}.md`
+- 回归报告 → `.e2e-tests/reports/regression-{YYYY-MM-DD}-{HHmm}.md`
+- 定向验证报告 → `.e2e-tests/{domain}/reports/{date}/TS-{NNN}-run-{RRR}.md`
+- **发布结论** → `.e2e-tests/{domain}/reports/{date}/release-conclusion.md`（GO/NO-GO/CONDITIONAL GO + 依据 + 未覆盖风险 + 限制说明）

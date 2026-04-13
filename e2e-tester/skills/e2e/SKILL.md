@@ -52,10 +52,26 @@ allowed-tools: Read, Write, Glob, Bash(mkdir*), AskUserQuestion, Skill
 > 仅 `design-full` / `design-lite` / `release-gate` / `repro-loop` 需要此步。
 
 1. 生成 domain 名（kebab-case），`AskUserQuestion` 确认
-2. 创建 `.e2e-tests/{domain}/` 及子目录，确保 `_shared/`、`registry/`、`asset-catalog.md`、`quality-ledger.md`、`env/` 存在
-3. 按 `references/index-template.md` 初始化 `task/index.md`（如不存在）
-4. 以 index.md frontmatter + 实际产物推断接续点
-5. 扫描共享资产，`AskUserQuestion` 确认接续阶段
+2. 创建域目录（逐个 mkdir -p）：
+   ```bash
+   mkdir -p .e2e-tests/{domain}/task
+   mkdir -p .e2e-tests/{domain}/context
+   mkdir -p .e2e-tests/{domain}/scenarios
+   mkdir -p .e2e-tests/{domain}/prep
+   mkdir -p .e2e-tests/{domain}/reports
+   mkdir -p .e2e-tests/{domain}/automation
+   mkdir -p .e2e-tests/{domain}/fixtures
+   mkdir -p .e2e-tests/{domain}/evidence
+   ```
+3. 确保全局资产存在（不存在时用 Write 创建）：
+   - `.e2e-tests/_shared/datasets/`、`.e2e-tests/_shared/mocks/`、`.e2e-tests/_shared/helpers/`（mkdir -p）
+   - `.e2e-tests/registry/index.yaml` — 不存在时写入空结构：`version: 1\ndomains: {}`
+   - `.e2e-tests/asset-catalog.md` — 不存在时写入四区块空骨架（共享数据集/Mock/Helper/跨域脚本）
+   - `.e2e-tests/quality-ledger.md` — 不存在时按 `references/quality-ledger-template.md` 创建空结构
+   - `.e2e-tests/env/` 目录（mkdir -p）
+4. 按 `references/index-template.md` 初始化 `.e2e-tests/{domain}/task/index.md`（如不存在）
+5. 以 index.md frontmatter + 实际产物推断接续点
+6. 扫描共享资产，`AskUserQuestion` 确认接续阶段
 
 ---
 

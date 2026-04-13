@@ -28,5 +28,5 @@
 
 ## 工作目录
 
-`.e2e-tests/{domain}/`（task / context / scenarios / prep / reports / automation）
-共享：`_shared/` + `asset-catalog.md` | 注册表：`registry/` | 质量缓存：`quality-ledger.md` | 环境：`env/*.yaml`
+`.e2e-tests/{domain}/`（task / context / scenarios / prep / reports / automation / fixtures / evidence）
+共享：`.e2e-tests/_shared/` + `.e2e-tests/asset-catalog.md` | 注册表：`.e2e-tests/registry/` | 质量缓存：`.e2e-tests/quality-ledger.md` | 环境：`.e2e-tests/env/*.yaml`

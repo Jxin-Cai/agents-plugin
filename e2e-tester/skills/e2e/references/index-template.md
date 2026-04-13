@@ -16,6 +16,10 @@ entry_intent: {用户原始意图}
 trigger_source: {发布前 | 缺陷 | 变更 | 巡检}
 target_env: {test | staging | prod-like}
 evidence_level: {light | standard | strict}
+# light: 关键截图(Given+Then) + 关键 API 出入参对
+# standard: 每步截图 + 完整 API 链 + 错误日志（默认）
+# strict: 密集截图序列 + 可访问性快照 + 全量控制台日志
+# 默认建议：release-gate→strict, design-lite→light, 其他→standard
 current_stage: {1-6 | done}
 completed_stages: [1, 2, ...]
 ---

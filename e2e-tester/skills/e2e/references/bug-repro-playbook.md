@@ -31,7 +31,7 @@
 
 ## 重点澄清
 
-- 这次的目标是“确认 bug 存在”还是“固化为回归”
+- 这次的目标是"确认 bug 存在"还是"固化为回归"
 - 哪个现象一出现就算复现成功
 - 最小复现路径是什么
 - 复现是否具有偶发性 / 时序敏感 / 环境敏感
@@ -40,7 +40,9 @@
 
 ## 交付物
 
-- 复现步骤与最小前置条件
-- 关键证据链（UI / API / Data / 日志）
-- 复现结论（稳定 / 偶发 / 未复现）
-- 是否建议沉淀成回归资产
+所有产物写入 `.e2e-tests/{domain}/` 下对应子目录：
+- 任务装配 → `.e2e-tests/{domain}/task/task.md`
+- 准备方案 → `.e2e-tests/{domain}/prep/TP-{NNN}-{slug}.md`
+- 复现报告 → `.e2e-tests/{domain}/reports/{date}/TS-{NNN}-run-{RRR}.md`
+- 证据文件 → `.e2e-tests/{domain}/evidence/{date}/`
+- **复现结论** → `.e2e-tests/{domain}/reports/{date}/repro-conclusion.md`（复现步骤 + 最小前置条件 + 证据链 + 稳定/偶发/未复现判定 + 是否建议沉淀）

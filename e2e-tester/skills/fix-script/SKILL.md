@@ -13,7 +13,7 @@ allowed-tools: Read, Glob, Grep, Write, Agent, Bash(git log*), Bash(git diff*), 
 
 ### Step 0: 收集失败上下文
 
-读取失败脚本 + JSDoc 元数据 + `registry/{domain}.yaml` 条目（source_paths、type、api_endpoints）+ 错误输出。
+读取失败脚本 + JSDoc 元数据 + `.e2e-tests/registry/{domain}.yaml` 条目（source_paths、type、api_endpoints）+ 错误输出。
 
 ### Step 1: 诊断根因
 
@@ -42,7 +42,7 @@ git diff HEAD~5..HEAD -- {source_paths}
 
 ### Step 4: 更新注册表
 
-`last_passed=today, fail_count=0`，按需更新 api_endpoints/source_paths。
+`last_passed=today, fail_count=0`，按需更新 `.e2e-tests/registry/{domain}.yaml` 中的 api_endpoints/source_paths。
 
 ## 约束
 

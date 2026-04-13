@@ -27,12 +27,19 @@ allowed-tools: Read, Write, Glob, Agent, AskUserQuestion
 3. 结果写入 `.e2e-tests/{domain}/context/context-{slug}.md`
 4. `AskUserQuestion` 确认充分性
 
+### 落盘检查
+
+确认以下文件已写入：
+- `.e2e-tests/{domain}/context/context-*.md`（至少一个）
+
+缺失则补写。
+
 ## 约束
 
 - 只读扫描，不改业务代码
 - 扫描走 Explore subagent，不在主上下文堆代码
 - 识别不到就如实说
-- 结果必须落文件
+- 结果必须落文件（写入 `.e2e-tests/{domain}/context/`）
 
 <IMPORTANT>
 目标是"知道怎么测、能看什么信号"，不是"理解整个代码库"。

@@ -17,7 +17,7 @@ allowed-tools: Read, Glob, Write, Agent, AskUserQuestion, Bash(npx tsc --noEmit*
 
 ### Step 1: 收集上下文与资产检索
 
-读取剧本、prep、task 文件、报告（重点提取 API 调用链）、`_shared/helpers/`、registry、asset-catalog。
+读取 `.e2e-tests/{domain}/scenarios/` 下的剧本、`.e2e-tests/{domain}/prep/` 下的方案、`.e2e-tests/{domain}/task/task.md`、`.e2e-tests/{domain}/reports/` 下的报告（重点提取 API 调用链）、`.e2e-tests/_shared/helpers/`、`.e2e-tests/registry/`、`.e2e-tests/asset-catalog.md`。
 判断已有脚本/helper/数据集是否可直接复用。
 
 ### Step 2: 适配性判断
@@ -30,16 +30,31 @@ allowed-tools: Read, Glob, Write, Agent, AskUserQuestion, Bash(npx tsc --noEmit*
 
 > **条件加载**：此时读取 `references/script-conventions.md`（含 subagent prompt 模板）。registry schema 见 `skills/e2e/references/registry-conventions.md`。
 
-通过 Agent 工具启动子 agent 生成脚本。
+通过 Agent 工具启动子 agent 生成脚本，写入 `.e2e-tests/{domain}/automation/ts-{nnn}-{slug}.{test|spec}.ts`。
 
 ### Step 4: 校验
 
 文件存在 + 元数据完整 + 断言与 oracle_types 一致 + api-script 无 playwright 依赖 / e2e-script 有 playwright 结构。
 
-### Step 5: 更新注册表
+### Step 5: 更新注册表与索引
 
-同步更新 `registry/{domain}.yaml`、`registry/index.yaml`、`asset-catalog.md`、`task/index.md`。
+同步更新：
+- `.e2e-tests/registry/{domain}.yaml`（脚本条目）
+- `.e2e-tests/registry/index.yaml`（全局索引 script_count + last_updated）
+- `.e2e-tests/asset-catalog.md`（跨域脚本参考）
+- `.e2e-tests/{domain}/task/index.md`（已沉淀资产区块）
+
 必须登记：脚本路径、覆盖场景/case、依赖资产、source_paths、automation_confidence、限制说明。
+
+### 落盘检查
+
+确认以下文件已写入/更新：
+- `.e2e-tests/{domain}/automation/ts-{nnn}-{slug}.{test|spec}.ts`（脚本文件）
+- `.e2e-tests/registry/{domain}.yaml`
+- `.e2e-tests/registry/index.yaml`
+- `.e2e-tests/{domain}/task/index.md`
+
+缺失则补写。
 
 ## 约束
 
