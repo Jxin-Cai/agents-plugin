@@ -39,7 +39,7 @@ argument-hint: "<问题空间、机会或需求方向>"
 
 ## 目录约定
 
-- 独立运行：`_discovery/{当前日期}-{任务简写}/`
+- 独立运行：`.product-manager/discovery/{当前日期}-{任务简写}/`
 - 作为需求型维度运行：`{需求目录}/discovery/`
 
 ---
@@ -83,7 +83,7 @@ argument-hint: "<问题空间、机会或需求方向>"
 ## Step 5: 用户确认与保存
 
 保存到：
-- 独立运行：`_discovery/{当前日期}-{任务简写}/discovery-{日期}.md`
+- 独立运行：`.product-manager/discovery/{当前日期}-{任务简写}/discovery-{日期}.md`
 - 需求型维度：`{需求目录}/discovery/discovery-{日期}.md`
 
 如果是需求型维度，同时更新 `meta/workbench-state.md`：

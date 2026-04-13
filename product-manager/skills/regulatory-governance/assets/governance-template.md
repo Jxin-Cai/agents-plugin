@@ -3,7 +3,7 @@ type: governance
 version: 1
 created: {{YYYY-MM-DD}}
 slug: {{需求简写}}
-requirement_dir: _requirements/{{YYYY-MM-DD}}-{{需求简写}}
+requirement_dir: .product-manager/requirements/{{YYYY-MM-DD}}-{{需求简写}}
 ---
 
 # 监管与企业治理分析: {{标题}}

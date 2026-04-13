@@ -35,7 +35,7 @@ argument-hint: "<项目名称或需求目录>"
 
 ## 前置条件
 
-确定当前需求目录：优先使用 `_requirements/` 下最近创建的日期目录。
+确定当前需求目录：优先使用 `.product-manager/requirements/` 下最近创建的日期目录。
 
 加载以下上下文（按优先级）：
 1. `{需求目录}/meta/workbench-state.md` — 必须，确认维度与已完成步骤
@@ -46,8 +46,8 @@ argument-hint: "<项目名称或需求目录>"
 6. `{需求目录}/nfr/nfr-*.md` — 如已做 enterprise-nfr
 7. `{需求目录}/governance/governance-*.md` — 如已做 governance
 8. `{需求目录}/raw/**`
-9. `_product_intelligence/domain-glossary.md`
-10. `_product_intelligence/product-context.md`
+9. `.product-manager/intelligence/domain-glossary.md`
+10. `.product-manager/intelligence/product-context.md`
 11. 当前对话中的需求讨论
 
 如果 `selected_dimensions` 不包含 `prd`：
@@ -95,7 +95,7 @@ argument-hint: "<项目名称或需求目录>"
 - 所有用户角色都有对应功能点
 - P0 功能的异常 / 逆向 / 边界信息完整
 - frontmatter 字段与契约一致
-- `requirement_dir` 使用 `_requirements/{YYYY-MM-DD}-{slug}`
+- `requirement_dir` 使用 `.product-manager/requirements/{YYYY-MM-DD}-{slug}`
 - 已选分析维度与正文摘要一致
 - 没有将运行时状态写成正文内容
 

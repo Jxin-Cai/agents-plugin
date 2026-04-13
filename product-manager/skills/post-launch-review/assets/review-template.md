@@ -3,7 +3,7 @@ type: review
 version: 2
 created: {{日期}}
 slug: {{需求简写}}
-requirement_dir: _requirements/{{日期}}-{{需求简写}}
+requirement_dir: .product-manager/requirements/{{日期}}-{{需求简写}}
 source_prd: {{PRD 文件路径}}
 source_metrics: {{指标文件路径，如有}}
 ---

@@ -4,7 +4,7 @@ version: 2
 status: draft
 created: {{YYYY-MM-DD}}
 slug: {{需求简写}}
-requirement_dir: _requirements/{{YYYY-MM-DD}}-{{需求简写}}
+requirement_dir: .product-manager/requirements/{{YYYY-MM-DD}}-{{需求简写}}
 workflow_mode: requirement-delivery
 selected_dimensions: []
 domain: ''

@@ -34,8 +34,8 @@ argument-hint: "<需求目标描述>"
 ## 前置条件
 
 确定当前需求目录：
-- 优先使用 `_requirements/` 下最近创建的日期目录
-- 若无，则询问用户需求简写并创建 `_requirements/{当前日期}-{需求简写}/`
+- 优先使用 `.product-manager/requirements/` 下最近创建的日期目录
+- 若无，则询问用户需求简写并创建 `.product-manager/requirements/{当前日期}-{需求简写}/`
 
 确保以下目录存在：
 - `raw/`
@@ -49,8 +49,8 @@ argument-hint: "<需求目标描述>"
 - `{需求目录}/meta/workbench-state.md`
 - `{需求目录}/raw/**`
 - `{需求目录}/domain/context-*.md`
-- `_product_intelligence/patterns.md`
-- `_product_intelligence/decision-journal.md`
+- `.product-manager/intelligence/patterns.md`
+- `.product-manager/intelligence/decision-journal.md`
 - 当前对话中的需求讨论
 
 ---

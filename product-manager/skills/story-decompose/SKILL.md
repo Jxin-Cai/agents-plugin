@@ -16,7 +16,7 @@ argument-hint: "<PRD 文件路径或需求名称>"
 
 - 先读取 `{需求目录}/meta/workbench-state.md`
 - 如果 `selected_dimensions` 不包含 `story`，先向用户确认是否补选
-- 目录一律使用 `_requirements/{YYYY-MM-DD}-{slug}`
+- 目录一律使用 `.product-manager/requirements/{YYYY-MM-DD}-{slug}`
 - 保存后更新 `artifact_paths.stories`、`completed_steps` 和 `next_recommended_step`
 - 只展示与已选维度相关的后续建议
 
@@ -27,7 +27,7 @@ argument-hint: "<PRD 文件路径或需求名称>"
 加载：
 1. `{需求目录}/meta/workbench-state.md`
 2. `{需求目录}/prd/prd-*.md`
-3. `_product_intelligence/patterns.md`（如存在）
+3. `.product-manager/intelligence/patterns.md`（如存在）
 
 如果没有 PRD，建议先执行 `/generate-prd`。
 

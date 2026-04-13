@@ -16,7 +16,7 @@ argument-hint: "<产品线、目标或 backlog 范围>"
 
 使用 Read 工具加载：
 - `references/roadmap-principles.md`
-- `_product_intelligence/product-context.md`（如存在）
+- `.product-manager/intelligence/product-context.md`（如存在）
 
 可参考已有优先级框架语言：
 - `sprint-prioritizer/skills/priority-matrix/SKILL.md`
@@ -39,7 +39,7 @@ argument-hint: "<产品线、目标或 backlog 范围>"
 ## 前置条件
 
 工作目录使用：
-`_portfolio/{当前日期}-{任务简写}/`
+`.product-manager/portfolio/{当前日期}-{任务简写}/`
 
 确保子目录存在：
 - `opportunities/`
@@ -122,14 +122,27 @@ argument-hint: "<产品线、目标或 backlog 范围>"
 - 保存路线图
 - 调整优先级 / 时段
 
-## Step 6: 保存产出
+## Step 6: 保存产出与更新状态
 
-保存到：
+**6.1 保存产物文件：**
 - `opportunities/opportunity-map-{日期}.md`
 - `priority/priority-matrix-{日期}.md`
 - `roadmap/roadmap-{日期}.md`
 
-如果本技能是从某个需求目录触发的，可在该需求的 `meta/workbench-state.md` 中记录一个 roadmap 摘要或引用路径。
+**6.2 更新状态文件（必须）：**
+
+如果本技能是从某个需求目录触发的，**必须**更新该需求的 `meta/workbench-state.md`：
+- `completed_steps` 追加 `portfolio-roadmap`
+- `artifact_paths.roadmap` 记录路线图目录路径
+- `artifact_paths.opportunities` 记录机会池文件路径
+- `artifact_paths.priority` 记录优先级文件路径
+- `next_recommended_step` 按已选维度中的剩余维度推荐，若无剩余则标记 `done-for-now`
+
+如果是独立运行（不在需求目录上下文中），在 `.product-manager/portfolio/{日期}-{slug}/meta/workbench-state.md` 中记录完成状态。
+
+**6.3 落盘检查：**
+- 确认三个产物文件均已保存且非空
+- 确认状态文件已更新
 
 <IMPORTANT>
 本技能解决的是组合管理和路线图，不是 Sprint 计划。

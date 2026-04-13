@@ -16,7 +16,7 @@ argument-hint: "<需求范围描述>"
 
 - ✅ 本步骤只做信息搜集和分类，不做需求判断
 - ✅ 始终用中文与用户沟通
-- ✅ 优先使用 `_requirements/{YYYY-MM-DD}-{slug}` 目录
+- ✅ 优先使用 `.product-manager/requirements/{YYYY-MM-DD}-{slug}` 目录
 - ✅ 确保 `meta/workbench-state.md` 存在并在保存后更新
 - 🚫 不替用户决定什么是重要的
 - 🚫 不在没有用户确认的情况下写入最终领域摘要
@@ -27,8 +27,8 @@ argument-hint: "<需求范围描述>"
 ## 前置条件
 
 确定当前需求目录：
-- 优先使用 `_requirements/` 下最近创建的日期目录
-- 若无，则询问用户需求简写并创建 `_requirements/{当前日期}-{需求简写}/`
+- 优先使用 `.product-manager/requirements/` 下最近创建的日期目录
+- 若无，则询问用户需求简写并创建 `.product-manager/requirements/{当前日期}-{需求简写}/`
 
 确保以下目录存在：
 - `raw/`
@@ -64,9 +64,9 @@ argument-hint: "<需求范围描述>"
 - `README.md`、`docs/**/*.md`
 - `**/api/**`、`**/schema/**`、`**/types/**`
 - `**/config/**`
-- `_requirements/raw/**`
-- `_requirements/domain/**`
-- `_product_intelligence/**`
+- `.product-manager/requirements/raw/**`
+- `.product-manager/requirements/domain/**`
+- `.product-manager/intelligence/**`
 
 提取：
 - 项目类型：greenfield / brownfield
@@ -96,16 +96,25 @@ argument-hint: "<需求范围描述>"
 
 ## Step 5: 保存领域知识并更新状态
 
-用户确认后：
-- 保存到 `{需求目录}/domain/context-{日期}.md`
+用户确认后，**必须完成以下两步保存操作**：
+
+**5.1 保存上下文文档：**
+- 使用 Write 工具将扫描报告保存到 `{需求目录}/domain/context-{日期}.md`
+- 保存完成后，用 Read 工具验证文件已写入成功
 - 提醒用户可以将原始需求文档放入 `{需求目录}/raw/`
 
-更新 `meta/workbench-state.md`：
-- `completed_steps` 追加 `scan-context`
-- `artifact_paths.context`
-- `next_recommended_step: brainstorm-requirements`
+**5.2 更新状态文件：**
+- 更新 `meta/workbench-state.md`：
+  - `completed_steps` 追加 `scan-context`
+  - `artifact_paths.context` 记录实际保存路径
+  - `next_recommended_step: brainstorm-requirements`
 
 如果扫描中发现明显需要治理 / NFR 关注，也可以在状态文件中追加备注，供后续澄清阶段参考。
+
+**5.3 落盘检查：**
+- 确认 `domain/context-{日期}.md` 文件存在且非空
+- 确认 `meta/workbench-state.md` 中 `completed_steps` 包含 `scan-context`
+- 如果任一检查失败，重新执行保存
 
 ## Step 6: 菜单
 

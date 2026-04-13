@@ -12,7 +12,7 @@ argument-hint: "<需求周期名称>"
 
 ## 关键规则
 
-- 需求目录统一使用 `_requirements/{YYYY-MM-DD}-{slug}`
+- 需求目录统一使用 `.product-manager/requirements/{YYYY-MM-DD}-{slug}`
 - 复盘只关注 PM 域内的产出、决策和学习，不扩展到跨职能 handoff 设计
 - 保存路径统一为 `{需求目录}/review/review-{日期}.md`
 - 引用案例路径时使用完整需求目录，不使用旧式无日期目录写法
@@ -27,7 +27,7 @@ argument-hint: "<需求周期名称>"
 3. `{需求目录}/metrics/success-metrics-*.md`（如有）
 4. `{需求目录}/stories/stories-*.md`（如有）
 5. `{需求目录}/meta/workbench-state.md`（如有）
-6. `_product_intelligence/decision-journal.md`
+6. `.product-manager/intelligence/decision-journal.md`
 7. `references/review-principles.md`
 8. `assets/review-template.md`
 

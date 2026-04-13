@@ -28,7 +28,7 @@ argument-hint: "<PRD 文件路径或需求名称>"
 1. `{需求目录}/meta/workbench-state.md`
 2. `{需求目录}/prd/prd-*.md`（优先）
 3. `{需求目录}/discovery/discovery-*.md`（如无 PRD 且做了 discovery）
-4. `_product_intelligence/product-context.md`（如有基线数据）
+4. `.product-manager/intelligence/product-context.md`（如有基线数据）
 5. `references/success-metrics-principles.md`
 
 ---

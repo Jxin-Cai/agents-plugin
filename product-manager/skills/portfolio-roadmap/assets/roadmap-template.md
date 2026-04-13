@@ -3,7 +3,7 @@ type: roadmap
 version: 1
 created: {{YYYY-MM-DD}}
 slug: {{任务简写}}
-portfolio_dir: _portfolio/{{YYYY-MM-DD}}-{{任务简写}}
+portfolio_dir: .product-manager/portfolio/{{YYYY-MM-DD}}-{{任务简写}}
 time_horizon: {{本季度/下季度/半年}}
 framework: {{RICE/WSJF/MoSCoW+RICE}}
 ---

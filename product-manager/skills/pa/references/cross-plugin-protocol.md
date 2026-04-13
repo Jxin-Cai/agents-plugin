@@ -2,15 +2,15 @@
 
 ## 目录契约
 
-需求型：`_requirements/{YYYY-MM-DD}-{slug}/`  
+需求型：`.product-manager/requirements/{YYYY-MM-DD}-{slug}/`  
 子目录：`raw/ domain/ discovery/ prd/ stories/ metrics/ nfr/ governance/ review/ meta/`
 
-组合/路线图：`_portfolio/{YYYY-MM-DD}-{slug}/`  
+组合/路线图：`.product-manager/portfolio/{YYYY-MM-DD}-{slug}/`  
 子目录：`opportunities/ priority/ roadmap/ meta/`
 
-独立 discovery：`_discovery/{YYYY-MM-DD}-{slug}/`
+独立 discovery：`.product-manager/discovery/{YYYY-MM-DD}-{slug}/`
 
-知识库：`_product_intelligence/`
+知识库：`.product-manager/intelligence/`
 
 ## 状态文件
 
@@ -29,7 +29,7 @@ version: 2
 status: draft | approved | in-development | shipped | retired
 created: {YYYY-MM-DD}
 slug: {需求简写}
-requirement_dir: _requirements/{YYYY-MM-DD}-{slug}
+requirement_dir: .product-manager/requirements/{YYYY-MM-DD}-{slug}
 workflow_mode: requirement-delivery
 selected_dimensions: [prd, story, success-metrics]
 domain: {领域}
@@ -41,6 +41,6 @@ compliance_profile: [PCI-DSS, AML/KYC]
 
 ## 统一规则
 
-1. 目录统一用 `_requirements/{YYYY-MM-DD}-{slug}`，不用无日期写法
+1. 目录统一用 `.product-manager/requirements/{YYYY-MM-DD}-{slug}`，不用无日期写法
 2. PM 工作台只做 PM 域内路由
 3. 用户没有选择的分析维度，不自动生成对应产物

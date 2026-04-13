@@ -16,7 +16,7 @@
 - 用 `AskUserQuestion` 让用户做选择，不用文本菜单
 - 不默认跑完整需求 SOP
 - 不默认每个需求都要 Story、指标、治理、NFR、路线图
-- 需求目录一律 `_requirements/{YYYY-MM-DD}-{slug}`
+- 需求目录一律 `.product-manager/requirements/{YYYY-MM-DD}-{slug}`
 
 ## 企业复杂应用重点
 

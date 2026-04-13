@@ -50,14 +50,14 @@
 | `discovery` | `discovery-product` | 问题/证据/假设/实验，判断是否进入交付 | `discovery/discovery-{日期}.md` |
 | `enterprise-nfr` | `enterprise-nfr` | 性能/可靠性/安全/审计等非功能需求深挖 | `nfr/nfr-{日期}.md` |
 | `governance` | `regulatory-governance` | 行业监管和企业治理要求转化为产品要求 | `governance/governance-{日期}.md` |
-| `roadmap` | `portfolio-roadmap` | 机会池整理 + 量化优先级 + Now/Next/Later 路线图 | `_portfolio/{日期}-{slug}/` |
+| `roadmap` | `portfolio-roadmap` | 机会池整理 + 量化优先级 + Now/Next/Later 路线图 | `.product-manager/portfolio/{日期}-{slug}/` |
 
 ### 闭环与知识沉淀
 
 | 技能 | 职责 | 核心产出 |
 |------|------|---------|
 | `post-launch-review` | 上线复盘：功能交付评估、指标对比、决策审计、模式提取 | `review/review-{日期}.md` |
-| `product-knowledge` | 知识库管理：决策日志、领域术语、需求模式、产品上下文 | `_product_intelligence/` |
+| `product-knowledge` | 知识库管理：决策日志、领域术语、需求模式、产品上下文 | `.product-manager/intelligence/` |
 
 ## 典型工作流
 
@@ -137,7 +137,7 @@ product-manager/
 ### 工作产物目录（运行时生成）
 
 ```
-_requirements/{YYYY-MM-DD}-{slug}/   # 需求交付
+.product-manager/requirements/{YYYY-MM-DD}-{slug}/   # 需求交付
   raw/                                # 原始需求文档
   domain/                             # 领域知识、风暴、澄清产出
   discovery/                          # 发现式验证产出
@@ -150,15 +150,15 @@ _requirements/{YYYY-MM-DD}-{slug}/   # 需求交付
   meta/
     workbench-state.md                # 状态文件（进度、已选维度）
 
-_portfolio/{YYYY-MM-DD}-{slug}/      # 路线图工作
+.product-manager/portfolio/{YYYY-MM-DD}-{slug}/      # 路线图工作
   opportunities/                      # 机会池
   priority/                           # 优先级评估
   roadmap/                            # 路线图
   meta/
 
-_discovery/{YYYY-MM-DD}-{slug}/      # 独立 discovery
+.product-manager/discovery/{YYYY-MM-DD}-{slug}/      # 独立 discovery
 
-_product_intelligence/               # 产品知识库
+.product-manager/intelligence/               # 产品知识库
   product-context.md                  # 产品上下文
   decision-journal.md                 # 决策日志
   domain-glossary.md                  # 领域术语

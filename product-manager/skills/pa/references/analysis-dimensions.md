@@ -12,7 +12,7 @@
 | `discovery` | 发现式验证 | 明确问题、假设、证据和实验 | `discovery/discovery-*.md` | 0 或 1 |
 | `enterprise-nfr` | 企业级 NFR 深挖 | 深挖性能、可靠性、安全、审计等非功能需求 | `nfr/nfr-*.md` | 0 或 1 |
 | `governance` | 监管/治理深挖 | 把行业监管和企业治理要求转成结构化要求 | `governance/governance-*.md` | 0 或 1 |
-| `roadmap` | 优先级/路线图定位 | 决定该需求在机会池或路线图中的位置 | `_portfolio/...` 或 `roadmap/` 摘要 | 3 |
+| `roadmap` | 优先级/路线图定位 | 决定该需求在机会池或路线图中的位置 | `.product-manager/portfolio/...` 或 `roadmap/` 摘要 | 3 |
 
 ## 2. 默认规则
 
@@ -33,7 +33,7 @@
 
 需求目录下统一使用：
 
-`_requirements/{YYYY-MM-DD}-{slug}/meta/workbench-state.md`
+`.product-manager/requirements/{YYYY-MM-DD}-{slug}/meta/workbench-state.md`
 
 至少记录：
 - `workflow_mode`

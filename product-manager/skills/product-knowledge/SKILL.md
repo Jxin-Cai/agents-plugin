@@ -35,7 +35,7 @@ argument-hint: "<操作：init | view | add-decision | add-term | add-pattern | 
 
 ## Step 1: 检测知识库状态
 
-检查 `_product_intelligence/` 是否存在。
+检查 `.product-manager/intelligence/` 是否存在。
 
 如果不存在：
 - 说明知识库用途
@@ -78,7 +78,7 @@ argument-hint: "<操作：init | view | add-decision | add-term | add-pattern | 
 
 ## 操作 A: 初始化知识库
 
-1. 创建 `_product_intelligence/`
+1. 创建 `.product-manager/intelligence/`
 2. 引导用户填写 `product-context.md`
 3. 创建 `decision-journal.md`
 4. 创建 `domain-glossary.md`

@@ -36,9 +36,9 @@ argument-hint: "<功能模块或需求范围>"
 
 ## 前置条件
 
-确定当前需求目录：优先使用 `_requirements/` 下最近创建的日期目录；若无，则询问用户需求简写并创建：
+确定当前需求目录：优先使用 `.product-manager/requirements/` 下最近创建的日期目录；若无，则询问用户需求简写并创建：
 
-`_requirements/{当前日期}-{需求简写}/`
+`.product-manager/requirements/{当前日期}-{需求简写}/`
 
 确保以下目录存在：
 - `raw/`
@@ -60,7 +60,7 @@ argument-hint: "<功能模块或需求范围>"
 - `{需求目录}/raw/**` — 原始需求文档
 - `{需求目录}/domain/**` — 领域知识
 - `{需求目录}/meta/workbench-state.md` — 当前工作台状态
-- `_product_intelligence/decision-journal.md` — 历史决策参考
+- `.product-manager/intelligence/decision-journal.md` — 历史决策参考
 - 当前对话中的需求讨论
 
 如果没有功能点清单，先引导用户列出核心功能点，或建议先执行 `/brainstorm-requirements`。
@@ -87,7 +87,7 @@ argument-hint: "<功能模块或需求范围>"
 每完成一个模块：
 1. 向用户展示补全后的功能清单
 2. 询问是否有补充或修改
-3. 如果产生关键产品决策，提示是否写入 `_product_intelligence/decision-journal.md`
+3. 如果产生关键产品决策，提示是否写入 `.product-manager/intelligence/decision-journal.md`
 4. 用户确认后再进入下一个模块
 
 ## Step 3: 穷举路径检查

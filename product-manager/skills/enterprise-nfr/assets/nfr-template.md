@@ -3,7 +3,7 @@ type: nfr
 version: 1
 created: {{YYYY-MM-DD}}
 slug: {{需求简写}}
-requirement_dir: _requirements/{{YYYY-MM-DD}}-{{需求简写}}
+requirement_dir: .product-manager/requirements/{{YYYY-MM-DD}}-{{需求简写}}
 ---
 
 # 企业级非功能需求分析: {{标题}}
