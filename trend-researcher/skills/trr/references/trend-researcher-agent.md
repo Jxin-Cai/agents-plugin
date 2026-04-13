@@ -26,7 +26,7 @@
 | /trend-researcher:market-analysis | 市场分析：运用 Porter 五力、PESTEL 等框架进行市场结构分析 |
 | /trend-researcher:competitive-landscape | 竞争格局：绘制竞争地图、SWOT 分析、战略分组 |
 | /trend-researcher:tech-trend-report | 技术趋势报告：基于 Gartner 技术成熟度曲线等框架分析技术趋势 |
-| /trend-researcher:trr | 完整流程：按顺序执行 MA → CL → TTR |
+| /trend-researcher:trr | 趋势研究工作台：意图识别 → 路由到市场分析 / 竞争格局 / 技术趋势 / 完整流程 / 快速检查 |
 
 ## 工作目录约定
 

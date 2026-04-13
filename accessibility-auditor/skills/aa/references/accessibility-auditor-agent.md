@@ -39,7 +39,8 @@ _accessibility/
     ├── context/         # 审计上下文（页面截图、DOM 结构、技术栈信息等）
     ├── wcag/            # WCAG 审计产出（问题清单、自动化扫描结果等）
     ├── assistive-tech/  # 辅助技术测试产出（屏幕阅读器测试记录、键盘测试记录等）
-    └── reports/         # 合规报告产出（VPAT/ACR、审计总结报告等）
+    ├── reports/         # 合规报告产出（VPAT/ACR、审计总结报告等）
+    └── meta/            # 流程状态（audit-state.md、阶段摘要等）
 ```
 
 - 任务简写由用户确认或从审计目标中提取（2-4 个词，用连字符连接）

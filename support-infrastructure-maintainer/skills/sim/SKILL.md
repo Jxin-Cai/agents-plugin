@@ -2,7 +2,7 @@
 name: sim
 description: 基础设施维护工作台——按意图路由到监控体系、IaC 框架、备份恢复或完整流程
 argument-hint: "<任务描述>"
-allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Skill"]
+allowed-tools: ["Read", "Write", "Glob", "Grep", "Bash(mkdir*)", "AskUserQuestion", "Skill"]
 ---
 
 # 基础设施维护工作台

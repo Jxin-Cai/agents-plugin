@@ -9,7 +9,7 @@ task_count=$(find _experiments -maxdepth 1 -mindepth 1 -type d 2>/dev/null | wc 
 echo "- 任务数: ${task_count}"
 if [ "$task_count" -gt 0 ]; then
   echo "- 最近任务:"
-  ls -1t _experiments/ 2>/dev/null | head -3 | while read d; do
+  find _experiments -maxdepth 1 -mindepth 1 -type d -exec basename {} \; 2>/dev/null | sort -r | head -3 | while read d; do
     state="_experiments/${d}/meta/state.md"
     if [ -f "$state" ]; then
       next=$(grep "^next_step:" "$state" 2>/dev/null | cut -d' ' -f2)

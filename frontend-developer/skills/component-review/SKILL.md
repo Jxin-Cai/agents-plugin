@@ -2,7 +2,7 @@
 name: component-review
 description: 组件架构审查——审查组件设计、Props 接口、状态管理和复用性
 argument-hint: "<目标组件/页面路径或描述>"
-allowed-tools: ["Read", "Write", "Glob", "Grep", "Bash(mkdir*)", "AskUserQuestion"]
+allowed-tools: ["Read", "Write", "Glob", "Grep", "Bash(mkdir*|wc*)", "AskUserQuestion"]
 ---
 
 # 组件架构审查

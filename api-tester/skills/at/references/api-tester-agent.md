@@ -27,7 +27,7 @@
 | /api-tester:contract-test | 契约测试：定义消费者驱动的 API 契约，生成契约测试用例 |
 | /api-tester:integration-test-plan | 集成测试计划：制定服务间集成测试策略和用例 |
 | /api-tester:api-health-check | API 健康检查：设计健康检查端点和监控告警方案 |
-| /api-tester:at | 完整流程：按顺序执行 CT -> ITP -> AHC |
+| /api-tester:at | API 测试工作台：意图路由，支持完整流程 / 单项测试 / 快速扫描 |
 
 ## 工作目录约定
 

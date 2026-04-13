@@ -2,7 +2,7 @@
 name: quality-report
 description: 基于覆盖率和失败分析产出，生成综合质量报告，含 KPI 度量、门控判定和改进建议
 argument-hint: "<报告标题或分析范围>"
-allowed-tools: ["Read", "Write", "Glob", "AskUserQuestion"]
+allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion"]
 ---
 
 # 质量报告
@@ -35,7 +35,7 @@ allowed-tools: ["Read", "Write", "Glob", "AskUserQuestion"]
 
 ## 前置条件
 
-确定当前工作目录：使用 Glob 搜索 `_test-analysis/*/meta/state.md`，按目录名中的日期排序取最新一个作为当前工作目录。若无匹配结果，使用 `AskUserQuestion` 询问用户任务名称并创建目录。
+确定当前工作目录：使用 Glob 搜索 `_test-analysis/*/meta/state.md`，按目录名中的日期排序取最新一个作为当前工作目录。若无匹配结果，使用 `AskUserQuestion` 询问用户任务名称，然后使用 `Bash(mkdir*)` 创建 `_test-analysis/{当前日期}-{缩写}/` 及子目录 `context/`、`meta/`、`coverage/`、`failures/`、`reports/`。
 
 使用 Glob 和 Read 加载以下上下文（如果存在）：
 - 使用 Glob 搜索 `{工作目录}/coverage/**`，逐个 Read 找到的文件 — 覆盖率分析产出

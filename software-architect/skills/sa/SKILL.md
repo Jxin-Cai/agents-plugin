@@ -2,7 +2,7 @@
 name: sa
 description: 软件架构工作台——按意图路由到对应 workflow（系统设计 / 架构评审 / ADR / 完整流程 / 快速诊断）
 argument-hint: "<架构任务描述>"
-allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Skill"]
+allowed-tools: ["Read", "Write", "Glob", "Grep", "Bash(mkdir*)", "AskUserQuestion", "Skill"]
 ---
 
 # 软件架构工作台

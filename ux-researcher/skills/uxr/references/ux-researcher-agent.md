@@ -37,6 +37,7 @@
 _ux-research/
 └── {YYYY-MM-DD}-{研究简写}/   # 如 2026-04-06-onboarding-ux
     ├── context/     # 研究背景（产品上下文、已有数据、研究假设）
+    ├── meta/        # 状态管理（state.md、阶段摘要）
     ├── interviews/  # 访谈相关（访谈指南、访谈记录、访谈分析）
     ├── tests/       # 测试相关（测试计划、测试记录、测试报告）
     └── personas/    # 用户画像（画像文档、JTBD 地图）

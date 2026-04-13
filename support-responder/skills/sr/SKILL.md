@@ -50,7 +50,7 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 2. 使用 `AskUserQuestion` 确认缩写
 3. 创建 `_support/{当前日期}-{缩写}/` 及子目录 `context/` `meta/` 和各阶段子目录
 4. 初始化 `meta/state.md`（workflow_mode、completed_steps、next_step）
-5. Glob `_support/{目录名}/tickets/` `kb/` `analytics/` 检查各阶段产出文件是否存在；Read `meta/state.md` 获取 next_step；若产物已存在但 state 未更新，以产物为准推进到下一阶段
+5. Glob `_support/{目录名}/tickets/` `_support/{目录名}/kb/` `_support/{目录名}/analytics/` 检查各阶段产出文件是否存在；Read `meta/state.md` 获取 next_step；若产物已存在但 state 未更新，以产物为准推进到下一阶段
 
 **⏸️ 使用 `AskUserQuestion` 确认从哪里开始。**
 
@@ -92,7 +92,7 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 
 1. Glob `_support/*/meta/state.md` 获取所有任务目录列表
 2. 逐个 Read `meta/state.md`，提取 `workflow_mode`、`completed_steps`、`next_step`
-3. Glob `_support/{目录名}/tickets/` `kb/` `analytics/` 检查各阶段产出文件是否存在；若产物文件已存在但 `completed_steps` 未包含该阶段，以产物为准，将 next_step 推进到下一阶段
+3. Glob `_support/{目录名}/tickets/` `_support/{目录名}/kb/` `_support/{目录名}/analytics/` 检查各阶段产出文件是否存在；若产物文件已存在但 `completed_steps` 未包含该阶段，以产物为准，将 next_step 推进到下一阶段
 4. 向用户展示未完成任务列表（目录名 + 当前进度 + 下一步），使用 `AskUserQuestion`：从断点继续 / 重新开始 / 放弃该任务
 
 <IMPORTANT>

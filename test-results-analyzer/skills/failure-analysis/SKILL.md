@@ -2,7 +2,7 @@
 name: failure-analysis
 description: 结构化诊断测试失败的根本原因，识别失败模式和缺陷聚集区域
 argument-hint: "<测试失败报告路径或失败描述>"
-allowed-tools: ["Read", "Write", "Glob", "Grep", "AskUserQuestion"]
+allowed-tools: ["Read", "Write", "Glob", "Grep", "Bash(mkdir*)", "AskUserQuestion"]
 ---
 
 # 失败分析
@@ -34,7 +34,7 @@ allowed-tools: ["Read", "Write", "Glob", "Grep", "AskUserQuestion"]
 
 ## 前置条件
 
-确定当前工作目录：使用 Glob 搜索 `_test-analysis/*/meta/state.md`，按目录名中的日期排序取最新一个作为当前工作目录。若无匹配结果，使用 `AskUserQuestion` 询问用户任务名称并创建目录。
+确定当前工作目录：使用 Glob 搜索 `_test-analysis/*/meta/state.md`，按目录名中的日期排序取最新一个作为当前工作目录。若无匹配结果，使用 `AskUserQuestion` 询问用户任务名称，然后使用 `Bash(mkdir*)` 创建 `_test-analysis/{当前日期}-{缩写}/` 及子目录 `context/`、`meta/`、`coverage/`、`failures/`、`reports/`。
 
 使用 Glob 和 Read 加载以下上下文（如果存在）：
 - 使用 Glob 搜索 `{工作目录}/context/**`，逐个 Read 找到的文件 — 原始测试数据

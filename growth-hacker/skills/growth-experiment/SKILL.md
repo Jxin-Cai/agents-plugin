@@ -25,7 +25,7 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion"]
 
 ## 前置条件
 
-- 已有产品基本信息（来自 `/gh` Step 0 或用户直接提供）
+- 已有产品基本信息
 - 用户能提供当前关键指标数据（至少是大致范围）
 
 ---

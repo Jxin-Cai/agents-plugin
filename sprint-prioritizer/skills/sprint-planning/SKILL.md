@@ -2,7 +2,7 @@
 name: sprint-planning
 description: Sprint 规划，基于优先级排序和团队容量生成可执行的 Sprint 计划
 argument-hint: "<Sprint 目标或规划范围>"
-allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion"]
+allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Skill"]
 ---
 
 # Sprint 规划

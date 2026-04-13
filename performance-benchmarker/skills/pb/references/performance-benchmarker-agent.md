@@ -23,7 +23,7 @@
 | /performance-benchmarker:load-test-plan | 负载测试计划：设计分阶段压测方案和工作负载模型 |
 | /performance-benchmarker:profiling-guide | 性能分析指南：系统化定位 CPU/内存/I/O 瓶颈 |
 | /performance-benchmarker:optimization-report | 优化报告：生成结构化的性能优化报告 |
-| /performance-benchmarker:pb | 完整流程：按顺序执行 LTP → PG → OR |
+| /performance-benchmarker:pb | 性能基准测试工作台：按意图路由到负载测试、性能分析、优化报告或完整流程 |
 
 ## 领域感知
 

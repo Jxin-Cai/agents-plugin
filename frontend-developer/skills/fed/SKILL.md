@@ -2,7 +2,7 @@
 name: fed
 description: 前端审查工作台——按意图路由到对应 workflow（组件审查 / 性能检查 / 响应式审计 / 快速扫描 / 完整审查 / 自定义）
 argument-hint: "<审查任务描述或目标组件/页面路径>"
-allowed-tools: ["Read", "Write", "Glob", "Grep", "Bash(mkdir*)", "AskUserQuestion", "Skill"]
+allowed-tools: ["Read", "Write", "Glob", "Grep", "Bash(mkdir*|wc*)", "AskUserQuestion", "Skill"]
 ---
 
 # 前端审查工作台

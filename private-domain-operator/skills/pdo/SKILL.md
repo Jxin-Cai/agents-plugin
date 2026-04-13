@@ -31,6 +31,7 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 | "社群 / 社区 / 运营" | community-only | 调用 `/community-operations $ARGUMENTS` |
 | "生命周期 / 留存 / 召回" | lifecycle-only | 调用 `/user-lifecycle $ARGUMENTS` |
 | "转化 / 漏斗 / 成交" | conversion-only | 调用 `/conversion-funnel $ARGUMENTS` |
+| "检查 / 盘点 / 概览 / 快速看看" | quick-scan | → Step 3 |
 | "完整策略 / 全套 或复杂需求" | full-strategy | → Step 1 |
 
 意图不明确时，用 `AskUserQuestion` 让用户选择：
@@ -38,6 +39,7 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 - 仅社群 
 - 仅生命周期 
 - 仅转化 
+- 快速检查（概览现有私域资产）
 - 完整私域运营流程（推荐）
 
 **⏸️ 等待用户选择。**

@@ -2,7 +2,7 @@
 name: security-review
 description: 基于 OWASP Top 10 对目标代码进行安全漏洞扫描和风险评估
 argument-hint: "<审查目标：PR 链接、文件路径或模块名>"
-allowed-tools: ["Read", "Write", "Glob", "Grep", "Bash(ls*|find*|wc*|head*|git*|npm*|pip*)", "AskUserQuestion"]
+allowed-tools: ["Read", "Write", "Glob", "Grep", "Bash(mkdir*|ls*|find*|wc*|head*|git*|npm*|pip*)", "AskUserQuestion"]
 ---
 
 # 安全审查

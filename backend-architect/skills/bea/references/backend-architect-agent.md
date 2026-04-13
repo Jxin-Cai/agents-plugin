@@ -27,9 +27,10 @@
 | full-architecture | 完整流程：API + 数据库 + 扩展性 | `/bea` |
 | api-design-only | 仅 API 契约设计 | `/api-design` |
 | db-modeling-only | 仅数据库建模 | `/database-modeling` |
-| scalability-review | 仅可扩展性评审 | `/scalability-review` |
+| scalability-only | 仅可扩展性评审 | `/scalability-review` |
 | microservice-design | 微服务拆分与通信设计 | `/bea`（路由） |
 | tech-debt-assessment | 技术债识别与还债计划 | `/bea`（路由） |
+| quick-scan | 快速架构扫描（编排器内轻量执行） | `/bea`（路由） |
 
 ## 工作目录约定
 

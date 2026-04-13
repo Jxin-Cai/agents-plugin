@@ -91,6 +91,7 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 
 <IMPORTANT>
 工作台的职责是"意图识别 + 路由 + 接续"，不是把所有请求都塞进固定管道。
+每个阶段完成后必须等待用户确认，不可自动推进到下一阶段。
 契约测试必须验证 schema 合规性，不可仅测试 HTTP 状态码。
 集成测试必须覆盖错误场景和超时场景。
 产出文件与状态文件冲突时，以产出文件为准。

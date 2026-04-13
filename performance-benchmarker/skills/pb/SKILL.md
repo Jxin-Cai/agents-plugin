@@ -48,7 +48,7 @@ allowed-tools: ["Read", "Write", "Edit", "Glob", "Grep", "Bash(mkdir*|find*|ls*|
 
 1. 从 `$ARGUMENTS` 提取任务描述，生成英文缩写（2-4 词，连字符连接）
 2. 使用 `AskUserQuestion` 确认缩写
-3. 创建 `_performance/{当前日期}-{缩写}/` 及子目录 `context/` `meta/` 和各阶段子目录
+3. 创建 `_performance/{当前日期}-{缩写}/` 及子目录 `context/`、`meta/`、`load-tests/`、`profiling/`、`reports/`
 4. 初始化 `meta/state.md`（workflow_mode、completed_steps、next_step）
 5. 用 Glob 扫描 `_performance/{目录}/` 下 `load-tests/`、`profiling/`、`reports/` 中的产物文件，判断接续点——产物存在则跳过对应阶段
 

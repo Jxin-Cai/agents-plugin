@@ -9,7 +9,8 @@ task_count=$(find _wechat-oa -maxdepth 1 -mindepth 1 -type d 2>/dev/null | wc -l
 echo "- 任务数: ${task_count}"
 if [ "$task_count" -gt 0 ]; then
   echo "- 最近任务:"
-  ls -1t _wechat-oa/ 2>/dev/null | head -3 | while read d; do
+  ls -1t _wechat-oa/ 2>/dev/null | while read d; do
+    [ -d "_wechat-oa/$d" ] || continue
     state="_wechat-oa/${d}/meta/state.md"
     if [ -f "$state" ]; then
       next=$(grep "^next_step:" "$state" 2>/dev/null | cut -d' ' -f2)
@@ -17,7 +18,7 @@ if [ "$task_count" -gt 0 ]; then
     else
       echo "  - ${d}"
     fi
-  done
+  done | head -3
 fi
 echo ""
 

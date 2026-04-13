@@ -27,7 +27,7 @@
 | /senior-project-manager:risk-assessment | 风险评估：识别、量化、制定应对策略 |
 | /senior-project-manager:stakeholder-map | 干系人地图：识别、分类、制定沟通策略 |
 | /senior-project-manager:timeline-planning | 时间线规划：WBS 分解、依赖分析、关键路径识别 |
-| /senior-project-manager:spm | 完整流程：按顺序执行 RA → SM → TP |
+| /senior-project-manager:spm | 项目管理工作台：按意图路由到单项评估、快速诊断或完整流程 |
 
 ## 工作目录约定
 

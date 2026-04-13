@@ -11,8 +11,9 @@ allowed-tools: ["Read", "Write", "Glob", "Grep", "Bash(mkdir*)", "AskUserQuestio
 
 ## 加载引用
 
-Read skills/executive-dashboard/references/executive-dashboard-principles.md
-Read skills/executive-dashboard/references/dashboard-sql-patterns.md
+使用 Read 工具加载以下引用文件：
+- `references/executive-dashboard-principles.md` — 仪表盘设计原则
+- `references/dashboard-sql-patterns.md` — SQL 模式参考
 
 ## 强制执行规则
 

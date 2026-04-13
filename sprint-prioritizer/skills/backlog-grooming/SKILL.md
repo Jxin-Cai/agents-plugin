@@ -2,7 +2,7 @@
 name: backlog-grooming
 description: Backlog 梳理，结构化整理需求池，进行就绪度检查和工作量估算
 argument-hint: "<需求池描述或 Backlog 来源>"
-allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion"]
+allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Skill"]
 ---
 
 # Backlog 梳理

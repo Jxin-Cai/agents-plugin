@@ -27,7 +27,7 @@
 | /project-shepherd:health-check | 健康检查：多维度评估项目当前状态，输出健康报告 |
 | /project-shepherd:blocker-removal | 障碍清除：识别、分类、升级和解决项目阻塞 |
 | /project-shepherd:velocity-tracking | 速率跟踪：分析团队速率趋势，生成燃尽/燃起图分析 |
-| /project-shepherd:ps | 完整流程：按顺序执行健康检查 → 障碍清除 → 速率跟踪 |
+| /project-shepherd:ps | 项目守护工作台：按意图路由到健康检查、障碍清除、速率跟踪或完整流程 |
 
 ## 工作目录约定
 

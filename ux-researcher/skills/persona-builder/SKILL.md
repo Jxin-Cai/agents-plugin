@@ -140,7 +140,7 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion"]
 
 ## Step 5: 构建画像文档
 
-读取 `assets/persona-template.md` 模板，为每个用户群体生成完整画像。
+按已加载的 `assets/persona-template.md` 模板，为每个用户群体生成完整画像。
 
 **关键原则**：
 - 每条属性标注数据来源（访谈/测试/数据/假设）

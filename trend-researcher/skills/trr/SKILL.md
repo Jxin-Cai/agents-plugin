@@ -48,7 +48,7 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 
 1. 从 `$ARGUMENTS` 提取任务描述，生成英文缩写（2-4 词，连字符连接）
 2. 使用 `AskUserQuestion` 确认缩写
-3. 创建 `_trend-research/{当前日期}-{缩写}/` 及子目录 `context/` `meta/` 和各阶段子目录
+3. 创建 `_trend-research/{当前日期}-{缩写}/` 及子目录 `context/` `meta/` `market/` `competitive/` `trends/`
 4. 初始化 `meta/state.md`（workflow_mode、completed_steps、next_step）
 5. 扫描已有目录，检查接续点（产物优先于状态文件）
 

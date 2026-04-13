@@ -11,8 +11,9 @@ allowed-tools: ["Read", "Write", "Glob", "Grep", "Bash(mkdir*)", "AskUserQuestio
 
 ## 加载引用
 
-Read skills/marketing-attribution/references/marketing-attribution-principles.md
-Read skills/marketing-attribution/references/attribution-sql-patterns.md
+使用 Read 工具加载以下引用文件：
+- `references/marketing-attribution-principles.md` — 归因分析原则
+- `references/attribution-sql-patterns.md` — 归因 SQL 模式参考
 
 ## 强制执行规则
 

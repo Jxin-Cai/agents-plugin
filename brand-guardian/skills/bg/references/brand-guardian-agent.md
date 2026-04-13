@@ -26,7 +26,7 @@
 | /brand-guardian:brand-consistency-audit | 品牌一致性审计：全面盘点品牌资产，逐项检查跨渠道一致性 |
 | /brand-guardian:voice-tone-review | 语气风格审查：审查内容的品牌声音和语气一致性 |
 | /brand-guardian:visual-identity-check | 视觉识别检查：检查视觉元素是否符合品牌视觉规范 |
-| /brand-guardian:bg | 完整流程：按顺序执行 BCA → VTR → VIC |
+| /brand-guardian:bg | 品牌守护工作台：按意图路由到单项审查、快速检查或完整流程 |
 
 ## 工作目录约定
 

@@ -27,7 +27,7 @@
 | /software-architect:system-design | 系统设计：基于 C4 模型的分层架构设计 |
 | /software-architect:architecture-review | 架构评审：基于 ATAM 方法的质量属性评审 |
 | /software-architect:adr-generation | ADR 生成：架构决策记录的结构化生成 |
-| /software-architect:sa | 完整流程：按顺序执行 SD → AR → ADR |
+| /software-architect:sa | 架构工作台：按意图路由到系统设计 / 架构评审 / ADR / 完整流程 / 快速诊断 |
 
 ## 工作目录约定
 

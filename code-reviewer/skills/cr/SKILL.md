@@ -2,7 +2,7 @@
 name: cr
 description: 代码审查编排器——按意图路由到安全审查、质量审计、重构建议或完整流程
 argument-hint: "<审查目标描述，如 PR 链接、文件路径或功能模块名>"
-allowed-tools: ["Read", "Write", "Glob", "Grep", "Bash(mkdir*|ls*|find*|wc*|head*|git*)", "AskUserQuestion"]
+allowed-tools: ["Read", "Write", "Glob", "Grep", "Bash(mkdir*|ls*|find*|wc*|head*|git*)", "AskUserQuestion", "Skill"]
 ---
 
 # 代码审查编排器
@@ -73,7 +73,7 @@ Read `references/workflow-playbook.md` 获取执行规范和门控模板。
 | 质量速览 | 用 `wc -l` 统计文件行数，Grep 扫描嵌套 >3 层的代码块，识别重复代码段 | 超标文件清单 + 度量数值 |
 | 重构速览 | 标记行数最长的 3 个函数/方法，识别最明显的 2-3 个坏味道 | 坏味道清单（类型 + 位置） |
 
-生成精简报告（不超过 50 行）到 `meta/quick-scan-{日期}.md`。
+生成精简报告（不超过 50 行）到 `_code-review/quick-scan-{日期}.md`（无需任务目录）。
 
 ---
 

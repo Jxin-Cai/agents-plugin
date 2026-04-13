@@ -27,7 +27,7 @@
 | /experiment-tracker:ab-test-design | A/B 测试设计：定义假设、变量、分组方案和样本量 |
 | /experiment-tracker:metrics-definition | 指标定义：构建实验指标体系（核心指标、辅助指标、护栏指标） |
 | /experiment-tracker:results-analysis | 结果分析：统计检验、效果量评估和决策建议 |
-| /experiment-tracker:et | 完整流程：按顺序执行 AB → MD → RA |
+| /experiment-tracker:et | 实验跟踪工作台：按意图路由到设计、指标、分析或完整流程 |
 
 ## 工作目录约定
 
@@ -38,6 +38,7 @@ _experiments/
 └── {YYYY-MM-DD}-{实验简写}/   # 如 2026-04-06-cta-color
     ├── context/    # 实验背景（业务上下文、历史数据、相关实验记录）
     ├── designs/    # 实验设计（假设、变量、分组方案、样本量计算）
+    ├── meta/       # 状态管理（state.md、阶段摘要）
     ├── metrics/    # 指标定义（核心指标、辅助指标、护栏指标、计算口径）
     └── results/    # 结果分析（统计检验结果、效果量、决策建议）
 ```

@@ -11,7 +11,8 @@ allowed-tools: ["Read", "Write", "Glob", "Grep", "Bash(mkdir*)", "AskUserQuestio
 
 ## 加载引用
 
-Read skills/customer-segmentation/references/customer-segmentation-principles.md
+使用 Read 工具加载：
+- `references/customer-segmentation-principles.md`
 
 ## 强制执行规则
 

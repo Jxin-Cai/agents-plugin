@@ -2,7 +2,7 @@
 name: quality-audit
 description: 评估代码质量指标，识别复杂度、重复度、耦合度等方面的问题
 argument-hint: "<审查目标：文件路径、目录或模块名>"
-allowed-tools: ["Read", "Write", "Glob", "Grep", "Bash(ls*|find*|wc*|head*|git*)", "AskUserQuestion"]
+allowed-tools: ["Read", "Write", "Glob", "Grep", "Bash(mkdir*|ls*|find*|wc*|head*|git*)", "AskUserQuestion"]
 ---
 
 # 质量审计
