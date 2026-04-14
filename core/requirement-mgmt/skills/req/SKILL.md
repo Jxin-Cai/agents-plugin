@@ -54,6 +54,10 @@ bash "${REQMGMT_SKILLS}/_lib/dispatcher.sh" setup
 | `transitions` / `状态列表` / `可用状态` + issue ID | `/req-transitions <id>` | 列出可用状态转换 |
 | `transition` / `状态变更` + issue ID + 目标状态 | `/req-transition <id> <status>` | 执行状态变更 |
 | `attach` / `附件` / `上传` + issue ID + 文件路径 | `/req-attach <id> <file>` | 上传附件 |
+| `create` / `创建 issue` + JSON 文件路径 | `/req-create <json_file>` | 创建 issue |
+| `update` / `更新 issue` + issue ID + JSON 文件路径 | `/req-update <id> <json_file>` | 更新 issue |
+| `publish` / `发布` / `推送到 Jira` | `/req-publish` | 将本地 Story 发布为 Jira Issue |
+| `sync` / `同步` / `同步变更` | `/req-sync` | 同步本地变更到 Jira |
 
 ---
 
@@ -70,6 +74,10 @@ bash "${REQMGMT_SKILLS}/_lib/dispatcher.sh" setup
 - **查看可用状态转换** — 列出 issue 当前可流转的状态（req-transitions）
 - **执行状态变更** — 将 issue 转换到目标状态（req-transition）
 - **上传附件** — 向 issue 上传文件（req-attach）
+- **创建 issue** — 通过 JSON 文件创建新 issue（req-create）
+- **更新 issue** — 通过 JSON 文件更新已有 issue（req-update）
+- **发布 Story 到 Jira** — 将本地 Story 清单批量发布为 Jira Issue（req-publish）
+- **同步变更到 Jira** — 检测本地变更并更新 Jira Issue（req-sync）
 - **配置需求管理系统** — 首次使用或更换系统时执行（req-setup）
 
 用户选择后，使用 `AskUserQuestion` 追问缺失的必要参数（如 issue ID、搜索关键词等），然后调用对应子技能。

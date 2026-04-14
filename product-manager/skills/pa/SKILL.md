@@ -189,6 +189,7 @@ argument-hint: "<当前想做的产品工作或需求描述>"
 
 用 `AskUserQuestion` 提供以下选项：
 - 继续补做其他分析维度
+- 发布到 Jira — 调用 `/req-publish`
 - 进入上线复盘
 - 管理知识库
 - 结束本次工作

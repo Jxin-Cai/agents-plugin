@@ -3,7 +3,7 @@ set -euo pipefail
 
 # dispatcher.sh — 需求管理操作的统一入口
 # 用法: dispatcher.sh <operation> [args...]
-# 操作: setup, fetch, comment, transitions, transition, attach, search
+# 操作: setup, fetch, comment, transitions, transition, attach, search, create, update
 #
 # 读取 .requirement-mgmt/config.yaml 中的 provider 配置，
 # 将操作路由到对应 provider 的 api.sh。
@@ -20,7 +20,7 @@ shift || true
 
 if [[ -z "$ACTION" ]]; then
     echo "Usage: dispatcher.sh <operation> [args...]" >&2
-    echo "Operations: setup, fetch, comment, transitions, transition, attach, search" >&2
+    echo "Operations: setup, fetch, comment, transitions, transition, attach, search, create, update" >&2
     exit 1
 fi
 

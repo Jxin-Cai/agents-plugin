@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Jira Server / Data Center API adapter
-# Implements: fetch, comment, transitions, transition, attach, search
+# Implements: fetch, comment, transitions, transition, attach, search, create, update
 set -euo pipefail
 
 ###############################################################################
@@ -59,6 +59,33 @@ api_post() {
     -H "Authorization: Bearer $TOKEN" \
     -H "Content-Type: application/json" \
     -d "$2" \
+    "$BASE_URL/rest/api/${API_VERSION}/$1"
+}
+
+api_put() {
+  curl "${CURL_OPTS[@]}" \
+    -X PUT \
+    -H "Authorization: Bearer $TOKEN" \
+    -H "Content-Type: application/json" \
+    -d "$2" \
+    "$BASE_URL/rest/api/${API_VERSION}/$1"
+}
+
+api_post_file() {
+  curl "${CURL_OPTS[@]}" \
+    -X POST \
+    -H "Authorization: Bearer $TOKEN" \
+    -H "Content-Type: application/json" \
+    -d @"$2" \
+    "$BASE_URL/rest/api/${API_VERSION}/$1"
+}
+
+api_put_file() {
+  curl "${CURL_OPTS[@]}" \
+    -X PUT \
+    -H "Authorization: Bearer $TOKEN" \
+    -H "Content-Type: application/json" \
+    -d @"$2" \
     "$BASE_URL/rest/api/${API_VERSION}/$1"
 }
 
@@ -285,6 +312,15 @@ print(json.dumps({
 " "$jql")"
 
   local result
+  # Jira Cloud 已废弃 POST /rest/api/{2,3}/search (410 Gone)
+  # 新端点: POST /rest/api/3/search/jql (仅 Cloud)
+  # Server/DC 仍用旧端点，故先尝试新端点，失败时回退
+  result="$(curl "${CURL_OPTS[@]}" \
+    -X POST \
+    -H "Authorization: Bearer $TOKEN" \
+    -H "Content-Type: application/json" \
+    -d "$payload" \
+    "$BASE_URL/rest/api/3/search/jql" 2>/dev/null)" || \
   result="$(api_post "search" "$payload")"
 
   python3 -c "
@@ -292,13 +328,18 @@ import json, sys
 
 data = json.loads(sys.stdin.read())
 issues = data.get('issues', [])
-total = data.get('total', 0)
 
 if not issues:
     print('No issues found.')
     sys.exit(0)
 
-print(f'Found {total} issue(s) (showing {len(issues)}):')
+# /search/jql 不返回 total，用 isLast 判断是否还有更多
+if 'total' in data:
+    print(f\"Found {data['total']} issue(s) (showing {len(issues)}):\")
+elif data.get('isLast', True):
+    print(f'Found {len(issues)} issue(s):')
+else:
+    print(f'Showing {len(issues)} issue(s) (more available):')
 print()
 print('| Key | Type | Summary | Status | Assignee | Priority |')
 print('|-----|------|---------|--------|----------|----------|')
@@ -307,7 +348,6 @@ for i in issues:
     f = i.get('fields', {})
     itype = (f.get('issuetype') or {}).get('name', '')
     summary = f.get('summary', '')
-    # Truncate long summaries for table readability
     if len(summary) > 60:
         summary = summary[:57] + '...'
     status = (f.get('status') or {}).get('name', '')
@@ -315,6 +355,39 @@ for i in issues:
     priority = (f.get('priority') or {}).get('name', '')
     print(f'| {key} | {itype} | {summary} | {status} | {assignee} | {priority} |')
 " <<< "$result"
+}
+
+op_create() {
+  local json_file="$1"
+
+  if [[ ! -f "$json_file" ]]; then
+    echo "ERROR: JSON file not found: ${json_file}" >&2
+    exit 1
+  fi
+
+  local result
+  result="$(api_post_file "issue" "$json_file")"
+
+  python3 -c "
+import json, sys
+data = json.loads(sys.stdin.read())
+key = data.get('key', '')
+issue_id = data.get('id', '')
+print(f'{key}')
+" <<< "$result"
+}
+
+op_update() {
+  local issue_id="$1"
+  local json_file="$2"
+
+  if [[ ! -f "$json_file" ]]; then
+    echo "ERROR: JSON file not found: ${json_file}" >&2
+    exit 1
+  fi
+
+  api_put_file "issue/${issue_id}" "$json_file" > /dev/null
+  echo "Updated ${issue_id} successfully."
 }
 
 ###############################################################################
@@ -350,8 +423,16 @@ case "$OPERATION" in
     [[ -z "${1:-}" ]] && { echo "Usage: api.sh search <JQL>" >&2; exit 1; }
     op_search "$@"
     ;;
+  create)
+    [[ -z "${1:-}" ]] && { echo "Usage: api.sh create <JSON_FILE>" >&2; exit 1; }
+    op_create "$1"
+    ;;
+  update)
+    [[ -z "${1:-}" || -z "${2:-}" ]] && { echo "Usage: api.sh update <ISSUE_ID> <JSON_FILE>" >&2; exit 1; }
+    op_update "$1" "$2"
+    ;;
   *)
-    echo "Jira provider — supported operations: fetch, comment, transitions, transition, attach, search" >&2
+    echo "Jira provider — supported operations: fetch, comment, transitions, transition, attach, search, create, update" >&2
     echo "Usage: api.sh <operation> [args...]" >&2
     exit 1
     ;;
