@@ -46,3 +46,12 @@
 - 复现报告 → `.e2e-tests/{domain}/reports/{date}/TS-{NNN}-run-{RRR}.md`
 - 证据文件 → `.e2e-tests/{domain}/evidence/{date}/`
 - **复现结论** → `.e2e-tests/{domain}/reports/{date}/repro-conclusion.md`（复现步骤 + 最小前置条件 + 证据链 + 稳定/偶发/未复现判定 + 是否建议沉淀）
+
+## 落盘检查
+
+流程结束前，用 Glob 逐项确认以下产物存在，缺失则补写：
+- `.e2e-tests/{domain}/task/task.md`
+- `.e2e-tests/{domain}/reports/{date}/repro-conclusion.md`
+- `.e2e-tests/{domain}/task/index.md`（已更新 status）
+
+无复现结论文件不得结束流程。

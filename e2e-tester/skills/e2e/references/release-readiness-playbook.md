@@ -50,3 +50,12 @@
 - 回归报告 → `.e2e-tests/reports/regression-{YYYY-MM-DD}-{HHmm}.md`
 - 定向验证报告 → `.e2e-tests/{domain}/reports/{date}/TS-{NNN}-run-{RRR}.md`
 - **发布结论** → `.e2e-tests/{domain}/reports/{date}/release-conclusion.md`（GO/NO-GO/CONDITIONAL GO + 依据 + 未覆盖风险 + 限制说明）
+
+## 落盘检查
+
+流程结束前，用 Glob 逐项确认以下产物存在，缺失则补写：
+- `.e2e-tests/{domain}/task/task.md`
+- `.e2e-tests/{domain}/reports/{date}/release-conclusion.md`
+- `.e2e-tests/{domain}/task/index.md`（已更新 status）
+
+无发布结论文件不得结束流程。

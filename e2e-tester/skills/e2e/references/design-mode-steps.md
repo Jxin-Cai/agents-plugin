@@ -11,7 +11,7 @@
 5. 重型任务走 subagent（scan-context、test-automation-builder）
 6. 逐阶段停顿等用户确认
 7. quality-ledger 缺失不阻塞
-8. `design-lite` 不追求形式完整——可跳过不必要阶段，在决策日志中说明
+8. `design-lite` 不追求形式完整——可跳过不必要阶段，在决策日志中说明（前提：用户已在路由阶段确认不需要留存）
 9. **每步结束时执行落盘检查**——用 Glob 确认产物文件存在，缺失则补写
 
 ## Step 0: 初始化与断点恢复

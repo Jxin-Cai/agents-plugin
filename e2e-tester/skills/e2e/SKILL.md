@@ -38,7 +38,17 @@ allowed-tools: Read, Write, Glob, Bash(mkdir*), AskUserQuestion, Skill
 | `repro-loop` | 缺陷复现，证据优先 |
 | `script-maintenance` | 修脚本 / 沉淀脚本 |
 
+### design-lite 确认关卡
+
+当路由结果为 `design-lite` 时，**必须在宣告前用 `AskUserQuestion` 确认**（见 `references/intent-assembly-router.md` 的确认规则）。用户可能虽然目标清晰，但仍希望沉淀环境数据和脚本——此时应切换为 `design-full`。
+
 ### workflow 执行入口
+
+workflow 确定后，**必须先向用户宣告场景**再开始执行：
+
+> 已识别本次为 **{workflow 中文名}** 场景。
+> 目标：{一句话目标}
+> 执行链路：{关键步骤概要}
 
 - `regression-batch` → `run-suite`
 - `impact-first` → `impact-analysis`

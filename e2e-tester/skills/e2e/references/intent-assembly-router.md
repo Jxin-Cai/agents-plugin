@@ -26,10 +26,22 @@
 3. 主要风险？
 4. 有无可复用资产？
 
+## design-lite 确认
+
+当路由结果为 `design-lite` 时，**必须用 `AskUserQuestion` 向用户确认**：
+
+> 本次识别为专项验证场景，建议走 **design-lite** 最小设计链。
+> 这意味着**不走完整 6 阶段，不会沉淀环境数据和自动化脚本**。
+> 如果你希望借此 case 沉淀环境配置、测试数据或可复用脚本，建议改走 **design-full**。
+
+- 用户确认 design-lite → 继续
+- 用户选择 design-full → 切换 workflow，在决策日志记录原因
+
 ## 原则
 
 - 先装配，再选 SOP
 - 显式意图优先直达
 - 新功能测试只是其中一种场景
 - 有资产优先走轻 workflow
+- design-lite 必须经用户确认——目标清晰不等于不需要留存
 - workflow 确定后才加载重型 playbook
