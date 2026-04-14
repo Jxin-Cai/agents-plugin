@@ -8,15 +8,41 @@
 
 从 `index.md` frontmatter 读取 `evidence_level`（light / standard / strict）。缺失时视为 `standard`。
 
-证据根目录：`.e2e-tests/{domain}/evidence/{YYYY-MM-DD}/TS-{NNN}-C{N}/`（当前日期 + 场景编号 + case 编号），创建子目录：
+证据根目录：`.e2e-tests/tasks/{date}-{slug}/evidence/{YYYY-MM-DD}/TS-{NNN}-C{N}/`（当前日期 + 场景编号 + case 编号）。
+
+先创建证据目录结构：`mkdir -p .e2e-tests/tasks/{date}-{slug}/evidence/{YYYY-MM-DD}/TS-{NNN}-C{N}/{screenshots,videos,api}`
+
+再按级别补充子目录：
 - `screenshots/` — 所有级别
 - `api/` — 所有级别
+- `videos/` — 按需录屏
 - `snapshots/` — 仅 strict
 - strict 时立即调用 `browser_console_messages(level: "debug", filename: "console-full.txt")` 开始全量日志采集
 
 ### C.1 打开浏览器
 
 开启后立即关注网络请求——每步操作触发的 API 调用都要记录。
+
+### C.1.1 屏蔽第三方干扰脚本
+
+读取 `.e2e-tests/shared/env/{target_env}.yaml` 中的 `blocked_scripts`。若存在，优先使用环境配置中的规则；若缺失，使用默认统计/监控脚本屏蔽清单。
+
+通过 `browser_run_code` 设置路由规则，拦截已知的第三方统计/监控脚本：
+
+```javascript
+async (page) => {
+  await page.route(/\/(piwik|matomo)\.js/, route => route.abort());
+  await page.route(/google-analytics\.com|googletagmanager\.com/, route => route.abort());
+  await page.route(/sentry\.io|browser\.sentry-cdn\.com/, route => route.abort());
+  await page.route(/hotjar\.com|clarity\.ms/, route => route.abort());
+}
+```
+
+**原则**：
+- 只屏蔽统计/监控类脚本，不屏蔽业务依赖的第三方服务
+- 控制台日志中来自被屏蔽域名的错误标记为 `[third-party-noise]`
+- `[third-party-noise]` 不计入失败判定，不作为 oracle 缺失的依据
+- 若第三方脚本异常导致页面关键业务功能不可用，再按真实产品问题处理，不因为“第三方”而自动忽略
 
 ### C.2 逐 case 执行
 
@@ -46,6 +72,7 @@
    - 截图：`browser_take_screenshot(filename: "screenshots/then-result.png")`（所有级别）
    - standard 出错时：`browser_console_messages(level: "error", filename: "console-error.txt")`
    - strict：`browser_console_messages(level: "debug", filename: "console-full.txt")` 刷新全量日志
+   - 若控制台日志包含被屏蔽域名报错，在报告中归类到 `third-party-noise`，不计入失败归因
 
 ### C.2.1 网络请求捕获
 
@@ -98,7 +125,7 @@ browser_network_requests:
 
 ### C.4 失败分类
 
-product defect / environment defect / data-setup defect / automation defect / requirement-oracle unclear
+product defect / environment defect / data-setup defect / automation defect / requirement-oracle unclear / third-party-noise
 疑似偶发标记 flaky suspicion: low/medium/high。
 
 ### C.5 关闭浏览器
@@ -112,3 +139,4 @@ product defect / environment defect / data-setup defect / automation defect / re
 - 每 case 的截图文件列表
 - 每 case 的 API 记录文件列表
 - evidence_level 实际执行级别
+- 第三方脚本屏蔽规则来源（env/default）

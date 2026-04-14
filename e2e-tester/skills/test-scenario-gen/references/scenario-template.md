@@ -8,6 +8,7 @@
 ---
 id: TS-{NNN}
 domain: {business-domain}
+task_folder: {YYYY-MM-DD}-{task-slug}
 title: {标题}
 goal: {一句话业务目标}
 business_scenario: {单一业务场景}

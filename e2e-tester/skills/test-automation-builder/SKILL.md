@@ -1,7 +1,7 @@
 ---
 name: test-automation-builder
 description: 将高价值测试路径沉淀为自动化脚本（api-script 或 e2e-script）
-allowed-tools: Read, Glob, Write, Agent, AskUserQuestion, Bash(npx tsc --noEmit*), Bash(npx tsx*), Bash(npx playwright*)
+allowed-tools: Read, Glob, Write, Agent, AskUserQuestion, Bash(mkdir*), Bash(npx tsc --noEmit*), Bash(npx tsx*), Bash(npx playwright*)
 ---
 
 # 自动化测试资产构建器
@@ -17,7 +17,7 @@ allowed-tools: Read, Glob, Write, Agent, AskUserQuestion, Bash(npx tsc --noEmit*
 
 ### Step 1: 收集上下文与资产检索
 
-读取 `.e2e-tests/{domain}/scenarios/` 下的剧本、`.e2e-tests/{domain}/prep/` 下的方案、`.e2e-tests/{domain}/task/task.md`、`.e2e-tests/{domain}/reports/` 下的报告（重点提取 API 调用链）、`.e2e-tests/_shared/helpers/`、`.e2e-tests/registry/`、`.e2e-tests/asset-catalog.md`。
+读取 `.e2e-tests/tasks/{date}-{slug}/scenarios/` 下的剧本、`.e2e-tests/tasks/{date}-{slug}/prep/` 下的方案、`.e2e-tests/tasks/{date}-{slug}/task/task.md`、`.e2e-tests/tasks/{date}-{slug}/reports/` 下的报告（重点提取 API 调用链）、`.e2e-tests/shared/helpers/`、`.e2e-tests/shared/registry/`、`.e2e-tests/shared/asset-catalog.md`。
 判断已有脚本/helper/数据集是否可直接复用。
 
 ### Step 2: 适配性判断
@@ -30,7 +30,9 @@ allowed-tools: Read, Glob, Write, Agent, AskUserQuestion, Bash(npx tsc --noEmit*
 
 > **条件加载**：此时读取 `references/script-conventions.md`（含 subagent prompt 模板）。registry schema 见 `skills/e2e/references/registry-conventions.md`。
 
-通过 Agent 工具启动子 agent 生成脚本，写入 `.e2e-tests/{domain}/automation/ts-{nnn}-{slug}.{test|spec}.ts`。
+写入前确保目录存在：`mkdir -p .e2e-tests/shared/automation/{domain}`
+
+通过 Agent 工具启动子 agent 生成脚本，写入 `.e2e-tests/shared/automation/{domain}/ts-{nnn}-{slug}.{test|spec}.ts`。
 
 ### Step 4: 校验
 
@@ -39,20 +41,20 @@ allowed-tools: Read, Glob, Write, Agent, AskUserQuestion, Bash(npx tsc --noEmit*
 ### Step 5: 更新注册表与索引
 
 同步更新：
-- `.e2e-tests/registry/{domain}.yaml`（脚本条目）
-- `.e2e-tests/registry/index.yaml`（全局索引 script_count + last_updated）
-- `.e2e-tests/asset-catalog.md`（跨域脚本参考）
-- `.e2e-tests/{domain}/task/index.md`（已沉淀资产区块）
+- `.e2e-tests/shared/registry/{domain}.yaml`（脚本条目）
+- `.e2e-tests/shared/registry/index.yaml`（全局索引 script_count + last_updated）
+- `.e2e-tests/shared/asset-catalog.md`（跨域脚本参考）
+- `.e2e-tests/tasks/{date}-{slug}/task/index.md`（已沉淀资产区块）
 
 必须登记：脚本路径、覆盖场景/case、依赖资产、source_paths、automation_confidence、限制说明。
 
 ### 落盘检查
 
 确认以下文件已写入/更新：
-- `.e2e-tests/{domain}/automation/ts-{nnn}-{slug}.{test|spec}.ts`（脚本文件）
-- `.e2e-tests/registry/{domain}.yaml`
-- `.e2e-tests/registry/index.yaml`
-- `.e2e-tests/{domain}/task/index.md`
+- `.e2e-tests/shared/automation/{domain}/ts-{nnn}-{slug}.{test|spec}.ts`（脚本文件）
+- `.e2e-tests/shared/registry/{domain}.yaml`
+- `.e2e-tests/shared/registry/index.yaml`
+- `.e2e-tests/tasks/{date}-{slug}/task/index.md`
 
 缺失则补写。
 
@@ -64,7 +66,8 @@ allowed-tools: Read, Glob, Write, Agent, AskUserQuestion, Bash(npx tsc --noEmit*
 4. 注册表必须同步更新
 5. 优先复用再新建
 6. 资产必须可追溯
+7. 沉淀脚本统一进入 shared/automation/，不留 task 目录副本
 
 <IMPORTANT>
-业务场景只能通过 UI 验证时，应生成 e2e-script，而不是在 limitations 标注"不支持"然后放弃。
+业务场景只能通过 UI 验证时，应生成 e2e-script，而不是在 limitations 标注“不支持”然后放弃。
 </IMPORTANT>

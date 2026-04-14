@@ -20,11 +20,11 @@ git diff {ref}^ {ref} --name-only
 
 ### Step 2: 匹配已有测试
 
-读取 `.e2e-tests/registry/`，四层匹配：
+读取 `.e2e-tests/shared/registry/`，四层匹配：
 1. **source_paths 直接命中** → P0
 2. **API 端点匹配**（变更文件中的端点 → registry api_endpoints）→ P0
 3. **tags/covers 模糊匹配** + risk_level High → P1
-4. **`.e2e-tests/quality-ledger.md` 活跃失败模式**涉及变更模块 → P2
+4. **`.e2e-tests/shared/quality-ledger.md` 活跃失败模式**涉及变更模块 → P2
 
 不确定时用 Explore subagent 快速扫描。
 
@@ -36,16 +36,16 @@ git diff {ref}^ {ref} --name-only
 
 - 批量回归 → 调用 `run-suite`
 - 新建任务 → 调用 `e2e`
-- 仅报告 → 写入 `.e2e-tests/reports/impact-{date}-{slug}.md`
+- 仅报告 → 写入 `.e2e-tests/shared/reports/impact-{date}-{slug}.md`
 
 ### 落盘检查
 
-若用户选择"仅报告"，确认文件已写入：
-- `.e2e-tests/reports/impact-{date}-{slug}.md`
+若用户选择“仅报告”，确认文件已写入：
+- `.e2e-tests/shared/reports/impact-{date}-{slug}.md`
 
 ## 约束
 
-1. 直接用 `.e2e-tests/registry/` 元数据 + 实时扫描，不依赖代码快照
-2. 模糊匹配标注"建议人工确认"
+1. 直接用 `.e2e-tests/shared/registry/` 元数据 + 实时扫描，不依赖代码快照
+2. 模糊匹配标注“建议人工确认”
 3. 直接命中才是 P0
 4. 展示后等用户确认，不自动执行

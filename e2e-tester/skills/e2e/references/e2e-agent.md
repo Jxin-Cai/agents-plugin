@@ -28,5 +28,11 @@
 
 ## 工作目录
 
-`.e2e-tests/{domain}/`（task / context / scenarios / prep / reports / automation / fixtures / evidence）
-共享：`.e2e-tests/_shared/` + `.e2e-tests/asset-catalog.md` | 注册表：`.e2e-tests/registry/` | 质量缓存：`.e2e-tests/quality-ledger.md` | 环境：`.e2e-tests/env/*.yaml`
+```
+.e2e-tests/
+├── shared/          # 公共可复用资源（env / automation / datasets / mocks / helpers / registry / reports / quality-ledger.md / asset-catalog.md）
+└── tasks/           # 需求维度过程（{date}-{slug}/ → task / context / scenarios / prep / reports / evidence / fixtures）
+```
+
+公共区路径：`.e2e-tests/shared/`（环境配置、沉淀脚本、注册表、数据集、质量缓存）
+需求区路径：`.e2e-tests/tasks/{date}-{slug}/`（任务定义、过程证据、报告、剧本、准备方案）

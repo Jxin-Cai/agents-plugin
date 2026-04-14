@@ -1,13 +1,19 @@
 #!/bin/bash
 # SessionStart hook for e2e-tester plugin
-# 1. 创建顶层工作目录
+# 1. 创建顶层工作目录（shared/ 公共区 + tasks/ 需求区）
 # 2. 展示 QA 工作台状态
 
-# 创建 .e2e-tests 顶层目录（具体领域子目录在流程中按需创建）
-mkdir -p .e2e-tests
-mkdir -p .e2e-tests/_shared
-mkdir -p .e2e-tests/registry
-mkdir -p .e2e-tests/reports
+# ── 公共可复用资源区 ──
+mkdir -p .e2e-tests/shared/env
+mkdir -p .e2e-tests/shared/automation
+mkdir -p .e2e-tests/shared/datasets
+mkdir -p .e2e-tests/shared/mocks
+mkdir -p .e2e-tests/shared/helpers
+mkdir -p .e2e-tests/shared/registry
+mkdir -p .e2e-tests/shared/reports
+
+# ── 需求维度过程区 ──
+mkdir -p .e2e-tests/tasks
 
 # 展示 QA 工作台状态
 if [ -d ".e2e-tests" ]; then
@@ -15,24 +21,30 @@ if [ -d ".e2e-tests" ]; then
   echo "## QA 工作台状态"
   echo ""
 
-  ACTIVE_TASKS=$(find .e2e-tests -path "*/task/index.md" 2>/dev/null | wc -l | tr -d ' ')
+  ACTIVE_TASKS=$(find .e2e-tests/tasks -path "*/task/index.md" 2>/dev/null | wc -l | tr -d ' ')
   echo "- 可接续任务索引: ${ACTIVE_TASKS} 个"
 
-  if [ -f ".e2e-tests/quality-ledger.md" ]; then
+  if [ -f ".e2e-tests/shared/quality-ledger.md" ]; then
     echo "- quality-ledger: 已存在"
   else
     echo "- quality-ledger: 未初始化"
   fi
 
-  if [ -f ".e2e-tests/registry/index.yaml" ]; then
+  if [ -f ".e2e-tests/shared/registry/index.yaml" ]; then
     echo "- registry: 已存在"
   else
     echo "- registry: 未初始化"
   fi
 
-  if [ -d ".e2e-tests/reports" ] && [ "$(ls -A .e2e-tests/reports 2>/dev/null)" ]; then
-    LATEST_REPORT=$(ls -t .e2e-tests/reports 2>/dev/null | head -n 1)
-    echo "- 最近报告目录: ${LATEST_REPORT}"
+  ENV_COUNT=$(ls .e2e-tests/shared/env/*.yaml 2>/dev/null | wc -l | tr -d ' ')
+  echo "- 环境配置: ${ENV_COUNT} 个"
+
+  SCRIPT_COUNT=$(find .e2e-tests/shared/automation -name "*.ts" 2>/dev/null | wc -l | tr -d ' ')
+  echo "- 沉淀脚本: ${SCRIPT_COUNT} 个"
+
+  if [ -d ".e2e-tests/shared/reports" ] && [ "$(ls -A .e2e-tests/shared/reports 2>/dev/null)" ]; then
+    LATEST_REPORT=$(ls -t .e2e-tests/shared/reports 2>/dev/null | head -n 1)
+    echo "- 最近回归报告: ${LATEST_REPORT}"
   fi
 
   echo ""

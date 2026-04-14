@@ -40,18 +40,18 @@
 
 ## 交付物
 
-所有产物写入 `.e2e-tests/{domain}/` 下对应子目录：
-- 任务装配 → `.e2e-tests/{domain}/task/task.md`
-- 准备方案 → `.e2e-tests/{domain}/prep/TP-{NNN}-{slug}.md`
-- 复现报告 → `.e2e-tests/{domain}/reports/{date}/TS-{NNN}-run-{RRR}.md`
-- 证据文件 → `.e2e-tests/{domain}/evidence/{date}/`
-- **复现结论** → `.e2e-tests/{domain}/reports/{date}/repro-conclusion.md`（复现步骤 + 最小前置条件 + 证据链 + 稳定/偶发/未复现判定 + 是否建议沉淀）
+所有产物写入 `.e2e-tests/tasks/{date}-{slug}/` 下对应子目录：
+- 任务装配 → `.e2e-tests/tasks/{date}-{slug}/task/task.md`
+- 准备方案 → `.e2e-tests/tasks/{date}-{slug}/prep/TP-{NNN}-{slug}.md`
+- 复现报告 → `.e2e-tests/tasks/{date}-{slug}/reports/{date}/TS-{NNN}-run-{RRR}.md`
+- 证据文件 → `.e2e-tests/tasks/{date}-{slug}/evidence/{date}/`
+- **复现结论** → `.e2e-tests/tasks/{date}-{slug}/reports/{date}/repro-conclusion.md`（复现步骤 + 最小前置条件 + 证据链 + 稳定/偶发/未复现判定 + 是否建议沉淀）
 
 ## 落盘检查
 
 流程结束前，用 Glob 逐项确认以下产物存在，缺失则补写：
-- `.e2e-tests/{domain}/task/task.md`
-- `.e2e-tests/{domain}/reports/{date}/repro-conclusion.md`
-- `.e2e-tests/{domain}/task/index.md`（已更新 status）
+- `.e2e-tests/tasks/{date}-{slug}/task/task.md`
+- `.e2e-tests/tasks/{date}-{slug}/reports/{date}/repro-conclusion.md`
+- `.e2e-tests/tasks/{date}-{slug}/task/index.md`（已更新 status）
 
 无复现结论文件不得结束流程。

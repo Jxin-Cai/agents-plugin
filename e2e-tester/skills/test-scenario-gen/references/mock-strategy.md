@@ -14,7 +14,7 @@
 
 ## Mock 配置格式
 
-路径：`.e2e-tests/{domain}/fixtures/mocks/{service}.mock.yaml`
+路径：`.e2e-tests/tasks/{date}-{slug}/fixtures/mocks/{service}.mock.yaml`
 
 ```yaml
 service: {name}
@@ -40,12 +40,12 @@ endpoints:
 
 | 场景 | 方式 |
 |------|------|
-| api-script | `_shared/helpers/mock-loader.ts`（脚本内 mock helper） |
+| api-script | `shared/helpers/mock-loader.ts`（脚本内 mock helper） |
 | Playwright 探索 | `page.route()` 网络拦截 |
 | 多服务联调 | 外部 Mock Server |
 | 1-2 个端点 | 脚本内硬编码 |
 
-mock-loader 不存在时由 `test-automation-builder` subagent 一并生成，登记到 `.e2e-tests/asset-catalog.md`。
+mock-loader 不存在时由 `test-automation-builder` subagent 一并生成，登记到 `.e2e-tests/shared/asset-catalog.md`。
 
 ## 剧本中声明
 

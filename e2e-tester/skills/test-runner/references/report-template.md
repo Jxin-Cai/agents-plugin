@@ -44,13 +44,13 @@
 （列出该 case 的所有证据文件）
 
 ## 七、失败分析与归因
-现象 / 归因（5类）/ 置信度 / 建议动作
+现象 / 归因（6类）/ 置信度 / 建议动作
 
 ## 八、Flaky 观察
 suspicion / 重试结果 / 根因分类 / 治理建议
 
 ## 九、资产汇总
-已复用 / 本次新增
+已复用 / 本次新增 / 新沉淀环境信息
 
 ## 十、未覆盖项与限制
 
@@ -69,5 +69,6 @@ suspicion / 重试结果 / 根因分类 / 治理建议
 7. 必须交代复用和沉淀
 8. evidence_level=light 时：Oracle 证据允许引用关键截图（Given + Then）而非逐步截图，证据清单章节可省略
 9. evidence_level=strict 时：Oracle 证据必须包含 snapshot 文件引用，证据清单章节必填
+10. `third-party-noise` 只记录，不单独导致 FAIL；除非能证明它直接破坏业务链路
 
 轻量回归报告见 `skills/run-suite/references/regression-report-template.md`。

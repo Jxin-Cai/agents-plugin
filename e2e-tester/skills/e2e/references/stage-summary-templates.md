@@ -1,6 +1,6 @@
 # 阶段摘要模板
 
-写入路径：`.e2e-tests/{domain}/context/stage-{N}-summary.md`
+写入路径：`.e2e-tests/tasks/{date}-{slug}/context/stage-{N}-summary.md`
 
 ## Stage 1: 任务装配与澄清
 
@@ -48,6 +48,9 @@ task_type / workflow / trigger_source / 交付物
 
 ## 准备方案
 | 剧本 | 方案 | 准备度 |
+
+## 环境配置确认
+| 环境 | 配置文件 | 账号 | blocked_scripts | 状态 |
 
 ## 资产决策（复用 / 新增 / 任务专用）
 ## BLOCKED/PARTIAL 原因

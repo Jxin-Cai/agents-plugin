@@ -2,8 +2,8 @@
 
 ## 命名
 
-- api-script: `.e2e-tests/{domain}/automation/ts-{nnn}-{slug}.test.ts`
-- e2e-script: `.e2e-tests/{domain}/automation/ts-{nnn}-{slug}.spec.ts`
+- api-script: `.e2e-tests/shared/automation/{domain}/ts-{nnn}-{slug}.test.ts`
+- e2e-script: `.e2e-tests/shared/automation/{domain}/ts-{nnn}-{slug}.spec.ts`
 
 ## JSDoc 元数据（必须）
 
@@ -12,6 +12,7 @@
  * @type {api-script | e2e-script}
  * @scenario TS-{NNN}
  * @domain {domain}
+ * @task_folder {YYYY-MM-DD}-{task-slug}
  * @title {中文标题}
  * @business_scenario {场景}
  * @cases C1, C2, C3
@@ -38,7 +39,7 @@
 - 断言基于 HTTP status + response body
 - 状态验证通过查询接口
 - `npx tsx` 直接运行
-- 需 mock 时用 `_shared/helpers/mock-loader`
+- 需 mock 时用 `shared/helpers/mock-loader`
 
 ## e2e-script 规则
 
@@ -68,5 +69,5 @@
 通用：复用已有 helper/数据集/mock。头部含完整 JSDoc。断言覆盖关键 oracle。每 case 独立。含清理逻辑。
 
 输入：剧本、prep、任务文件、API 调用链摘要、可复用资产
-输出：写入 .e2e-tests/{domain}/automation/ts-{nnn}-{slug}.{test|spec}.ts
+输出：写入 .e2e-tests/shared/automation/{domain}/ts-{nnn}-{slug}.{test|spec}.ts
 ```

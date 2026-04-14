@@ -1,6 +1,6 @@
 # Quality Ledger 模板
 
-`.e2e-tests/quality-ledger.md` — 跨任务质量经验缓存。存在时加速，缺失不阻塞。
+`.e2e-tests/shared/quality-ledger.md` — 跨任务质量经验缓存。存在时加速，缺失不阻塞。
 
 ```markdown
 # Quality Ledger
@@ -36,5 +36,5 @@
 
 ## 分片
 
-超 300 行时：顶层保留摘要 + 最近 5 条 active，详细条目按 domain 分片到 `.e2e-tests/{domain}/quality-ledger.md`。
+超 300 行时：先 `mkdir -p .e2e-tests/shared/quality-ledger/`，顶层保留摘要 + 最近 5 条 active，详细条目按业务域分片到 `.e2e-tests/shared/quality-ledger/{domain}.md`。
 清理：resolved 超 180 天的失败模式/环境陷阱、超 90 天的 flaky、变更日志保留最近 50 条。

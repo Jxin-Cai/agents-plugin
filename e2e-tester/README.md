@@ -64,30 +64,47 @@
 
 ```
 .e2e-tests/
-├── _shared/                    # 跨域共享资产
-│   ├── datasets/               # 共享数据集
-│   ├── mocks/                  # 共享 Mock 配置
-│   └── helpers/                # 共享 Helper
-├── registry/                   # 脚本注册表
-│   ├── index.yaml              # 全局索引
-│   ├── {domain}.yaml           # 域级注册
-│   └── suites.yaml             # 套件定义
-├── reports/                    # 回归报告
-├── env/                        # 环境配置（{env}.yaml）
-├── asset-catalog.md            # 资产目录
-├── quality-ledger.md           # 质量经验缓存
-└── {domain}/                   # 单次任务域
-    ├── task/
-    │   ├── index.md            # 任务索引（唯一状态文件）
-    │   └── task.md             # 任务装配卡
-    ├── context/                # 上下文扫描结果 + 阶段摘要
-    ├── scenarios/              # BDD 剧本（TS-{NNN}-{slug}.md）
-    ├── prep/                   # 准备方案（TP-{NNN}-{slug}.md）
-    ├── reports/                # 执行报告
-    ├── automation/             # 自动化脚本
-    ├── fixtures/               # 任务专用数据/Mock
-    └── evidence/               # 测试证据（截图等）
+├── shared/                              # 公共可复用资源区（跨需求复用）
+│   ├── env/                             # 环境配置（{env}.yaml）
+│   ├── automation/                      # 沉淀的自动化脚本（按 domain 分子目录）
+│   │   └── {domain}/                    # ts-{nnn}-{slug}.test.ts / .spec.ts
+│   ├── datasets/                        # 共享测试数据集
+│   ├── mocks/                           # 共享 Mock 配置
+│   ├── helpers/                         # 共享 Helper
+│   ├── registry/                        # 脚本注册表
+│   │   ├── index.yaml                   # 全局索引
+│   │   ├── {domain}.yaml                # 域级注册
+│   │   └── suites.yaml                  # 套件定义
+│   ├── reports/                         # 全局回归报告
+│   ├── quality-ledger.md                # 质量经验缓存
+│   └── asset-catalog.md                 # 资产总目录
+│
+└── tasks/                               # 需求维度过程区（按需求/任务隔离）
+    └── {YYYY-MM-DD}-{task-slug}/        # 单次需求的完整过程文件夹
+        ├── task/
+        │   ├── index.md                 # 任务索引（唯一状态文件）
+        │   └── task.md                  # 任务装配卡
+        ├── context/                     # 上下文扫描结果 + 阶段摘要
+        ├── scenarios/                   # BDD 剧本（TS-{NNN}-{slug}.md）
+        ├── prep/                        # 准备方案（TP-{NNN}-{slug}.md）
+        ├── reports/                     # 本需求的执行报告
+        ├── evidence/                    # 测试证据
+        │   └── {YYYY-MM-DD}/            # 按执行日期分组
+        │       └── TS-{NNN}-C{N}/       # 按 case 隔离
+        │           ├── screenshots/     # 截图
+        │           ├── videos/          # 录屏
+        │           ├── api/             # 接口交互记录
+        │           ├── snapshots/       # 可访问性快照（strict）
+        │           └── evidence-manifest.md
+        └── fixtures/                    # 任务专用数据/Mock
 ```
+
+### 两大区域设计原则
+
+| 区域 | 目录 | 内容 | 生命周期 |
+|------|------|------|---------|
+| **公共区** | `shared/` | 环境配置、沉淀脚本、注册表、数据集、质量缓存 | 持久，跨需求复用 |
+| **需求区** | `tasks/{date}-{slug}/` | 过程截图、接口记录、报告、剧本、准备方案 | 跟随需求，完整可追溯 |
 
 ## 核心概念
 
@@ -136,14 +153,18 @@
 | standard | 每步截图 | 全量 API 调用链 | 错误级别控制台日志 | 一般场景（默认） |
 | strict | 每原子操作截图 | 全量 API 调用链 | 可访问性快照 + 全量控制台日志 | 发布验证、合规审计 |
 
-证据文件存储在 `evidence/{date}/TS-{NNN}-C{N}/` 下，standard/strict 模式自动生成 `evidence-manifest.md` 索引所有证据文件，供测试报告结构化引用。
+证据文件存储在 `tasks/{date}-{slug}/evidence/{date}/TS-{NNN}-C{N}/` 下，standard/strict 模式自动生成 `evidence-manifest.md` 索引所有证据文件，供测试报告结构化引用。
+
+### 第三方脚本屏蔽
+
+Playwright 探索执行时自动屏蔽已知的第三方统计/监控脚本（piwik、GA、Sentry、Hotjar 等），防止干扰测试。可通过环境配置 `blocked_scripts` 自定义屏蔽列表。
 
 ## 脚本类型
 
-| 类型 | 文件后缀 | 执行方式 | 适用场景 |
-|------|---------|---------|---------|
-| api-script | `.test.ts` | `npx tsx` | 核心操作有 API + 状态可查询 |
-| e2e-script | `.spec.ts` | `npx playwright test` | 部分操作必须通过 UI 完成 |
+| 类型 | 文件后缀 | 存放路径 | 执行方式 | 适用场景 |
+|------|---------|---------|---------|---------|
+| api-script | `.test.ts` | `shared/automation/{domain}/` | `npx tsx` | 核心操作有 API + 状态可查询 |
+| e2e-script | `.spec.ts` | `shared/automation/{domain}/` | `npx playwright test` | 部分操作必须通过 UI 完成 |
 
 ## 行为纪律
 

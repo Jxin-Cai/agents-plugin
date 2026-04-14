@@ -14,7 +14,7 @@ allowed-tools: Read, Write, Glob, AskUserQuestion
 
 ### Step 0: 先扫资产，再决定问什么
 
-扫描 `.e2e-tests/asset-catalog.md`、`.e2e-tests/registry/`、`.e2e-tests/_shared/`、`.e2e-tests/{domain}/task/task.md`（如存在）。
+扫描 `.e2e-tests/shared/asset-catalog.md`、`.e2e-tests/shared/registry/`、`.e2e-tests/shared/`、`.e2e-tests/tasks/{date}-{slug}/task/task.md`（如存在）。
 识别可复用资产和可接续任务，只追问缺口。
 
 ### Step 1: 装配任务类型与目标
@@ -47,7 +47,7 @@ allowed-tools: Read, Write, Glob, AskUserQuestion
 
 ### Step 4: 生成任务文件
 
-写入 `.e2e-tests/{domain}/task/task.md`：
+写入 `.e2e-tests/tasks/{date}-{slug}/task/task.md`：
 
 ```markdown
 # 当前 QA 任务
@@ -71,14 +71,14 @@ allowed-tools: Read, Write, Glob, AskUserQuestion
 
 ### Step 5: 更新索引并确认
 
-在 `.e2e-tests/{domain}/task/index.md` 登记 task_type、workflow、Intent Assembly Card、Workflow Decision Log。
+在 `.e2e-tests/tasks/{date}-{slug}/task/index.md` 登记 task_type、workflow、Intent Assembly Card、Workflow Decision Log。
 `AskUserQuestion` 确认后结束。
 
 ### 落盘检查
 
 确认以下文件已写入：
-- `.e2e-tests/{domain}/task/task.md`
-- `.e2e-tests/{domain}/task/index.md`
+- `.e2e-tests/tasks/{date}-{slug}/task/task.md`
+- `.e2e-tests/tasks/{date}-{slug}/task/index.md`
 
 缺失则补写。
 
@@ -86,7 +86,7 @@ allowed-tools: Read, Write, Glob, AskUserQuestion
 
 ## 约束
 
-1. 必须产出 `.e2e-tests/{domain}/task/task.md`，不是口头摘要
+1. 必须产出 `.e2e-tests/tasks/{date}-{slug}/task/task.md`，不是口头摘要
 2. 先装配工作类型，再设计测试——不默认进新功能六阶段
 3. 无成功判据和不可接受结果 → 不进入后续 workflow
 4. 角色、状态、边界、依赖策略必须明确

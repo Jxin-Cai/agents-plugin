@@ -2,7 +2,7 @@
 
 用于 `run-suite` 批量回归执行。一行一脚本摘要，仅失败展开详情。
 
-文件路径：`.e2e-tests/reports/regression-{YYYY-MM-DD}-{HHmm}.md`
+文件路径：`.e2e-tests/shared/reports/regression-{YYYY-MM-DD}-{HHmm}.md`
 
 ---
 
@@ -52,4 +52,4 @@
 1. 轻量报告不替代设计模式的完整报告——仅用于 `run-suite` 批量回归
 2. 失败展开部分只包含错误输出和简要分析，不做完整 Oracle 矩阵分析
 3. 如需深入分析某个失败，应转入 `fix-script` 或设计模式的 `test-runner`
-4. 回归报告的失败分类沿用 5 类归因，但不强制要求归因置信度
+4. 回归报告的失败分类沿用 6 类归因（api-change / flow-change / data-change / env-issue / script-defect / unknown），但不强制要求归因置信度
