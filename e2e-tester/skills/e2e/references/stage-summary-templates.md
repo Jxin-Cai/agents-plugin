@@ -1,6 +1,6 @@
 # 阶段摘要模板
 
-写入路径：`.e2e-tests/tasks/{date}-{slug}/context/stage-{N}-summary.md`
+写入路径：`.e2e-tests/scenarios/{scenario}/runs/{run}/context/stage-{N}-summary.md`
 
 ## Stage 1: 任务装配与澄清
 
@@ -26,6 +26,7 @@ task_type / workflow / trigger_source / 交付物
 # Stage 2 摘要
 
 ## 上下文文件路径
+（场景级：.e2e-tests/scenarios/{scenario}/context/）
 ## 关键调用链
 ## 异步链路与一致性窗口
 ## 可观察信号（UI / API / Data / Side Effect）
@@ -39,6 +40,9 @@ task_type / workflow / trigger_source / 交付物
 
 ## 剧本概览
 | 剧本 | 业务场景 | case 数 | 风险 | 主要 Oracle | 复用资产 |
+
+## 剧本文件
+.e2e-tests/scenarios/{scenario}/scenario.md
 ```
 
 ## Stage 4: 测试准备
@@ -50,7 +54,7 @@ task_type / workflow / trigger_source / 交付物
 | 剧本 | 方案 | 准备度 |
 
 ## 环境配置确认
-| 环境 | 配置文件 | 账号 | blocked_scripts | 状态 |
+| 环境 | 配置文件 | 账号 | blocked_scripts | 认证脚本 | 状态 |
 
 ## 资产决策（复用 / 新增 / 任务专用）
 ## BLOCKED/PARTIAL 原因
@@ -66,6 +70,7 @@ task_type / workflow / trigger_source / 交付物
 
 ## 失败归因
 ## 沉淀候选
+## 认证脚本沉淀状态
 ```
 
 ## Stage 6: 自动化沉淀
@@ -75,6 +80,9 @@ task_type / workflow / trigger_source / 交付物
 
 ## 沉淀结果
 | 脚本 | 类型 | 覆盖场景 | 注册表状态 |
+
+## 认证脚本
+| 环境 | 脚本路径 | 状态 |
 
 ## 未沉淀原因
 ```

@@ -1,12 +1,13 @@
 # 任务索引模板
 
-`task/index.md` 是单次 QA 任务的唯一状态文件。
+`index.md` 是单次测试执行（run）的唯一状态文件。
 
 ## Frontmatter
 
 ```yaml
 ---
-task_folder: {YYYY-MM-DD}-{task-slug}
+scenario: {scenario-slug}
+run_folder: {YYYY-MM-DD}-{run-slug}
 domain: {business-domain}
 status: active | completed | archived
 created: {YYYY-MM-DD}
@@ -31,7 +32,7 @@ completed_stages: [1, 2, ...]
 ## 正文结构
 
 ```markdown
-# {task-folder} QA 任务索引
+# {scenario-slug} / {run-folder} QA 任务索引
 
 ## Intent Assembly Card
 task_type / workflow / entry_intent / trigger_source / target_env / 交付物
@@ -53,4 +54,4 @@ task_type / workflow / entry_intent / trigger_source / target_env / 交付物
 1. 每阶段结束更新 frontmatter + 产物区块
 2. 断点恢复：先读 frontmatter，再验实际文件；冲突以产物为准
 3. workflow 切换记入 Decision Log
-4. `task_folder` 用于文件系统定位，`domain` 保留业务域语义，用于 automation/registry 分组
+4. `scenario` 用于定位剧本，`run_folder` 用于定位本次执行，`domain` 保留业务域语义

@@ -45,10 +45,10 @@
 
 ## 交付物
 
-所有需求级产物写入 `.e2e-tests/tasks/{date}-{slug}/` 下对应子目录：
-- 任务装配 → `.e2e-tests/tasks/{date}-{slug}/task/task.md`
-- 定向验证报告 → `.e2e-tests/tasks/{date}-{slug}/reports/{date}/TS-{NNN}-run-{RRR}.md`
-- **发布结论** → `.e2e-tests/tasks/{date}-{slug}/reports/{date}/release-conclusion.md`（GO/NO-GO/CONDITIONAL GO + 依据 + 未覆盖风险 + 限制说明）
+所有需求级产物写入对应路径：
+- 任务装配 → `.e2e-tests/scenarios/{scenario}/runs/{run}/task.md`
+- 定向验证报告 → `.e2e-tests/scenarios/{scenario}/runs/{run}/reports/TS-{NNN}-run-{RRR}.md`
+- **发布结论** → `.e2e-tests/scenarios/{scenario}/runs/{run}/reports/release-conclusion.md`（GO/NO-GO/CONDITIONAL GO + 依据 + 未覆盖风险 + 限制说明）
 
 全局可复用报告写入共享区：
 - 影响分析报告 → `.e2e-tests/shared/reports/impact-{date}-{slug}.md`
@@ -57,8 +57,8 @@
 ## 落盘检查
 
 流程结束前，用 Glob 逐项确认以下产物存在，缺失则补写：
-- `.e2e-tests/tasks/{date}-{slug}/task/task.md`
-- `.e2e-tests/tasks/{date}-{slug}/reports/{date}/release-conclusion.md`
-- `.e2e-tests/tasks/{date}-{slug}/task/index.md`（已更新 status）
+- `.e2e-tests/scenarios/{scenario}/runs/{run}/task.md`
+- `.e2e-tests/scenarios/{scenario}/runs/{run}/reports/release-conclusion.md`
+- `.e2e-tests/scenarios/{scenario}/runs/{run}/index.md`（已更新 status）
 
 无发布结论文件不得结束流程。

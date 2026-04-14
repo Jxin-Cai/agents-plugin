@@ -24,13 +24,15 @@ allowed-tools: Read, Write, Glob, Agent, AskUserQuestion
 
 1. Glob 识别技术栈
 2. **Agent**（Explore, "very thorough"）按 9 段维度扫描。多服务时可并行多个 Explore
-3. 结果写入 `.e2e-tests/tasks/{date}-{slug}/context/context-{slug}.md`
+3. 结果写入 **场景级** `.e2e-tests/scenarios/{scenario}/context/context-{slug}.md`（跨 run 共享）
 4. `AskUserQuestion` 确认充分性
+
+> 已有场景级 context 时，确认仍有效即可跳过重新扫描。
 
 ### 落盘检查
 
 确认以下文件已写入：
-- `.e2e-tests/tasks/{date}-{slug}/context/context-*.md`（至少一个）
+- `.e2e-tests/scenarios/{scenario}/context/context-*.md`（至少一个）
 
 缺失则补写。
 
@@ -39,7 +41,7 @@ allowed-tools: Read, Write, Glob, Agent, AskUserQuestion
 - 只读扫描，不改业务代码
 - 扫描走 Explore subagent，不在主上下文堆代码
 - 识别不到就如实说
-- 结果必须落文件（写入 `.e2e-tests/tasks/{date}-{slug}/context/`）
+- 结果必须落文件（写入 `.e2e-tests/scenarios/{scenario}/context/`）
 
 <IMPORTANT>
 目标是"知道怎么测、能看什么信号"，不是"理解整个代码库"。

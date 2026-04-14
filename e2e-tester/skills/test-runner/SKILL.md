@@ -8,15 +8,19 @@ allowed-tools: Read, Glob, Write, Skill, AskUserQuestion, Bash(npx playwright*),
 
 通过准备度门禁、三路径策略和多层 oracle 验证执行测试，给出可信测试结论。
 
+## 路径变量
+
+以下用 `{scenario}` 代替 `{scenario-slug}`，`{run}` 代替 `{YYYY-MM-DD}-{run-slug}`。
+
 ## 流程
 
 ### 阶段 0: 读取输入与 readiness gate
 
-读取 `.e2e-tests/tasks/{date}-{slug}/task/task.md`、`.e2e-tests/tasks/{date}-{slug}/task/index.md`、`.e2e-tests/tasks/{date}-{slug}/scenarios/` 下的剧本、`.e2e-tests/tasks/{date}-{slug}/prep/` 下的方案、已有报告、`.e2e-tests/shared/quality-ledger.md`（只提取与当前 domain 相关的时序基线、失败模式、环境陷阱条目）、`.e2e-tests/shared/env/{target_env}.yaml`（如存在）。
+读取当前 run 的 `task.md`、`index.md`、`.e2e-tests/scenarios/{scenario}/scenario.md`（剧本）、`.e2e-tests/scenarios/{scenario}/runs/{run}/prep/` 下的方案、已有报告、`.e2e-tests/shared/quality-ledger.md`（只提取与当前 domain 相关的时序基线、失败模式、环境陷阱条目）、`.e2e-tests/shared/env/{target_env}.yaml`（如存在）。
 - readiness = BLOCKED → 停止执行
 - real 依赖不可用且无降级 → BLOCKED
 
-**证据级别确认**：从 `.e2e-tests/tasks/{date}-{slug}/task/index.md` frontmatter 读取 `evidence_level`。若缺失，用 `AskUserQuestion` 引导选择：
+**证据级别确认**：从当前 run 的 `index.md` frontmatter 读取 `evidence_level`。若缺失，用 `AskUserQuestion` 引导选择：
 
 | 选项 | 说明 | 默认推荐场景 |
 |------|------|-------------|
@@ -24,7 +28,7 @@ allowed-tools: Read, Glob, Write, Skill, AskUserQuestion, Bash(npx playwright*),
 | standard | 每步截图 + 完整 API 链 + 错误日志 | 一般场景（推荐） |
 | strict | 密集截图序列 + 可访问性快照 + 全量日志 | release-gate、合规审计 |
 
-选择后回写 `.e2e-tests/tasks/{date}-{slug}/task/index.md` frontmatter。
+选择后回写 index.md frontmatter。
 
 ### 阶段 1: 资产检索与路径决策
 
@@ -56,23 +60,23 @@ allowed-tools: Read, Glob, Write, Skill, AskUserQuestion, Bash(npx playwright*),
 
 > **条件加载**：此时读取 `references/report-template.md`。含 async/flaky 时才读 `references/async-and-flaky-guide.md`。
 
-写报告前确保目录存在：`mkdir -p .e2e-tests/tasks/{date}-{slug}/reports/{date}`
+写报告前确保目录存在：`mkdir -p .e2e-tests/scenarios/{scenario}/runs/{run}/reports`
 
-生成 `.e2e-tests/tasks/{date}-{slug}/reports/{date}/TS-{NNN}-run-{RRR}.md`。按 case 给出 PASS/FAIL/BLOCKED/SKIP。证据引用使用文件路径（如 `.e2e-tests/tasks/{date}-{slug}/evidence/{date}/TS-{NNN}-C{N}/screenshots/then-result.png`），不用自由文本。
+生成 `.e2e-tests/scenarios/{scenario}/runs/{run}/reports/TS-{NNN}-run-{RRR}.md`。按 case 给出 PASS/FAIL/BLOCKED/SKIP。证据引用使用文件路径（如 `evidence/{case-id}/screenshots/then-result.png`），不用自由文本。
 
 ### 阶段 4: 沉淀判断与索引回写
 
 **产物沉淀**（已完成，确认落盘）：
-- 剧本已在 `.e2e-tests/tasks/{date}-{slug}/scenarios/` ✓
-- 准备方案已在 `.e2e-tests/tasks/{date}-{slug}/prep/` ✓
-- 报告已在 `.e2e-tests/tasks/{date}-{slug}/reports/` ✓
-- 证据已在 `.e2e-tests/tasks/{date}-{slug}/evidence/` ✓
+- 剧本已在 `.e2e-tests/scenarios/{scenario}/scenario.md` ✓
+- 准备方案已在 `.e2e-tests/scenarios/{scenario}/runs/{run}/prep/` ✓
+- 报告已在 `.e2e-tests/scenarios/{scenario}/runs/{run}/reports/` ✓
+- 证据已在 `.e2e-tests/scenarios/{scenario}/runs/{run}/evidence/` ✓
 
 **脚本沉淀判断**（需条件）：路径成立 + 证据完整 + 有 API 端点 + 准备可重复 → 建议沉淀为自动化脚本。条件不满足时在 index.md 记录原因，不强制。
 
-回写 `.e2e-tests/tasks/{date}-{slug}/task/index.md`（报告路径、路径决策、case 结果、资产）。
+回写当前 run 的 `index.md`（报告路径、路径决策、case 结果、资产）。
 
-### 阶段 4.5: 回写 quality-ledger 与环境信息
+### 阶段 4.5: 回写 quality-ledger、环境信息与认证脚本
 
 写入 `.e2e-tests/shared/quality-ledger.md`（不存在时按 `skills/e2e/references/quality-ledger-template.md` 创建空结构后再写入）。
 
@@ -84,17 +88,23 @@ allowed-tools: Read, Glob, Write, Skill, AskUserQuestion, Bash(npx playwright*),
 - 需要屏蔽的第三方脚本模式
 - 环境陷阱 / known_traps
 
+**认证脚本沉淀检查**：如果路径 C 执行了登录操作：
+- 捕获到登录 API 调用链（认证端点 + token 返回）
+- 且 `shared/automation/auth/` 下没有对应环境的认证脚本
+- → 建议通过 `test-automation-builder` 沉淀为 `shared/automation/auth/login-{env}.test.ts`
+- 脚本功能：传入账号密码 → 返回 token/cookie
+
 ### 阶段 5: 后续动作
 
-`AskUserQuestion`（multiSelect）：补证据 / 重测 / 修改剧本 / 沉淀为自动化脚本 / 结束。
+`AskUserQuestion`（multiSelect）：补证据 / 重测 / 修改剧本 / 沉淀为自动化脚本 / 沉淀认证脚本 / 结束。
 
-**主动推荐**：如果脚本沉淀条件满足，将“沉淀为自动化脚本”标注为 (Recommended)。
+**主动推荐**：如果脚本沉淀条件满足，将"沉淀为自动化脚本"标注为 (Recommended)。如果认证脚本缺失，将"沉淀认证脚本"标注为 (Recommended)。
 
 ### 落盘检查
 
 确认以下文件已写入：
-- `.e2e-tests/tasks/{date}-{slug}/reports/{date}/TS-{NNN}-run-{RRR}.md`（报告）
-- `.e2e-tests/tasks/{date}-{slug}/task/index.md`（已更新）
+- `.e2e-tests/scenarios/{scenario}/runs/{run}/reports/TS-{NNN}-run-{RRR}.md`（报告）
+- 当前 run 的 `index.md`（已更新）
 - `.e2e-tests/shared/quality-ledger.md`（已更新或新建）
 
 缺失则补写。

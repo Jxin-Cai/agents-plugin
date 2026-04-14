@@ -61,27 +61,32 @@ workflow 确定后，**必须先向用户宣告场景**再开始执行：
 
 > 仅 `design-full` / `design-lite` / `release-gate` / `repro-loop` 需要此步。
 
-1. 生成 task-slug（kebab-case），`AskUserQuestion` 确认
-2. 任务文件夹命名为 `{YYYY-MM-DD}-{task-slug}`（当天日期 + slug）
-3. 创建任务目录（逐个 mkdir -p）：
+1. 确定 **scenario-slug**（kebab-case，描述业务场景），`AskUserQuestion` 确认
+2. 检查 `.e2e-tests/scenarios/{scenario-slug}/` 是否已存在：
+   - **已存在** → 读取 `scenario.md`，在 `runs/` 下创建新 run
+   - **不存在** → 创建完整的 scenario 文件夹结构
+3. 生成 **run-slug**（kebab-case，描述本次执行目的），run 文件夹命名为 `{YYYY-MM-DD}-{run-slug}`
+4. 创建目录（逐个 mkdir -p）：
    ```bash
-   mkdir -p .e2e-tests/tasks/{date}-{slug}/task
-   mkdir -p .e2e-tests/tasks/{date}-{slug}/context
-   mkdir -p .e2e-tests/tasks/{date}-{slug}/scenarios
-   mkdir -p .e2e-tests/tasks/{date}-{slug}/prep
-   mkdir -p .e2e-tests/tasks/{date}-{slug}/reports
-   mkdir -p .e2e-tests/tasks/{date}-{slug}/evidence
-   mkdir -p .e2e-tests/tasks/{date}-{slug}/fixtures
+   # 场景级（已存在时跳过）
+   mkdir -p .e2e-tests/scenarios/{scenario-slug}/context
+   mkdir -p .e2e-tests/scenarios/{scenario-slug}/runs
+   # run 级
+   mkdir -p .e2e-tests/scenarios/{scenario-slug}/runs/{date}-{run-slug}/prep
+   mkdir -p .e2e-tests/scenarios/{scenario-slug}/runs/{date}-{run-slug}/reports
+   mkdir -p .e2e-tests/scenarios/{scenario-slug}/runs/{date}-{run-slug}/evidence
+   mkdir -p .e2e-tests/scenarios/{scenario-slug}/runs/{date}-{run-slug}/fixtures
    ```
-4. 确保公共资产存在（不存在时用 Write 创建）：
+5. 确保公共资产存在（不存在时用 Write 创建）：
    - `.e2e-tests/shared/datasets/`、`.e2e-tests/shared/mocks/`、`.e2e-tests/shared/helpers/`（mkdir -p）
+   - `.e2e-tests/shared/automation/auth/`（mkdir -p）
    - `.e2e-tests/shared/registry/index.yaml` — 不存在时写入空结构：`version: 1\ndomains: {}`
    - `.e2e-tests/shared/asset-catalog.md` — 不存在时写入四区块空骨架（共享数据集/Mock/Helper/跨域脚本）
    - `.e2e-tests/shared/quality-ledger.md` — 不存在时按 `references/quality-ledger-template.md` 创建空结构
    - `.e2e-tests/shared/env/` 目录（mkdir -p）
-5. 按 `references/index-template.md` 初始化 `.e2e-tests/tasks/{date}-{slug}/task/index.md`（如不存在）
-6. 以 index.md frontmatter + 实际产物推断接续点
-7. 扫描共享资产，`AskUserQuestion` 确认接续阶段
+6. 按 `references/index-template.md` 初始化 `.e2e-tests/scenarios/{scenario-slug}/runs/{date}-{run-slug}/index.md`（如不存在）
+7. 以 index.md frontmatter + 实际产物推断接续点
+8. 扫描共享资产 + 已有 scenario.md，`AskUserQuestion` 确认接续阶段
 
 ---
 
@@ -90,7 +95,7 @@ workflow 确定后，**必须先向用户宣告场景**再开始执行：
 确定 workflow 后，**条件加载**对应 playbook 执行：
 
 | workflow | 加载文件 |
-|----------|---------|
+|----------|---------| 
 | `design-full` / `design-lite` | `references/design-mode-steps.md` |
 | `release-gate` | `references/release-readiness-playbook.md` |
 | `repro-loop` | `references/bug-repro-playbook.md` |
@@ -100,7 +105,7 @@ workflow 确定后，**必须先向用户宣告场景**再开始执行：
 
 ## 上下文纪律
 
-1. `task/index.md` 是唯一状态文件，断点恢复以产物为准
+1. `index.md` 是唯一状态文件，断点恢复以产物为准
 2. 每阶段从文件读上下文，不依赖对话记忆
 3. 重型任务（scan-context、test-automation-builder）走 subagent
 4. 逐阶段停顿等用户确认

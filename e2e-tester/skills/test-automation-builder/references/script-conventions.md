@@ -4,15 +4,16 @@
 
 - api-script: `.e2e-tests/shared/automation/{domain}/ts-{nnn}-{slug}.test.ts`
 - e2e-script: `.e2e-tests/shared/automation/{domain}/ts-{nnn}-{slug}.spec.ts`
+- auth-script: `.e2e-tests/shared/automation/auth/login-{env}.test.ts`
 
 ## JSDoc 元数据（必须）
 
 ```typescript
 /**
- * @type {api-script | e2e-script}
+ * @type {api-script | e2e-script | auth-script}
  * @scenario TS-{NNN}
  * @domain {domain}
- * @task_folder {YYYY-MM-DD}-{task-slug}
+ * @scenario_slug {scenario-slug}
  * @title {中文标题}
  * @business_scenario {场景}
  * @cases C1, C2, C3
@@ -21,8 +22,8 @@
  * @covers {feature1}, {feature2}
  * @tags {tag1}, {tag2}
  * @oracle {api, data, side-effect}
- * @prep prep/TP-{NNN}-{slug}.md
- * @task task/task.md
+ * @prep runs/{date}-{run-slug}/prep/TP-{NNN}-{slug}.md
+ * @task runs/{date}-{run-slug}/task.md
  * @api_endpoints {POST /api/xxx}, {GET /api/yyy}
  * @datasets / @mock_assets / @helpers {paths}
  * @created / @last_updated {YYYY-MM-DD}
@@ -48,6 +49,13 @@
 - UI 只用于无 API 替代的操作
 - `npx playwright test` 运行
 
+## auth-script 规则
+
+- 传入账号密码（通过环境变量），返回 token/cookie
+- 可被其他脚本 import 使用
+- 应 export 一个 `login(env, username, password)` 函数
+- 存放于 `shared/automation/auth/login-{env}.test.ts`
+
 ## 断言最低标准
 
 - 必须有 API 层断言（status + body 关键字段）
@@ -60,14 +68,15 @@
 
 ```text
 你是自动化测试脚本生成器。
-生成类型：{api-script | e2e-script}
+生成类型：{api-script | e2e-script | auth-script}
 可用工具：仅 Read, Write。不读 node_modules/，不执行命令。
 
 【api-script】纯 TS 脚本（.test.ts），fetch 调接口，assert 验证，npx tsx 运行。绝对不用 Playwright。
 【e2e-script】Playwright 脚本（.spec.ts），test.describe/test 结构，数据准备用 API，UI 仅用于必须操作。
+【auth-script】认证脚本（.test.ts），export login 函数，传入账号密码返回 token/cookie。
 
 通用：复用已有 helper/数据集/mock。头部含完整 JSDoc。断言覆盖关键 oracle。每 case 独立。含清理逻辑。
 
 输入：剧本、prep、任务文件、API 调用链摘要、可复用资产
-输出：写入 .e2e-tests/shared/automation/{domain}/ts-{nnn}-{slug}.{test|spec}.ts
+输出：写入对应路径
 ```

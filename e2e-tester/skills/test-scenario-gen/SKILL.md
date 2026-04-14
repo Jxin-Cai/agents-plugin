@@ -10,19 +10,20 @@ allowed-tools: Read, Glob, Write, AskUserQuestion
 
 ## 前置条件
 
-1. `.e2e-tests/tasks/{date}-{slug}/task/task.md` 和上下文摘要（除非用户跳过扫描）
-2. 读取 `.e2e-tests/tasks/{date}-{slug}/task/index.md` 识别已挂载的资产
+1. 当前 run 的 `task.md` 和上下文摘要（除非用户跳过扫描）
+2. 读取当前 run 的 `index.md` 识别已挂载的资产
 3. 检索 `.e2e-tests/shared/registry/index.yaml` 避免编号冲突，检索 `.e2e-tests/shared/asset-catalog.md` 寻找可复用资产
+4. 读取已有的 `.e2e-tests/scenarios/{scenario}/scenario.md`（如存在）
 
-> 若 `.e2e-tests/tasks/{date}-{slug}/task/task.md` 不存在，提示用户先通过 `/e2e` 入口完成任务装配，不直接生成空洞剧本。
+> 若当前 run 的 `task.md` 不存在，提示用户先通过 `/e2e` 入口完成任务装配，不直接生成空洞剧本。
 
 ## 流程
 
-### Step 1: 规划剧本列表
+### Step 1: 规划 case 列表
 
-- 一个业务场景一个剧本（TS-{NNN}-{slug}.md）
+- 剧本以场景为单位：`.e2e-tests/scenarios/{scenario}/scenario.md`
 - 每个剧本内多个 case：Happy Path（必须）、Key Exception（必须）、Boundary/Permission/Async/Idempotency（按需）
-- 已有剧本时先判断：沿用 / 追加 case / 重排 / 新增
+- **已有 scenario.md 时先判断**：沿用现有 case / 追加新 case / 调整 case / 全新设计
 - `AskUserQuestion` 确认规划
 
 ### Step 2: 设计 case oracle
@@ -38,17 +39,19 @@ Frontmatter 必含：goal、risk_level、persona、business_scenario、case_coun
 
 ### Step 4: 写入文件
 
-写入 `.e2e-tests/tasks/{date}-{slug}/scenarios/TS-{NNN}-{slug}.md`。
+写入 `.e2e-tests/scenarios/{scenario}/scenario.md`。
+- **已有 scenario.md 时**：在现有 case 池基础上追加/修改，不推倒重来
+- **新建时**：完整生成
 
 ### Step 5: 更新索引并确认
 
-在 `.e2e-tests/tasks/{date}-{slug}/task/index.md` 登记剧本信息。`AskUserQuestion` 确认。
+在当前 run 的 `index.md` 登记剧本信息。`AskUserQuestion` 确认。
 
 ### 落盘检查
 
 确认以下文件已写入：
-- `.e2e-tests/tasks/{date}-{slug}/scenarios/TS-{NNN}-{slug}.md`（本次生成的每个剧本）
-- `.e2e-tests/tasks/{date}-{slug}/task/index.md`（已更新）
+- `.e2e-tests/scenarios/{scenario}/scenario.md`
+- 当前 run 的 `index.md`（已更新）
 
 缺失则补写。
 

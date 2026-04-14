@@ -8,7 +8,7 @@
 - **智能 Workflow 分流** — 根据任务意图自动匹配最合适的工作流程，不把所有事情都拖进完整设计模式
 - **BDD 剧本设计** — 业务场景 x Case x Oracle 矩阵的结构化测试设计
 - **三路径执行** — 已有脚本自动化 / 实时生成后执行 / Playwright 探索式验证
-- **资产沉淀与复用** — 注册表管理测试脚本元数据，支持跨任务资产复用
+- **资产沉淀与复用** — 注册表管理测试脚本元数据，支持跨剧本资产复用
 - **断点恢复** — 基于文件产物自动推断接续点，支持任务中断后恢复
 
 ## 快速开始
@@ -36,7 +36,7 @@
 插件支持 7 种 Workflow，根据任务意图自动分流：
 
 | Workflow | 适用场景 | 执行链路 |
-|----------|---------|---------|
+|----------|---------|---------| 
 | `design-full` | 新功能、复杂验证 | 装配 → 扫描 → 剧本 → 准备 → 执行 → 沉淀 |
 | `design-lite` | 专项验证（权限/数据/集成） | 只保留必要阶段的最小可信设计链 |
 | `release-gate` | 发布前验证 | 装配 → 影响分析 → 回归 → 补充验证 → GO/NO-GO |
@@ -48,7 +48,7 @@
 ## Skill 清单
 
 | Skill | 说明 | 直接可用 |
-|-------|------|---------|
+|-------|------|---------| 
 | `e2e` | 入口：任务装配 + workflow 分流 | `/e2e-tester:e2e` |
 | `clarify-scope` | 任务装配与澄清，识别工作类型/目标/风险/边界 | `/e2e-tester:clarify-scope` |
 | `scan-context` | 项目上下文扫描（通过 Explore subagent 直读源码） | `/e2e-tester:scan-context` |
@@ -64,47 +64,57 @@
 
 ```
 .e2e-tests/
-├── shared/                              # 公共可复用资源区（跨需求复用）
-│   ├── env/                             # 环境配置（{env}.yaml）
-│   ├── automation/                      # 沉淀的自动化脚本（按 domain 分子目录）
-│   │   └── {domain}/                    # ts-{nnn}-{slug}.test.ts / .spec.ts
-│   ├── datasets/                        # 共享测试数据集
-│   ├── mocks/                           # 共享 Mock 配置
-│   ├── helpers/                         # 共享 Helper
-│   ├── registry/                        # 脚本注册表
-│   │   ├── index.yaml                   # 全局索引
-│   │   ├── {domain}.yaml                # 域级注册
-│   │   └── suites.yaml                  # 套件定义
-│   ├── reports/                         # 全局回归报告
-│   ├── quality-ledger.md                # 质量经验缓存
-│   └── asset-catalog.md                 # 资产总目录
+├── shared/                                  # 公共可复用资源区（跨剧本复用）
+│   ├── env/                                 # 环境配置（{env}.yaml）
+│   ├── automation/                          # 沉淀的自动化脚本
+│   │   ├── auth/                            # 认证脚本（登录、获取 token）
+│   │   └── {domain}/                        # 按业务域分（ts-{nnn}-{slug}.test.ts / .spec.ts）
+│   ├── datasets/                            # 共享测试数据集
+│   ├── mocks/                               # 共享 Mock 配置
+│   ├── helpers/                             # 共享 Helper
+│   ├── registry/                            # 脚本注册表
+│   │   ├── index.yaml                       # 全局索引
+│   │   ├── {domain}.yaml                    # 域级注册
+│   │   └── suites.yaml                      # 套件定义
+│   ├── reports/                             # 全局回归报告
+│   ├── quality-ledger.md                    # 质量经验缓存
+│   └── asset-catalog.md                     # 资产总目录
 │
-└── tasks/                               # 需求维度过程区（按需求/任务隔离）
-    └── {YYYY-MM-DD}-{task-slug}/        # 单次需求的完整过程文件夹
-        ├── task/
-        │   ├── index.md                 # 任务索引（唯一状态文件）
-        │   └── task.md                  # 任务装配卡
-        ├── context/                     # 上下文扫描结果 + 阶段摘要
-        ├── scenarios/                   # BDD 剧本（TS-{NNN}-{slug}.md）
-        ├── prep/                        # 准备方案（TP-{NNN}-{slug}.md）
-        ├── reports/                     # 本需求的执行报告
-        ├── evidence/                    # 测试证据
-        │   └── {YYYY-MM-DD}/            # 按执行日期分组
-        │       └── TS-{NNN}-C{N}/       # 按 case 隔离
-        │           ├── screenshots/     # 截图
-        │           ├── videos/          # 录屏
-        │           ├── api/             # 接口交互记录
-        │           ├── snapshots/       # 可访问性快照（strict）
-        │           └── evidence-manifest.md
-        └── fixtures/                    # 任务专用数据/Mock
+└── scenarios/                               # 测试剧本区（按业务场景组织）
+    └── {scenario-slug}/                     # 某个业务场景
+        ├── scenario.md                      # 剧本定义（稳定的 case 池）
+        ├── context/                         # 上下文扫描（场景级，跨 run 共享）
+        └── runs/                            # 历次执行
+            └── {YYYY-MM-DD}-{run-slug}/     # 某次测试任务
+                ├── task.md                  # 本次任务完整需求描述
+                ├── index.md                 # 任务状态（唯一状态文件）
+                ├── prep/                    # 准备方案（TP-{NNN}-{slug}.md）
+                ├── evidence/                # 过程证据
+                │   └── {case-id}/           # 按 case 组织
+                │       ├── screenshots/     # 截图
+                │       ├── videos/          # 录屏
+                │       ├── api/             # 接口交互记录
+                │       ├── snapshots/       # 可访问性快照（strict）
+                │       └── evidence-manifest.md
+                ├── reports/                 # 执行报告
+                └── fixtures/                # 本次专用数据/Mock
 ```
 
 ### 两大区域设计原则
 
 | 区域 | 目录 | 内容 | 生命周期 |
-|------|------|------|---------|
-| **公共区** | `shared/` | 环境配置、沉淀脚本、注册表、数据集、质量缓存 | 持久，跨需求复用 |
-| **需求区** | `tasks/{date}-{slug}/` | 过程截图、接口记录、报告、剧本、准备方案 | 跟随需求，完整可追溯 |
+|------|------|------|---------| 
+| **公共区** | `shared/` | 环境配置、沉淀脚本（含认证脚本）、注册表、数据集、质量缓存 | 持久，跨剧本复用 |
+| **剧本区** | `scenarios/{slug}/` | 剧本定义、上下文、历次执行的过程证据和报告 | 剧本持久，run 按执行增量 |
+
+### 概念模型
+
+| 概念 | 说明 |
+|------|------|
+| **Scenario（剧本）** | 稳定的业务场景定义，包含完整的 case 池。跨 run 共享，随业务演进补充 case |
+| **Run（执行）** | 每次具体的测试任务。选择剧本中的 case 子集执行，有独立的需求描述和过程记录 |
+| **Context（上下文）** | 场景级的代码/技术上下文扫描结果，跨 run 复用，变动时更新 |
+| **认证脚本** | 沉淀到 `shared/automation/auth/`，提供 login → token/cookie 能力，供所有剧本复用 |
 
 ## 核心概念
 
@@ -148,12 +158,12 @@
 执行新测试剧本时，引导用户选择证据采集级别（`evidence_level`），不同级别决定截图密度、API 记录粒度和辅助日志采集范围：
 
 | 级别 | 截图 | API 记录 | 辅助采集 | 适用场景 |
-|------|------|---------|---------|---------|
+|------|------|---------|---------|---------| 
 | light | Given + Then（每 case 2 张） | 关键业务 API 出入参对 | 无 | 快速验证、design-lite |
 | standard | 每步截图 | 全量 API 调用链 | 错误级别控制台日志 | 一般场景（默认） |
 | strict | 每原子操作截图 | 全量 API 调用链 | 可访问性快照 + 全量控制台日志 | 发布验证、合规审计 |
 
-证据文件存储在 `tasks/{date}-{slug}/evidence/{date}/TS-{NNN}-C{N}/` 下，standard/strict 模式自动生成 `evidence-manifest.md` 索引所有证据文件，供测试报告结构化引用。
+证据文件存储在 `scenarios/{slug}/runs/{date}-{slug}/evidence/{case-id}/` 下，standard/strict 模式自动生成 `evidence-manifest.md` 索引所有证据文件，供测试报告结构化引用。
 
 ### 第三方脚本屏蔽
 
@@ -162,9 +172,10 @@ Playwright 探索执行时自动屏蔽已知的第三方统计/监控脚本（pi
 ## 脚本类型
 
 | 类型 | 文件后缀 | 存放路径 | 执行方式 | 适用场景 |
-|------|---------|---------|---------|---------|
+|------|---------|---------|---------|---------| 
 | api-script | `.test.ts` | `shared/automation/{domain}/` | `npx tsx` | 核心操作有 API + 状态可查询 |
 | e2e-script | `.spec.ts` | `shared/automation/{domain}/` | `npx playwright test` | 部分操作必须通过 UI 完成 |
+| auth-script | `.test.ts` | `shared/automation/auth/` | `npx tsx` | 登录获取 token/cookie |
 
 ## 行为纪律
 
@@ -173,3 +184,5 @@ Playwright 探索执行时自动屏蔽已知的第三方统计/监控脚本（pi
 - 重型任务（上下文扫描、脚本生成）走 subagent
 - 优先复用已有资产
 - 无准备不执行，无关键证据不判 PASS
+- 识别到环境信息（URL、账号、认证方式）时主动沉淀到 `shared/env/`
+- 登录流程执行后主动建议沉淀认证脚本到 `shared/automation/auth/`

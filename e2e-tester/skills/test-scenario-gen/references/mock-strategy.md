@@ -14,7 +14,7 @@
 
 ## Mock 配置格式
 
-路径：`.e2e-tests/tasks/{date}-{slug}/fixtures/mocks/{service}.mock.yaml`
+路径：`.e2e-tests/scenarios/{scenario}/runs/{run}/fixtures/mocks/{service}.mock.yaml`
 
 ```yaml
 service: {name}

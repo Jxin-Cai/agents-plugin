@@ -1,19 +1,19 @@
 #!/bin/bash
 # SessionStart hook for e2e-tester plugin
-# 1. 创建顶层工作目录（shared/ 公共区 + tasks/ 需求区）
+# 1. 创建顶层工作目录（shared/ 公共区 + scenarios/ 剧本区）
 # 2. 展示 QA 工作台状态
 
 # ── 公共可复用资源区 ──
 mkdir -p .e2e-tests/shared/env
-mkdir -p .e2e-tests/shared/automation
+mkdir -p .e2e-tests/shared/automation/auth
 mkdir -p .e2e-tests/shared/datasets
 mkdir -p .e2e-tests/shared/mocks
 mkdir -p .e2e-tests/shared/helpers
 mkdir -p .e2e-tests/shared/registry
 mkdir -p .e2e-tests/shared/reports
 
-# ── 需求维度过程区 ──
-mkdir -p .e2e-tests/tasks
+# ── 测试剧本区 ──
+mkdir -p .e2e-tests/scenarios
 
 # 展示 QA 工作台状态
 if [ -d ".e2e-tests" ]; then
@@ -21,8 +21,11 @@ if [ -d ".e2e-tests" ]; then
   echo "## QA 工作台状态"
   echo ""
 
-  ACTIVE_TASKS=$(find .e2e-tests/tasks -path "*/task/index.md" 2>/dev/null | wc -l | tr -d ' ')
-  echo "- 可接续任务索引: ${ACTIVE_TASKS} 个"
+  SCENARIO_COUNT=$(find .e2e-tests/scenarios -maxdepth 1 -mindepth 1 -type d 2>/dev/null | wc -l | tr -d ' ')
+  echo "- 测试剧本: ${SCENARIO_COUNT} 个"
+
+  ACTIVE_RUNS=$(find .e2e-tests/scenarios -path "*/runs/*/index.md" 2>/dev/null | wc -l | tr -d ' ')
+  echo "- 可接续执行: ${ACTIVE_RUNS} 个"
 
   if [ -f ".e2e-tests/shared/quality-ledger.md" ]; then
     echo "- quality-ledger: 已存在"
@@ -41,6 +44,11 @@ if [ -d ".e2e-tests" ]; then
 
   SCRIPT_COUNT=$(find .e2e-tests/shared/automation -name "*.ts" 2>/dev/null | wc -l | tr -d ' ')
   echo "- 沉淀脚本: ${SCRIPT_COUNT} 个"
+
+  AUTH_COUNT=$(find .e2e-tests/shared/automation/auth -name "*.ts" 2>/dev/null | wc -l | tr -d ' ')
+  if [ "$AUTH_COUNT" -gt 0 ]; then
+    echo "- 认证脚本: ${AUTH_COUNT} 个"
+  fi
 
   if [ -d ".e2e-tests/shared/reports" ] && [ "$(ls -A .e2e-tests/shared/reports 2>/dev/null)" ]; then
     LATEST_REPORT=$(ls -t .e2e-tests/shared/reports 2>/dev/null | head -n 1)

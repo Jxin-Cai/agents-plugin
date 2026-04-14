@@ -18,7 +18,7 @@
 ## 四、Oracle 完整度
 | Oracle 类型 | 是否要求 | 是否验证 | 证据文件 | 状态 |
 
-> "证据文件"列使用相对路径（如 `evidence/{date}/TS-{NNN}-C1/screenshots/then-result.png`），不用自由文本描述。
+> "证据文件"列使用相对路径（如 `evidence/{case-id}/screenshots/then-result.png`），不用自由文本描述。
 
 ## 四.5 证据清单
 
@@ -26,8 +26,8 @@
 
 | Case | 证据类型 | 文件路径 | 步骤 | 说明 |
 |------|----------|----------|------|------|
-| C1 | screenshot | evidence/{date}/TS-{NNN}-C1/screenshots/given-verified.png | Given | 前置状态 |
-| C1 | api | evidence/{date}/TS-{NNN}-C1/api/step-01-POST-create-order.json | When-1 | 创建订单 |
+| C1 | screenshot | evidence/C1/screenshots/given-verified.png | Given | 前置状态 |
+| C1 | api | evidence/C1/api/step-01-POST-create-order.json | When-1 | 创建订单 |
 | ... | | | | |
 
 ## 五、Case 执行汇总
@@ -50,7 +50,7 @@
 suspicion / 重试结果 / 根因分类 / 治理建议
 
 ## 九、资产汇总
-已复用 / 本次新增 / 新沉淀环境信息
+已复用 / 本次新增 / 新沉淀环境信息 / 认证脚本状态
 
 ## 十、未覆盖项与限制
 

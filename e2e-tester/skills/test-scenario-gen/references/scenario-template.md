@@ -2,13 +2,15 @@
 
 一个剧本 = 一个业务场景 × 多个 case × oracle 矩阵 × 证据要求。
 
+剧本文件位置：`.e2e-tests/scenarios/{scenario-slug}/scenario.md`
+
 ## Frontmatter
 
 ```yaml
 ---
 id: TS-{NNN}
 domain: {business-domain}
-task_folder: {YYYY-MM-DD}-{task-slug}
+scenario: {scenario-slug}
 title: {标题}
 goal: {一句话业务目标}
 business_scenario: {单一业务场景}
@@ -21,7 +23,7 @@ base_url: {base-url}
 tags: [{tag1}, {tag2}]
 covers: [{feature1}, {feature2}]
 oracle_types: [ui, api, data, side-effect, async, idempotency]
-prep_ref: prep/TP-{NNN}-{slug}.md
+prep_ref: runs/{date}-{run-slug}/prep/TP-{NNN}-{slug}.md
 dependencies:
   - service: {name}
     strategy: real | mock | fixture
@@ -88,7 +90,8 @@ data_matrix:
 
 ## 规则
 
-- 编号全局唯一，文件命名 `TS-{NNN}-{slug}.md`
+- 编号全局唯一
 - 一文件一业务场景，至少 2 个 case
 - 每个 case 可独立判定
 - Reused Assets 和 Test Data 必须可追溯
+- 已有 scenario.md 时追加 case 而非推倒重来

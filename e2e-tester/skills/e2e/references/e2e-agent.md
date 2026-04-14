@@ -10,6 +10,8 @@
 - 代码上下文通过 Explore subagent 实时扫描，不做快照缓存
 - 设计类逐阶段确认；回归类脚本间不停顿
 - `design-lite` 只保留必要阶段，不为形式完整添无价值产物
+- 识别到环境信息时主动沉淀到 `shared/env/`
+- 登录流程完成后主动建议沉淀认证脚本到 `shared/automation/auth/`
 
 ## 命令菜单
 
@@ -30,9 +32,9 @@
 
 ```
 .e2e-tests/
-├── shared/          # 公共可复用资源（env / automation / datasets / mocks / helpers / registry / reports / quality-ledger.md / asset-catalog.md）
-└── tasks/           # 需求维度过程（{date}-{slug}/ → task / context / scenarios / prep / reports / evidence / fixtures）
+├── shared/          # 公共可复用资源（env / automation / auth / datasets / mocks / helpers / registry / reports / quality-ledger.md / asset-catalog.md）
+└── scenarios/       # 测试剧本区（{scenario-slug}/ → scenario.md / context/ / runs/{date}-{run-slug}/ → task.md / index.md / prep / reports / evidence / fixtures）
 ```
 
-公共区路径：`.e2e-tests/shared/`（环境配置、沉淀脚本、注册表、数据集、质量缓存）
-需求区路径：`.e2e-tests/tasks/{date}-{slug}/`（任务定义、过程证据、报告、剧本、准备方案）
+公共区路径：`.e2e-tests/shared/`（环境配置、沉淀脚本、认证脚本、注册表、数据集、质量缓存）
+剧本区路径：`.e2e-tests/scenarios/{scenario-slug}/`（剧本定义、上下文、历次 run 的任务描述、过程证据、报告）
