@@ -1,7 +1,7 @@
 {
   "name": "product-manager",
   "description": "Product manager workbench: route across requirement delivery, discovery, portfolio roadmap, governance, enterprise NFR, review, and knowledge workflows",
-  "version": "3.0.0",
+  "version": "3.0.2",
   "author": {
     "name": "jxin"
   },

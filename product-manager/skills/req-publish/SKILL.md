@@ -2,7 +2,7 @@
 name: req-publish
 description: 将本地 Story 清单一键发布为 Jira Issue（Epic + Story 层级），自动创建映射关系
 argument-hint: "<需求目录路径或 slug>"
-allowed-tools: ["Read", "Bash(bash*)", "Write", "AskUserQuestion"]
+allowed-tools: ["Read", "Bash(bash*)", "Write", "AskUserQuestion", "Skill"]
 ---
 
 # 需求发布到 Jira
@@ -28,14 +28,17 @@ allowed-tools: ["Read", "Bash(bash*)", "Write", "AskUserQuestion"]
 - ✅ 先创建 Epic、再创建 Story（Story 依赖 Epic key）
 - ✅ 每次发布后写入 `meta/jira-sync.yaml` 记录映射
 - ✅ 已发布的 issue 不重复创建（幂等性）
+- ✅ 创建 Epic/Story 必须调用 `/req-create`，上传附件必须调用 `/req-attach`
+- ✅ 首次缺配置时必须通过 `/req` 或 `/req-setup` 初始化并保存项目级 `.requirement-mgmt/config.yaml`
 - 🚫 不自动做状态流转
+- 🚫 不直接 `curl` Jira REST，不直接调用 `core/requirement-mgmt/skills/_providers/*/api.sh`
 - ⏸️ 发布前、发布后都要停下等用户确认
 
 ---
 
 ## 前置条件
 
-1. `.requirement-mgmt/config.yaml` 必须已配置。若不存在，引导执行 `/req-setup`
+1. 需求平台配置必须可用。发布前先通过 `/req` 的配置检测链路确认；若当前项目还没有 `.requirement-mgmt/config.yaml`，调用 `/req` 或 `/req-setup` 完成初始化，并在初始化后继续当前发布意图
 2. Story 清单必须存在：`{需求目录}/stories/stories-*.md`
 3. 读取 `meta/workbench-state.md` 确认 `story-decompose` 已完成
 

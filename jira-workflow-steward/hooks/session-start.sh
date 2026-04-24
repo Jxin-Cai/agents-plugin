@@ -3,6 +3,18 @@
 
 mkdir -p _jira-workflow
 
+find_req_config() {
+  local dir="$PWD"
+  while [ "$dir" != "/" ]; do
+    if [ -f "$dir/.requirement-mgmt/config.yaml" ]; then
+      echo "$dir/.requirement-mgmt/config.yaml"
+      return 0
+    fi
+    dir="$(dirname "$dir")"
+  done
+  return 1
+}
+
 echo "## Jira 工作流工作台状态"
 echo ""
 task_count=$(find _jira-workflow -maxdepth 1 -mindepth 1 -type d 2>/dev/null | wc -l | tr -d ' ')
@@ -20,10 +32,10 @@ if [ "$task_count" -gt 0 ]; then
   done
 fi
 
-if [ -f ".requirement-mgmt/config.yaml" ]; then
-  echo "- 需求平台: ✅ 已连接"
+if req_config=$(find_req_config); then
+  echo "- 需求平台: ✅ 已连接 (${req_config})"
 else
-  echo "- 需求平台: ❌ 未配置（可用 /req-setup 配置）"
+  echo "- 需求平台: ❌ 未配置（可直接用 /req 或 /req-setup，缺配置时会引导初始化）"
 fi
 echo ""
 

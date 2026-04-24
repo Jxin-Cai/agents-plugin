@@ -48,7 +48,7 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 1. 从 `$ARGUMENTS` 提取任务描述，生成英文缩写
 2. 使用 `AskUserQuestion` 确认缩写
 3. 创建 `_jira-workflow/{当前日期}-{缩写}/` 及子目录 `context/` `workflows/` `triage/` `boards/` `meta/`
-4. **需求平台连接检查**：检查 `.requirement-mgmt/config.yaml`，若不存在，询问是否配置（调用 `/req-setup`）
+4. **需求平台连接检查**：检查 requirement-mgmt 配置状态；若当前项目缺配置，用 `AskUserQuestion` 询问是否立即进入 `/req-setup` 初始化引导
 5. 初始化 `meta/workflow-state.md`（workflow_mode、completed_steps、next_step）
 6. 用 Glob 扫描 `{任务目录}/workflows/*.md`、`triage/*.md`、`boards/*.md`，按已有产物判定完成阶段（产物文件存在即视为该阶段已完成）
 

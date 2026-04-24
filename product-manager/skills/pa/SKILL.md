@@ -28,8 +28,10 @@ argument-hint: "<当前想做的产品工作或需求描述>"
 - ✅ 先识别当前工作类型，再进入对应 SOP
 - ✅ 如果用户意图不明确，使用 `AskUserQuestion` 让用户选择
 - ✅ 需求型工作中，澄清阶段后必须让用户多选分析维度
+- ✅ 需求平台写操作必须通过 `/req-*` 技能链路完成，不能绕过 requirement-mgmt
 - 🚫 不默认跑完整条需求 SOP
 - 🚫 不因为用户提了一个需求，就自动生成 Story、指标、治理、NFR、路线图全部产物
+- 🚫 不直接 `curl` Jira REST，不直接调用 `core/requirement-mgmt/skills/_providers/*/api.sh`
 - ⏸️ 每个阶段完成后停下来，等用户确认是否继续
 
 ---
@@ -45,12 +47,16 @@ argument-hint: "<当前想做的产品工作或需求描述>"
 - 明确是”企业级 NFR / 性能 / SLA / 安全 / 审计 / 可观测” → **企业级 NFR 模式**
 - 明确是”上线复盘 / 回顾结果 / 提取模式” → **上线复盘模式**
 - 明确是”知识库 / 决策 / 术语 / 模式管理” → **知识库管理模式**
-- 明确是”需求卡操作 / issue 查询 / 状态变更 / 搜索 issue / 评论 issue / 附件上传 / 配置需求平台 / 发布到 Jira / 推送 Jira / publish / 同步到 Jira / sync / 创建 issue / 更新 issue”，或输入为 issue ID 格式（如 `PROJ-123`、`#42`） → **需求平台操作模式**
+- 明确是”发布到 Jira / 推送 Jira / 批量创建故事卡 / 创建 Jira 故事卡 / Story 卡 / publish” → **需求平台发布模式**（调用 `/req-publish`；若当前项目缺配置，会自动引导初始化）
+- 明确是”同步到 Jira / sync / 增量同步 Story / 更新已发布需求” → **需求平台同步模式**（调用 `/req-sync`；若当前项目缺配置，会自动引导初始化）
+- 明确是”需求卡操作 / issue 查询 / 状态变更 / 搜索 issue / 评论 issue / 附件上传 / 配置需求平台 / Jira 测试 / Jira 连通性验证 / 创建 issue / 更新 issue”，或输入为 issue ID 格式（如 `PROJ-123`、`#42`） → **需求平台操作模式**（调用 `/req` 工作台；若当前项目缺配置，会自动引导初始化）
 
 如果无法唯一判断：
 - 使用 `AskUserQuestion` 让用户从以下选项中选择：
   - 需求交付（推荐）
-  - 需求平台操作（查看/搜索/评论/状态变更 issue）
+  - 需求平台发布（发布/推送到 Jira、批量创建故事卡）
+  - 需求平台同步（同步已发布 Story 到 Jira）
+  - 需求平台操作（配置/测试/查询/搜索/评论/状态变更 issue）
   - 产品组合 / 路线图
   - 发现式产品管理
   - 监管 / 企业治理
@@ -86,6 +92,8 @@ argument-hint: "<当前想做的产品工作或需求描述>"
 - 企业级 NFR → 调用 `/enterprise-nfr`
 - 上线复盘 → 调用 `/post-launch-review`
 - 知识库管理 → 调用 `/product-knowledge`
+- 需求平台发布 → 调用 `/req-publish`
+- 需求平台同步 → 调用 `/req-sync`
 - 需求平台操作 → 调用 `/req`
 
 ---
@@ -190,6 +198,7 @@ argument-hint: "<当前想做的产品工作或需求描述>"
 用 `AskUserQuestion` 提供以下选项：
 - 继续补做其他分析维度
 - 发布到 Jira — 调用 `/req-publish`
+- 同步到 Jira — 调用 `/req-sync`
 - 进入上线复盘
 - 管理知识库
 - 结束本次工作

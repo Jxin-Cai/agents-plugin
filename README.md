@@ -34,7 +34,7 @@ git clone git@github.com:Jxin-Cai/agents-plugin.git ~/.claude/plugins/agents-plu
 
 | 插件名 | 说明 | 版本 |
 |--------|------|------|
-| `product-manager` | 产品经理：结构化需求发现、头脑风暴、需求澄清与 PRD 生成 | 1.0.0 |
+| `product-manager` | 产品经理：结构化需求发现、头脑风暴、需求澄清与 PRD 生成 | 3.0.2 |
 
 ## product-manager
 

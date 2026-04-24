@@ -2,7 +2,7 @@
 name: req-sync
 description: 检测本地 Story 文件变更并同步到 Jira——增量更新已发布 issue 的内容
 argument-hint: "<需求目录路径或 slug>"
-allowed-tools: ["Read", "Bash(bash*)", "Write", "AskUserQuestion"]
+allowed-tools: ["Read", "Bash(bash*)", "Write", "AskUserQuestion", "Skill"]
 ---
 
 # 需求同步到 Jira
@@ -27,15 +27,19 @@ allowed-tools: ["Read", "Bash(bash*)", "Write", "AskUserQuestion"]
 - ✅ 只更新有变更的 Story，不做全量覆盖
 - ✅ 同步前展示变更差异，用 `AskUserQuestion` 让用户确认
 - ✅ 同步后更新 jira-sync.yaml 的 hash 和时间戳
+- ✅ 更新 issue 必须调用 `/req-update`
+- ✅ 首次缺配置时必须通过 `/req` 或 `/req-setup` 初始化并保存项目级 `.requirement-mgmt/config.yaml`
 - 🚫 不自动做状态流转（除非用户明确要求）
 - 🚫 不创建新 issue（新增的 Story 应通过 `/req-publish` 处理）
+- 🚫 不直接 `curl` Jira REST，不直接调用 `core/requirement-mgmt/skills/_providers/*/api.sh`
 
 ---
 
 ## 前置条件
 
-1. `meta/jira-sync.yaml` 必须存在（说明已经发布过）
-2. 如果不存在，提示用户先执行 `/req-publish`
+1. 需求平台配置必须可用。同步前先通过 `/req` 的配置检测链路确认；若当前项目还没有 `.requirement-mgmt/config.yaml`，调用 `/req` 或 `/req-setup` 完成初始化，并在初始化后继续当前同步意图
+2. `meta/jira-sync.yaml` 必须存在（说明已经发布过）
+3. 如果不存在，提示用户先执行 `/req-publish`
 
 ---
 

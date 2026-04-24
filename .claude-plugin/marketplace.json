@@ -9,7 +9,7 @@
       "name": "product-manager",
       "source": "./product-manager",
       "description": "Product manager: full lifecycle — requirements discovery, PRD generation, story decomposition, success metrics, post-launch review, knowledge persistence, and cross-plugin orchestration",
-      "version": "2.0.0",
+      "version": "3.0.2",
       "homepage": "https://github.com/Jxin-Cai/agents-plugin",
       "repository": "https://github.com/Jxin-Cai/agents-plugin",
       "author": { "name": "jxin" }
@@ -153,7 +153,7 @@
       "name": "sprint-prioritizer",
       "source": "./sprint-prioritizer",
       "description": "Sprint prioritizer: backlog grooming, priority matrix, and sprint planning",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "homepage": "https://github.com/Jxin-Cai/agents-plugin",
       "repository": "https://github.com/Jxin-Cai/agents-plugin",
       "author": { "name": "jxin" }
@@ -180,7 +180,7 @@
       "name": "jira-workflow-steward",
       "source": "./jira-workflow-steward",
       "description": "Jira workflow steward: workflow design, issue triage, and board optimization",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "homepage": "https://github.com/Jxin-Cai/agents-plugin",
       "repository": "https://github.com/Jxin-Cai/agents-plugin",
       "author": { "name": "jxin" }

@@ -1,7 +1,7 @@
 {
   "name": "sprint-prioritizer",
   "description": "Sprint prioritizer: structured backlog grooming, priority matrix scoring, and sprint planning",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": {
     "name": "jxin"
   },
