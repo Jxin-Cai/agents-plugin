@@ -9,85 +9,175 @@ allowed-tools: ["Read", "Write", "Bash(bash*)", "AskUserQuestion"]
 
 ## Overview
 
-引导用户选择和配置需求管理软件。配置持久化到项目空间的 `.requirement-mgmt/config.yaml`，后续所有需求管理操作自动基于此配置。
+引导用户初始化需求管理配置。配置持久化到当前项目的 `.requirement-mgmt/config.yaml`，后续所有需求管理操作自动复用。
 
-## When to Use
+统一使用以下辅助脚本：
 
-- 项目首次使用需求管理集成
-- 需要更换需求管理软件
-- 需要更新连接配置
+```bash
+REQMGMT_HELPER="core/requirement-mgmt/skills/_lib/setup-helper.sh"
+REQMGMT_DISPATCHER="core/requirement-mgmt/skills/_lib/dispatcher.sh"
+```
 
 ## Implementation
 
 ### Step 1: 检测现有配置
 
-从当前目录向上查找 `.requirement-mgmt/config.yaml`。
-
-- **若存在**：展示当前配置（provider 名称、连接信息摘要），用 AskUserQuestion 询问是否重新配置。若用户选择保留，直接结束。
-- **若不存在**：继续下一步。
-
-### Step 2: 扫描可用 Providers
-
-运行 dispatcher 的 setup 模式获取可用 provider 列表：
+先执行：
 
 ```bash
-bash core/requirement-mgmt/skills/_lib/dispatcher.sh setup
+bash "$REQMGMT_DISPATCHER" status
 ```
 
-输出格式为 `name|display_name`，每行一个。
+- 若 `CONFIG_FOUND=true`：再执行
 
-### Step 3: Provider 选择
+```bash
+bash "$REQMGMT_HELPER" summary
+```
 
-用 AskUserQuestion 让用户选择：
+读取当前 provider、项目根、连接摘要（敏感字段已掩码），然后用 AskUserQuestion 询问：
+- **保留当前配置（推荐）**
+- **重新配置**
 
-> 你的团队使用哪种需求管理软件？
+若用户保留，直接结束。
 
-选项从 Step 2 的输出动态生成。
+### Step 2: 选择 provider
 
-### Step 4: 连接配置
+若 `$ARGUMENTS` 已明确给出 provider，则优先使用；否则先执行：
 
-读取选中 provider 的 `provider.yaml`（位于 `core/requirement-mgmt/skills/_providers/<provider>/provider.yaml`），遍历 `connection_fields`：
+```bash
+bash "$REQMGMT_DISPATCHER" setup
+```
 
-- 对每个 `required: true` 的字段，引导用户输入真实配置值
-- 对每个 `required: false` 的字段，展示默认值并询问是否需要填写
-- 对 `secret: true` 的字段，明确告知这是授权信息/Token，将保存在项目空间的 `.requirement-mgmt/config.yaml` 中，仅供当前项目长期复用
-- 若用户不希望直接保存，可保留旧环境变量模式作为兼容回退，但默认推荐保存到项目空间
+从 `name|display_name` 列表生成 AskUserQuestion 选项，让用户选择 provider。
 
-### Step 5: 持久化
+### Step 3: 读取 provider schema
 
-在项目根目录创建 `.requirement-mgmt/config.yaml`：
+执行：
+
+```bash
+bash "$REQMGMT_HELPER" provider-schema <provider>
+```
+
+该命令会返回标准化 JSON，包含：
+- `connection_fields`
+- `options`
+- `operations`
+
+后续提问以这个 schema 为准。
+
+### Step 4: 采集连接信息
+
+#### Jira
+
+必收集：
+- `base_url`
+- `auth_mode`（`pat` / `idtoken`）
+
+提问规则：
+- `base_url`：要求用户输入 Jira host，例如 `https://jira.example.com`
+- `auth_mode=pat`：要求用户输入 PAT，写入 `connection.token`
+- `auth_mode=idtoken`：
+  1. 先让用户提供或确认现有登录命令 `login_command`
+  2. 明确告知该命令应打开浏览器登录并在 stdout 输出 idtoken
+  3. 经用户确认后执行该命令
+  4. 取 stdout 作为 `connection.token`
+  5. 同时保存 `connection.login_command`
+
+可选项：
+- `ssl_verify`
+- `api_version`
+
+#### GitHub Issues
+
+必收集：
+- `repo`（必须保存，格式 `owner/repo`）
+- `auth_mode`（`gh_cli` / `pat`）
+
+提问规则：
+- `repo`：要求用户输入默认仓库
+- `auth_mode=pat`：要求输入 PAT，写入 `connection.token`
+- `auth_mode=gh_cli`：先执行
+
+```bash
+gh auth status
+```
+
+  - 若已登录：继续
+  - 若未登录：提示用户先执行 `! gh auth login`，登录完成后再继续 setup
+
+### Step 5: 写入配置
+
+先确定目标配置路径：
+
+```bash
+bash "$REQMGMT_HELPER" config-path
+```
+
+然后把采集到的 `connection` / `options` 组织成 JSON 字符串，执行：
+
+```bash
+bash "$REQMGMT_HELPER" write-config <provider> '<connection_json>' '<options_json>'
+```
+
+期望写出的 YAML 形态：
 
 ```yaml
-provider: <selected_provider>
+provider: jira
 connection:
-  <key>: <real_value>
-  ...
+  base_url: https://jira.example.com
+  auth_mode: idtoken
+  token: <runtime token>
+  login_command: <existing command>
 options:
-  ...
+  ssl_verify: true
+  api_version: "2"
 ```
 
-要求：
-- `.requirement-mgmt/` 默认加入 `.gitignore`
-- 这是项目级本地配置，用于第一次授权后长期复用
-- 展示配置摘要时，对敏感字段只展示掩码，不回显完整 token
+```yaml
+provider: github-issues
+connection:
+  repo: owner/repo
+  auth_mode: gh_cli
+options: {}
+```
 
-### Step 6: 验证（可选）
+### Step 6: 确保忽略本地配置
 
-如果用户愿意提供一个测试 issue ID，运行一次 fetch 验证连接：
+执行：
 
 ```bash
-bash core/requirement-mgmt/skills/_lib/dispatcher.sh fetch <TEST_ISSUE_ID>
+bash "$REQMGMT_HELPER" ensure-gitignore
 ```
 
-### Step 7: 确认
+若项目根没有 `.gitignore`，允许创建；若已有但缺少 `.requirement-mgmt/`，则自动追加。
 
-展示最终配置摘要，并提示后续可使用的技能：
-- `/req-fetch <ISSUE_ID>` — 读取 issue
-- `/req-comment <ISSUE_ID> <TEXT>` — 添加评论
-- `/req-search <QUERY>` — 搜索 issue
+### Step 7: 展示结果并可选验证
+
+再次执行：
+
+```bash
+bash "$REQMGMT_HELPER" summary
+```
+
+向用户展示掩码后的配置摘要，并询问是否立即做一次验证。
+
+- Jira：若用户提供测试 issue key，则执行
+
+```bash
+bash "$REQMGMT_DISPATCHER" fetch <ISSUE_ID>
+```
+
+- GitHub：若用户愿意验证，可执行
+
+```bash
+bash "$REQMGMT_DISPATCHER" search "is:open"
+```
+
+或针对具体 issue 执行 `fetch`。
 
 ## Notes
 
-- 首次使用时必须主动引导用户输入 provider、URL、默认仓库、Token 等关键信息
-- 输入后的配置保存在项目空间，后续同项目下直接复用，不再重复询问
-- 若检测到已有配置，仅在用户明确要求时才重新配置
+- 所有敏感字段只展示掩码，禁止回显完整 token
+- `idtoken` 路径只复用用户现有登录命令，不在本技能内新做 OAuth 回调服务
+- 若已有配置，仅在用户明确要求时重配
+- 配置写入当前项目的 `.requirement-mgmt/`，不是全局目录

@@ -2,7 +2,7 @@
 name: req-transition
 description: 执行 issue 状态转换。需提供目标状态名称（不区分大小写）。建议先用 /req-transitions 确认可用选项。
 argument-hint: "<Issue ID> <目标状态名称>"
-allowed-tools: ["Read", "Bash(bash*)"]
+allowed-tools: ["Read", "Bash(bash*)", "AskUserQuestion", "Skill"]
 ---
 
 # Requirement Transition
@@ -34,7 +34,18 @@ bash core/requirement-mgmt/skills/_lib/dispatcher.sh transitions <ISSUE_ID>
 bash core/requirement-mgmt/skills/_lib/dispatcher.sh transition <ISSUE_ID> "<STATUS_NAME>"
 ```
 
-若 dispatcher 报错"未找到 config.yaml"，引导用户先执行 `/req-setup` 完成配置。
+先执行：
+
+```bash
+bash core/requirement-mgmt/skills/_lib/dispatcher.sh status
+```
+
+若返回 `CONFIG_FOUND=false`：
+- 用 AskUserQuestion 询问是否立即初始化
+- 若用户同意，调用 `/req-setup` 完成配置
+- setup 完成后，继续当前 transition 操作
+- 若用户拒绝，则停止并说明当前项目缺少 `.requirement-mgmt/config.yaml`
+
 
 ## Common Mistakes
 

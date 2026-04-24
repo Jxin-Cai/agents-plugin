@@ -6,13 +6,27 @@ set -euo pipefail
 # ---------------------------------------------------------------------------
 # Auth
 # ---------------------------------------------------------------------------
-# REQMGMT_TOKEN or indirection via REQMGMT_TOKEN_ENV
-if [[ -n "${REQMGMT_TOKEN_ENV:-}" ]]; then
-  export GH_TOKEN="${!REQMGMT_TOKEN_ENV}"
-elif [[ -n "${REQMGMT_TOKEN:-}" ]]; then
-  export GH_TOKEN="$REQMGMT_TOKEN"
-fi
-# If neither is set, gh CLI uses its own logged-in session.
+AUTH_MODE="${REQMGMT_AUTH_MODE:-gh_cli}"
+
+case "$AUTH_MODE" in
+  pat)
+    if [[ -n "${REQMGMT_TOKEN_ENV:-}" ]]; then
+      export GH_TOKEN="${!REQMGMT_TOKEN_ENV}"
+    elif [[ -n "${REQMGMT_TOKEN:-}" ]]; then
+      export GH_TOKEN="$REQMGMT_TOKEN"
+    else
+      echo "Error: GitHub auth_mode=pat requires REQMGMT_TOKEN or REQMGMT_TOKEN_ENV." >&2
+      exit 1
+    fi
+    ;;
+  gh_cli)
+    unset GH_TOKEN || true
+    ;;
+  *)
+    echo "Error: unsupported GitHub auth_mode '$AUTH_MODE'. Use 'gh_cli' or 'pat'." >&2
+    exit 1
+    ;;
+esac
 
 REPO="${REQMGMT_REPO:-}"
 
@@ -22,6 +36,17 @@ REPO="${REQMGMT_REPO:-}"
 require_gh() {
   if ! command -v gh &>/dev/null; then
     echo "Error: gh CLI is not installed. Install from https://cli.github.com" >&2
+    exit 1
+  fi
+}
+
+require_gh_auth() {
+  if [[ "$AUTH_MODE" != "gh_cli" ]]; then
+    return 0
+  fi
+
+  if ! gh auth status &>/dev/null; then
+    echo "Error: gh CLI is not authenticated. Run '! gh auth login' and retry." >&2
     exit 1
   fi
 }
@@ -149,6 +174,7 @@ op_not_supported() {
 # Dispatch
 # ---------------------------------------------------------------------------
 require_gh
+require_gh_auth
 
 OPERATION="${1:-}"
 shift || true

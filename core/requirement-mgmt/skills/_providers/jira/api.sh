@@ -25,14 +25,39 @@ resolve_var() {
 
 BASE_URL="$(resolve_var REQMGMT_BASE_URL JIRA_BASE_URL)"
 TOKEN="$(resolve_var REQMGMT_TOKEN JIRA_TOKEN)"
+AUTH_MODE="$(resolve_var REQMGMT_AUTH_MODE "")"
+LOGIN_COMMAND="$(resolve_var REQMGMT_LOGIN_COMMAND "")"
 SSL_VERIFY="$(resolve_var REQMGMT_SSL_VERIFY "")"
 API_VERSION="${REQMGMT_OPT_API_VERSION:-2}"
+
+if [[ -z "$AUTH_MODE" ]]; then
+  AUTH_MODE="pat"
+fi
+
+case "$AUTH_MODE" in
+  pat|idtoken) ;;
+  *)
+    echo "ERROR: unsupported Jira auth_mode '$AUTH_MODE'. Expected 'pat' or 'idtoken'." >&2
+    exit 1
+    ;;
+esac
 
 # Strip trailing slash from base URL
 BASE_URL="${BASE_URL%/}"
 
-if [[ -z "$BASE_URL" || -z "$TOKEN" ]]; then
-  echo "ERROR: REQMGMT_BASE_URL and REQMGMT_TOKEN (or JIRA_BASE_URL/JIRA_TOKEN) must be set." >&2
+if [[ -z "$BASE_URL" ]]; then
+  echo "ERROR: REQMGMT_BASE_URL (or JIRA_BASE_URL) must be set." >&2
+  exit 1
+fi
+
+if [[ -z "$TOKEN" ]]; then
+  if [[ "$AUTH_MODE" == "idtoken" && -n "$LOGIN_COMMAND" ]]; then
+    echo "ERROR: Jira auth_mode=idtoken requires a token at runtime. Re-run /req-setup to refresh it via the configured login command." >&2
+  elif [[ "$AUTH_MODE" == "idtoken" ]]; then
+    echo "ERROR: Jira auth_mode=idtoken requires REQMGMT_TOKEN or JIRA_TOKEN to be set." >&2
+  else
+    echo "ERROR: Jira auth_mode=pat requires REQMGMT_TOKEN or JIRA_TOKEN to be set." >&2
+  fi
   exit 1
 fi
 

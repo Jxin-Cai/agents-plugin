@@ -1,19 +1,32 @@
 # Jira Server / Data Center provider definition
-# Authentication: Personal Access Token (PAT)
+# Authentication: Personal Access Token (PAT) or browser login idtoken
 
 name: jira
 display_name: "Jira (Server/Data Center)"
-auth_type: pat
+auth_type: mixed
 
 connection_fields:
   - name: base_url
     type: string
     required: true
     description: "Jira instance base URL (e.g. https://jira.example.com)"
+  - name: auth_mode
+    type: string
+    required: true
+    default: "pat"
+    allowed:
+      - pat
+      - idtoken
+    description: "Authentication mode: PAT or browser login idtoken"
   - name: token
     type: secret
-    required: true
-    description: "Personal Access Token for authentication"
+    required: false
+    secret: true
+    description: "PAT or idtoken. Required for PAT mode; optional at rest for login-command mode"
+  - name: login_command
+    type: string
+    required: false
+    description: "Existing command that opens browser login and prints an idtoken"
 
 options:
   - name: ssl_verify

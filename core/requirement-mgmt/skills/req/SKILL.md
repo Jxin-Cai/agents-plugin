@@ -28,16 +28,19 @@ REQMGMT_SKILLS="core/requirement-mgmt/skills"
 运行以下命令检测配置状态：
 
 ```bash
-bash "${REQMGMT_SKILLS}/_lib/dispatcher.sh" setup
+bash "${REQMGMT_SKILLS}/_lib/dispatcher.sh" status
 ```
 
-若用户操作非 setup 类，检查 `.requirement-mgmt/config.yaml` 是否存在（dispatcher 会自动检测）。若不存在且用户未明确要求 setup，主动提示：
-
-> 检测到尚未配置需求管理系统，是否先执行配置？
+若用户操作不是 `setup` / `配置` / `初始化`，且检测结果为 `CONFIG_FOUND=false`，必须主动进入初始化引导，而不是让用户自己再跑一次命令。
 
 使用 `AskUserQuestion` 提供选项：
 - **立即配置（推荐）** — 调用 `/req-setup`
-- **跳过，我稍后手动配置**
+- **暂不配置** — 结束当前操作并说明依赖 `.requirement-mgmt/config.yaml`
+
+如果用户选择立即配置：
+1. 调用 `/req-setup`
+2. setup 完成后，继续处理当前 `$ARGUMENTS`
+3. 不要丢失用户原始意图
 
 ---
 

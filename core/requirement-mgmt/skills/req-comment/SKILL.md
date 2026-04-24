@@ -2,7 +2,7 @@
 name: req-comment
 description: 向配置的需求管理系统中的 issue 添加评论。用于记录构建结果、MR 链接、部署状态等里程碑信息。
 argument-hint: "<Issue ID> <评论内容>"
-allowed-tools: ["Read", "Bash(bash*)"]
+allowed-tools: ["Read", "Bash(bash*)", "AskUserQuestion", "Skill"]
 ---
 
 # Requirement Comment
@@ -32,7 +32,18 @@ allowed-tools: ["Read", "Bash(bash*)"]
 bash core/requirement-mgmt/skills/_lib/dispatcher.sh comment <ISSUE_ID> "<COMMENT_TEXT>"
 ```
 
-若 dispatcher 报错"未找到 config.yaml"，引导用户先执行 `/req-setup` 完成配置。
+先执行：
+
+```bash
+bash core/requirement-mgmt/skills/_lib/dispatcher.sh status
+```
+
+若返回 `CONFIG_FOUND=false`：
+- 用 AskUserQuestion 询问是否立即初始化
+- 若用户同意，调用 `/req-setup` 完成配置
+- setup 完成后，继续当前 comment 操作
+- 若用户拒绝，则停止并说明当前项目缺少 `.requirement-mgmt/config.yaml`
+
 
 ### 常见里程碑评论模板
 

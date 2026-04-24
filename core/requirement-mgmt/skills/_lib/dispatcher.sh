@@ -3,7 +3,7 @@ set -euo pipefail
 
 # dispatcher.sh — 需求管理操作的统一入口
 # 用法: dispatcher.sh <operation> [args...]
-# 操作: setup, fetch, comment, transitions, transition, attach, search, create, update
+# 操作: setup, status, fetch, comment, transitions, transition, attach, search, create, update
 #
 # 读取 .requirement-mgmt/config.yaml 中的 provider 配置，
 # 将操作路由到对应 provider 的 api.sh。
@@ -12,6 +12,7 @@ set -euo pipefail
 LIB_DIR="$(cd "$(dirname "$(readlink -f "$0" 2>/dev/null || python3 -c "import os,sys; print(os.path.realpath(sys.argv[1]))" "$0")")" && pwd)"
 SKILLS_ROOT="$(cd "$LIB_DIR/.." && pwd)"
 PROVIDERS_DIR="$SKILLS_ROOT/_providers"
+SETUP_HELPER="$LIB_DIR/setup-helper.sh"
 
 source "$LIB_DIR/config-reader.sh"
 
@@ -20,7 +21,7 @@ shift || true
 
 if [[ -z "$ACTION" ]]; then
     echo "Usage: dispatcher.sh <operation> [args...]" >&2
-    echo "Operations: setup, fetch, comment, transitions, transition, attach, search, create, update" >&2
+    echo "Operations: setup, status, fetch, comment, transitions, transition, attach, search, create, update" >&2
     exit 1
 fi
 
@@ -29,6 +30,11 @@ if [[ "$ACTION" == "setup" ]]; then
     echo "REQMGMT_SETUP_MODE=true"
     echo "PROVIDERS_DIR=$PROVIDERS_DIR"
     list_providers "$PROVIDERS_DIR"
+    exit 0
+fi
+
+if [[ "$ACTION" == "status" ]]; then
+    bash "$SETUP_HELPER" status
     exit 0
 fi
 
