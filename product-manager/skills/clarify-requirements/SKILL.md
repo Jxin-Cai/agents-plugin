@@ -164,6 +164,14 @@ argument-hint: "<功能模块或需求范围>"
 - `completed_steps` 追加 `clarify-requirements`
 - `next_recommended_step`
 - `artifact_paths.clarified`
+- `spec_state: draft`
+- `quality_gate.status: pending`
+- `quality_gate.report_path: ""`
+- `quality_gate.failed_items: []`
+- `slice_status: pending`
+- `uat_status: pending`
+
+每次重新澄清都必须重置质量门、切片和 UAT 状态，避免旧 PRD 或旧 Story 的结果污染新规格。
 
 `next_recommended_step` 的推荐逻辑：
 1. 如果选了 `discovery / enterprise-nfr / governance`，优先推荐这些深度分析

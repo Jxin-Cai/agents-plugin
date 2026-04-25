@@ -39,6 +39,13 @@
 2. 拿到 Epic key 后，创建 Story 并设置 parent
 3. 可选：将 PRD 文档作为附件上传到首个 Epic
 
+### UAT 附件与豁免
+
+- 如果存在 `stories/uat-pack-*.md`，发布预览中必须提示可上传为首个 Epic 附件
+- 如果 `uat_status: pending`，发布前必须让用户选择补齐、豁免或取消
+- 豁免不能无痕跳过，必须记录原因、确认人、确认时间和后续补测动作
+- UAT 附件上传失败不阻断 Issue 创建，但必须记录失败状态，方便后续重试
+
 ### 错误处理
 
 - 单个 issue 创建失败不阻断整体流程
@@ -67,6 +74,16 @@ prd_attachment:
   jira_key: SCRUM-10
   file: prd/prd-auth-2026-04-14.md
   hash: <md5>
+uat_attachment:
+  jira_key: SCRUM-10
+  file: stories/uat-pack-2026-04-14.md
+  hash: <md5>
+  status: uploaded | failed | skipped
+uat_waiver:
+  reason: ""
+  confirmed_by: ""
+  confirmed_at: ""
+  follow_up: ""
 ```
 
 ## 同步规则

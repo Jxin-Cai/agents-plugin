@@ -14,6 +14,7 @@ argument-hint: "<需求周期名称>"
 
 - 需求目录统一使用 `.product-manager/requirements/{YYYY-MM-DD}-{slug}`
 - 复盘只关注 PM 域内的产出、决策和学习，不扩展到跨职能 handoff 设计
+- 复盘必须输出知识回流候选，但写入知识库前仍需用户逐项确认
 - 保存路径统一为 `{需求目录}/review/review-{日期}.md`
 - 引用案例路径时使用完整需求目录，不使用旧式无日期目录写法
 
@@ -35,17 +36,22 @@ argument-hint: "<需求周期名称>"
 
 ## 执行要求
 
-保留现有主流程：
+保留现有主流程并增强知识回流：
 1. 选择复盘对象
 2. 成果对比
 3. 决策质量审计
 4. 模式提取
-5. 用户确认
-6. 保存并同步知识库
+5. 生成知识回流候选清单
+6. 用户确认
+7. 保存复盘产出
+8. 询问是否进入 `/product-knowledge archive-spec`
 
 同步要求：
 - 如果有状态文件，追加 `post-launch-review` 到 `completed_steps`
 - 记录 `artifact_paths.review`
+- 更新 `spec_state: shipped`
+- 将复盘中提取但尚未写入知识库的候选标记为 `knowledge_sync.decision_journal: pending`、`knowledge_sync.domain_glossary: pending`、`knowledge_sync.patterns: pending` 或 `knowledge_sync.product_context: pending`
+- `next_recommended_step` 推荐 `/product-knowledge archive-spec`
 
 <IMPORTANT>
 本技能保留现有复盘闭环，但统一目录契约和引用路径。

@@ -52,12 +52,23 @@
 | `governance` | `regulatory-governance` | 行业监管和企业治理要求转化为产品要求 | `governance/governance-{日期}.md` |
 | `roadmap` | `portfolio-roadmap` | 机会池整理 + 量化优先级 + Now/Next/Later 路线图 | `.product-manager/portfolio/{日期}-{slug}/` |
 
+### SDD 规格闭环增强
+
+| 能力 | 承载技能 | 职责 | 核心产出 / 状态 |
+|------|---------|------|----------------|
+| Spec Quality Gate | `generate-prd` | 检查完整性、可测性、一致性、可追溯性、风险透明度 | `prd/spec-quality-gate-{日期}.md`、`quality_gate.status` |
+| 可独立交付切片 | `story-decompose` | 检查 Story 是否具备独立价值、独立验收、跨层闭环、依赖与回滚说明 | `slice_status`、Story 切片矩阵 |
+| 规格状态机 | `pa` + 各阶段技能 | 维护 draft → approved → in-development → shipped → retired | `meta/workbench-state.md` |
+| UAT 验收包 | `story-decompose` | 将 Story、指标、NFR、治理要求转成 UAT 验收清单 | `stories/uat-pack-{日期}.md`、`uat_status` |
+| 规格归档与知识回流 | `post-launch-review` + `product-knowledge archive-spec` | 从复盘提取可复用决策、术语、模式、产品约束 | `knowledge_sync.archive`、`spec_state: retired` |
+
 ### 闭环与知识沉淀
 
 | 技能 | 职责 | 核心产出 |
 |------|------|---------|
-| `post-launch-review` | 上线复盘：功能交付评估、指标对比、决策审计、模式提取 | `review/review-{日期}.md` |
-| `product-knowledge` | 知识库管理：决策日志、领域术语、需求模式、产品上下文 | `.product-manager/intelligence/` |
+| `post-launch-review` | 上线复盘：功能交付评估、指标对比、决策审计、知识回流候选提取 | `review/review-{日期}.md` |
+| `product-knowledge` | 知识库管理：决策日志、领域术语、需求模式、产品上下文、规格归档 | `.product-manager/intelligence/` |
+
 
 ## 典型工作流
 
@@ -105,6 +116,18 @@
   -> PRD vs 实际对比 -> 决策审计 -> 模式沉淀到知识库
 ```
 
+### 场景 6：SDD 规格闭环
+
+```
+/pa 做一个高风险支付风控需求
+  -> clarify-requirements（澄清并选择 prd/story）
+  -> generate-prd（生成 PRD + Spec Quality Gate）
+  -> story-decompose（独立交付切片 + UAT 验收包）
+  -> req-publish（质量门 / 切片 / UAT 守卫通过后发布）
+  -> post-launch-review（复盘并提取知识回流候选）
+  -> product-knowledge archive-spec（归档并写入知识库）
+```
+
 ## 目录结构
 
 ### 插件结构
@@ -142,7 +165,7 @@ product-manager/
   domain/                             # 领域知识、风暴、澄清产出
   discovery/                          # 发现式验证产出
   prd/                                # PRD 文档
-  stories/                            # Story 清单
+  stories/                            # Story 清单与 UAT 验收包
   metrics/                            # 成功指标
   nfr/                                # 非功能需求
   governance/                         # 治理分析
@@ -177,6 +200,10 @@ product-manager/
 | `completed_steps` | 已完成的步骤 |
 | `next_recommended_step` | 推荐的下一步 |
 | `artifact_paths` | 各阶段产物路径 |
+| `spec_state` | 规格状态机：draft / approved / in-development / shipped / retired |
+| `quality_gate` | Spec Quality Gate 状态、报告路径和失败项 |
+| `slice_status` | Story 是否达到独立交付切片标准 |
+| `uat_status` | UAT 验收包状态：pending / ready / waived |
 | `knowledge_sync` | 知识库同步状态（可选） |
 
 状态文件使后续技能可以：

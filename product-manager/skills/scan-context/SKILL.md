@@ -44,6 +44,15 @@ argument-hint: "<需求范围描述>"
 - `completed_steps: []`
 - `next_recommended_step: scan-context`
 - `artifact_paths: {}`
+- `spec_state: draft`
+- `quality_gate.status: pending`
+- `quality_gate.report_path: ""`
+- `quality_gate.failed_items: []`
+- `slice_status: pending`
+- `uat_status: pending`
+- `state_history: []`
+
+如果状态文件已存在但缺少 SDD 闭环字段，按上述默认值补齐。
 
 ---
 

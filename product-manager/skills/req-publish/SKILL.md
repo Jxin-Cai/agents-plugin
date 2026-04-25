@@ -24,6 +24,9 @@ allowed-tools: ["Read", "Bash(bash*)", "Write", "AskUserQuestion", "Skill"]
 ## 强制执行规则
 
 - ✅ 始终用中文与用户沟通
+- ✅ 发布前必须检查 `quality_gate.status`、`slice_status`、`uat_status`
+- ✅ `uat_status: waived` 时必须记录豁免原因
+- ✅ UAT 验收包存在时，询问是否作为附件上传到首个 Epic
 - ✅ 发布前必须展示预览，用 `AskUserQuestion` 让用户确认
 - ✅ 先创建 Epic、再创建 Story（Story 依赖 Epic key）
 - ✅ 每次发布后写入 `meta/jira-sync.yaml` 记录映射
@@ -41,6 +44,14 @@ allowed-tools: ["Read", "Bash(bash*)", "Write", "AskUserQuestion", "Skill"]
 1. 需求平台配置必须可用。发布前先通过 `/req` 的配置检测链路确认；若当前项目还没有 `.requirement-mgmt/config.yaml`，调用 `/req` 或 `/req-setup` 完成初始化，并在初始化后继续当前发布意图
 2. Story 清单必须存在：`{需求目录}/stories/stories-*.md`
 3. 读取 `meta/workbench-state.md` 确认 `story-decompose` 已完成
+4. 发布守卫：
+   - `quality_gate.status` 必须为 `passed`，否则推荐回到 `/generate-prd`
+   - `slice_status` 应为 `ready`，否则推荐回到 `/story-decompose` 修订切片
+   - `uat_status` 必须为 `ready` 或 `waived`
+5. 如果 `uat_status: pending`，使用 `AskUserQuestion` 让用户选择：
+   - **先补 UAT 验收包（推荐）** — 回到 `/story-decompose`
+   - **记录 UAT 豁免并继续** — 写入豁免原因后继续发布
+   - **取消发布**
 
 如果缺少 Story 清单，向用户说明并推荐先执行 `/story-decompose`。
 
@@ -166,6 +177,11 @@ Epic 2: ...
 如果 PRD 文件存在，询问是否上传到首个 Epic：
 - 调用 `/req-attach <epic_key> <prd_file>`
 
+如果 UAT 验收包存在，询问是否上传到首个 Epic：
+- 调用 `/req-attach <epic_key> <uat_pack_file>`
+
+如果用户选择 UAT 豁免，必须把豁免原因写入 `meta/jira-sync.yaml` 的 `uat_waiver` 字段。
+
 ---
 
 ## Step 7: 写入映射文件
@@ -181,6 +197,8 @@ Epic 2: ...
 更新 `meta/workbench-state.md`：
 - `completed_steps` 追加 `req-publish`
 - `artifact_paths.jira_sync` 指向 `meta/jira-sync.yaml`
+- `spec_state: in-development`
+- `state_history` 追加从 `approved` 到 `in-development` 的迁移记录
 
 ---
 

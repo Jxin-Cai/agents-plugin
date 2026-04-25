@@ -16,9 +16,46 @@
 
 唯一状态文件：`meta/workbench-state.md`
 
-记录 `workflow_mode`、`selected_dimensions`、`completed_steps`、`next_recommended_step`、`artifact_paths`。涉及知识库同步时追加 `knowledge_sync`（synced / pending）。
+基础字段：`workflow_mode`、`slug`、`requirement_dir`、`selected_dimensions`、`completed_steps`、`next_recommended_step`、`artifact_paths`。
 
-运行时状态只放这里，不写进 PRD frontmatter。
+SDD 闭环字段：
+
+```yaml
+spec_state: draft | approved | in-development | shipped | retired
+quality_gate:
+  status: pending | passed | failed
+  report_path: ""
+  failed_items: []
+slice_status: pending | ready | partial
+uat_status: pending | ready | waived
+state_history:
+  - from: draft
+    to: approved
+    at: {YYYY-MM-DD}
+    reason: Spec Quality Gate passed
+knowledge_sync:
+  decision_journal: initialized | synced | pending
+  domain_glossary: initialized | synced | pending
+  patterns: initialized | synced | pending
+  product_context: initialized | synced | pending
+  archive: synced | pending
+```
+
+缺失新字段的旧状态文件必须按默认值补齐：`spec_state: draft`、`quality_gate.status: pending`、`slice_status: pending`、`uat_status: pending`。
+
+运行时状态只放这里；PRD frontmatter 的 `status` 仅镜像 `spec_state`，不承载执行过程细节。
+
+## 规格状态机
+
+| 状态 | 进入条件 | 守卫 |
+|------|----------|------|
+| `draft` | 完成需求澄清或 PRD 仍需修订 | 不允许发布到需求平台 |
+| `approved` | PRD 通过 Spec Quality Gate | 可进入 Story 切片和 UAT |
+| `in-development` | Story 已发布到 Jira/需求平台 | 需要记录 `jira-sync.yaml` |
+| `shipped` | 完成上线复盘 | 知识回流候选应标记 pending |
+| `retired` | 完成归档与知识回流 | 需求周期只读归档 |
+
+发布守卫：`quality_gate.status` 必须为 `passed`，`slice_status` 应为 `ready`，`uat_status` 必须为 `ready` 或 `waived`。如不满足，必须停下来让用户选择补齐、豁免或取消。
 
 ## PRD frontmatter（v2）
 

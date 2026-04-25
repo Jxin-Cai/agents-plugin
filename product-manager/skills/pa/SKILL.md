@@ -128,6 +128,15 @@ argument-hint: "<当前想做的产品工作或需求描述>"
 - `completed_steps: []`
 - `next_recommended_step`
 - `artifact_paths`
+- `spec_state: draft`
+- `quality_gate.status: pending`
+- `quality_gate.report_path: ""`
+- `quality_gate.failed_items: []`
+- `slice_status: pending`
+- `uat_status: pending`
+- `state_history: []`
+
+如果恢复旧状态文件时缺少 SDD 闭环字段，先按以上默认值补齐，再继续判断下一步。
 
 ### 2.2 接续判断
 
@@ -137,6 +146,9 @@ argument-hint: "<当前想做的产品工作或需求描述>"
 - 有 context 但没有 `brainstorm-*.md` → 推荐 `/brainstorm-requirements`
 - 有 brainstorm 但没有 `clarified-*.md` → 推荐 `/clarify-requirements`
 - 有 clarified 且 `selected_dimensions` 为空 → 回到 `/clarify-requirements` 补做维度选择
+- 有 `prd` 维度但 `quality_gate.status != passed` → 推荐 `/generate-prd` 补齐 PRD 与 Spec Quality Gate
+- 有 `story` 维度但 `slice_status != ready` → 推荐 `/story-decompose` 补齐独立交付切片
+- `uat_status == pending` 且用户准备发布 → 先推荐生成 UAT 验收包或记录豁免
 - 有 `selected_dimensions` → 只推荐对应维度的下一步
 
 如果已有产物，先向用户展示接续状态，再问：
@@ -172,9 +184,10 @@ argument-hint: "<当前想做的产品工作或需求描述>"
 
 推荐顺序：
 1. `discovery / enterprise-nfr / governance`（如已选择）
-2. `prd`
-3. `story / success-metrics`
-4. `roadmap`
+2. `prd` + Spec Quality Gate
+3. `story` + 独立交付切片检查 + UAT 验收包
+4. `success-metrics / roadmap`
+5. `req-publish`（仅当质量门通过、切片 ready、UAT ready 或 waived）
 
 每完成一个 SOP：
 - 更新 `meta/workbench-state.md` 的 `completed_steps`、`next_recommended_step`、`artifact_paths`
@@ -197,9 +210,11 @@ argument-hint: "<当前想做的产品工作或需求描述>"
 
 用 `AskUserQuestion` 提供以下选项：
 - 继续补做其他分析维度
+- 生成 / 刷新 UAT 验收包（如 Story 已完成）
 - 发布到 Jira — 调用 `/req-publish`
 - 同步到 Jira — 调用 `/req-sync`
 - 进入上线复盘
+- 归档并知识回流 — 调用 `/product-knowledge archive-spec`
 - 管理知识库
 - 结束本次工作
 

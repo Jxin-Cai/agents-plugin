@@ -1,7 +1,7 @@
 ---
 name: product-knowledge
 description: 产品知识库管理——初始化、查看、添加和维护公司/产品级知识，并同步工作台状态
-argument-hint: "<操作：init | view | add-decision | add-term | add-pattern | update-context>"
+argument-hint: "<操作：init | view | add-decision | add-term | add-pattern | update-context | archive-spec>"
 ---
 
 # 产品知识库管理
@@ -26,6 +26,7 @@ argument-hint: "<操作：init | view | add-decision | add-term | add-pattern | 
 - ✅ 知识库操作前先展示当前状态
 - ✅ 写入前向用户确认内容
 - ✅ 如果当前工作挂在某个需求目录下，尽量同步 `meta/workbench-state.md`
+- ✅ `archive-spec` 必须逐项确认知识回流内容后再写入知识库
 - 🚫 不在没有用户确认的情况下修改已有知识条目
 - 🚫 不记录临时性、一次性的信息
 - 📋 所有写入操作同步更新 `changelog.md`
@@ -63,6 +64,7 @@ argument-hint: "<操作：init | view | add-decision | add-term | add-pattern | 
 - `add-term`
 - `add-pattern`
 - `update-context`
+- `archive-spec`
 
 否则使用 `AskUserQuestion` 展示菜单：
 - 初始化知识库
@@ -71,6 +73,7 @@ argument-hint: "<操作：init | view | add-decision | add-term | add-pattern | 
 - 添加领域术语
 - 添加需求模式
 - 更新产品上下文
+- 归档规格并知识回流
 
 **⏸️ 等待用户选择。**
 
@@ -174,6 +177,43 @@ argument-hint: "<操作：init | view | add-decision | add-term | add-pattern | 
 
 ---
 
+## 操作 G: 归档规格并知识回流
+
+适用场景：上线复盘已完成，`meta/workbench-state.md` 中存在 `spec_state: shipped` 或 `artifact_paths.review`。
+
+执行步骤：
+1. 定位需求目录，读取：
+   - `meta/workbench-state.md`
+   - `review/review-*.md`
+   - `prd/prd-*.md`
+   - `stories/stories-*.md`
+   - `stories/uat-pack-*.md`（如存在）
+   - `meta/jira-sync.yaml`（如存在）
+2. 从复盘的“知识回流候选清单”提取候选项，按类型分组：
+   - 决策 → `decision-journal.md`
+   - 术语 → `domain-glossary.md`
+   - 模式 → `patterns.md`
+   - 产品约束 → `product-context.md`
+3. 向用户展示候选项，不自动写入。
+4. 使用 `AskUserQuestion` 逐组确认：写入 / 跳过 / 修改后写入。
+5. 写入被确认的内容，并追加 `changelog.md`。
+6. 更新状态文件：
+   - `knowledge_sync.decision_journal: synced`（如有写入）
+   - `knowledge_sync.domain_glossary: synced`（如有写入）
+   - `knowledge_sync.patterns: synced`（如有写入）
+   - `knowledge_sync.product_context: synced`（如有写入）
+   - `knowledge_sync.archive: synced`
+   - `spec_state: retired`
+   - `completed_steps` 追加 `product-knowledge archive-spec`
+   - `state_history` 追加从 `shipped` 到 `retired` 的迁移记录
+
+归档完成后展示：
+- 写入了哪些知识库文件
+- 跳过了哪些候选项及原因
+- 需求目录是否已进入 retired 状态
+
+---
+
 ## Step 3: 菜单
 
 操作完成后，使用 `AskUserQuestion` 展示：
@@ -190,11 +230,12 @@ argument-hint: "<操作：init | view | add-decision | add-term | add-pattern | 
 
 ```yaml
 knowledge_sync:
-  decision_journal: synced | pending
-  domain_glossary: synced | pending
-  patterns: synced | pending
-  product_context: synced | pending
-  last_synced_items: [decision, term, pattern]
+  decision_journal: initialized | synced | pending
+  domain_glossary: initialized | synced | pending
+  patterns: initialized | synced | pending
+  product_context: initialized | synced | pending
+  archive: synced | pending
+  last_synced_items: [decision, term, pattern, archive]
 ```
 
 如果当前需求在澄清、PRD、复盘中产生了新术语 / 决策 / 模式，但用户尚未确认写入知识库，应标记为 `pending`。

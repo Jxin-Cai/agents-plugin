@@ -16,8 +16,9 @@ argument-hint: "<项目名称或需求目录>"
 
 使用 Read 工具加载以下引用文件，严格遵守其中规则：
 
-- `references/prd-writing-guide.md` — PRD 写作规范
+- `references/prd-writing-guide.md` — PRD 写作规范与 Spec Quality Gate 判定规则
 - `assets/prd-template.md` — PRD 输出模板
+- `assets/spec-quality-gate-template.md` — 规格质量门报告模板
 
 ---
 
@@ -89,7 +90,7 @@ argument-hint: "<项目名称或需求目录>"
   - 做了 governance → 填写治理 / 合规摘要
 - 后续 PM 工作章节根据 `selected_dimensions` 标记待做 / 已完成 / 未选择
 
-## Step 3: 质量自检
+## Step 3: 质量自检与 Spec Quality Gate
 
 严格检查：
 - 所有用户角色都有对应功能点
@@ -98,6 +99,24 @@ argument-hint: "<项目名称或需求目录>"
 - `requirement_dir` 使用 `.product-manager/requirements/{YYYY-MM-DD}-{slug}`
 - 已选分析维度与正文摘要一致
 - 没有将运行时状态写成正文内容
+
+按 `references/prd-writing-guide.md` 的 Spec Quality Gate 规则生成独立质量门报告，使用 `assets/spec-quality-gate-template.md` 的结构。
+
+质量门必须给出：
+- 总结论：`passed` 或 `failed`
+- 五个维度的逐项结论：完整性、可测性、一致性、可追溯性、风险透明度
+- 失败项与影响范围
+- 修复建议
+- Go / No-Go 结论
+
+如果 Gate 失败：
+1. 向用户展示失败项和修复建议
+2. 使用 `AskUserQuestion` 询问：修订 PRD / 保留草稿 / 取消保存
+3. 未得到确认前不要把 `spec_state` 改为 `approved`
+
+如果 Gate 通过：
+- PRD frontmatter 的 `status` 可设为 `approved`
+- 状态文件写入 `quality_gate.status: passed`
 
 ## Step 4: 知识库一致性检查
 
@@ -112,6 +131,7 @@ argument-hint: "<项目名称或需求目录>"
 - 功能点数
 - 已纳入的分析维度
 - 开放问题数
+- Spec Quality Gate 结论与失败项数量
 - frontmatter 关键信息
 
 使用 `AskUserQuestion` 询问：
@@ -125,9 +145,18 @@ argument-hint: "<项目名称或需求目录>"
 保存到：
 `{需求目录}/prd/prd-{项目名}-{日期}.md`
 
+同时保存质量门报告到：
+`{需求目录}/prd/spec-quality-gate-{日期}.md`
+
 同时更新 `meta/workbench-state.md`：
 - `completed_steps` 追加 `generate-prd`
 - `artifact_paths.prd`
+- `artifact_paths.spec_quality_gate`
+- `quality_gate.status: passed | failed`
+- `quality_gate.report_path`
+- `quality_gate.failed_items`
+- Gate 通过时 `spec_state: approved`
+- Gate 失败时 `spec_state: draft`
 - `next_recommended_step`
 
 推荐逻辑：
