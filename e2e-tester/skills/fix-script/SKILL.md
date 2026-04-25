@@ -42,7 +42,19 @@ git diff HEAD~5..HEAD -- {source_paths}
 
 ### Step 4: 更新注册表
 
-`last_passed=today, fail_count=0`，按需更新 `.e2e-tests/shared/registry/{domain}.yaml` 中的 api_endpoints/source_paths。
+通过后更新 `.e2e-tests/shared/registry/{domain}.yaml`：
+- `last_passed=today`
+- `fail_count=0`
+- 按需更新 `api_endpoints` / `source_paths`
+- 如果修复改变了脚本执行方式或维护策略，同步更新：
+  - `execution_mode`
+  - `parallel_safe`
+  - `recommended_workers`
+  - `retry_policy`
+  - `trace_policy`
+  - `abstraction_mode`
+
+如果这些字段没有变化，保持原值，不要为了“补齐”而盲目重置；如果旧条目缺失这些字段，则按 `skills/e2e/references/registry-conventions.md` 的默认值补齐后，再写入本次确认后的现值。
 
 ## 约束
 

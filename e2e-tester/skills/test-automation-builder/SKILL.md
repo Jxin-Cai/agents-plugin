@@ -52,7 +52,16 @@ allowed-tools: Read, Glob, Write, Agent, AskUserQuestion, Bash(mkdir*), Bash(npx
 - `.e2e-tests/shared/asset-catalog.md`（跨域脚本参考）
 - 当前 run 的 `index.md`（已沉淀资产区块）
 
-必须登记：脚本路径、覆盖场景/case、依赖资产、source_paths、automation_confidence、限制说明。
+必须登记：
+- 脚本路径、覆盖场景/case、依赖资产、source_paths、automation_confidence、限制说明
+- `execution_mode`：`serial | parallel`
+- `parallel_safe`：是否允许与其他脚本并行
+- `recommended_workers`：推荐并行度
+- `retry_policy`：`none | on-failure-once | flaky-only`
+- `trace_policy`：`off | on-failure | on-retry | always`
+- `abstraction_mode`：`inline | helper | page-object | keyword`
+
+登记这些字段时不要留空；如果当前脚本仍沿用旧实现方式，也要明确写出现值，而不是省略。判断口径以 `skills/e2e/references/registry-conventions.md` 为准。
 
 ### 落盘检查
 

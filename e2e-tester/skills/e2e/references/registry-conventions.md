@@ -28,6 +28,12 @@ scripts:
     api_endpoints: []
     source_paths: []        # 业务源码 glob，用于 impact-analysis
     persona: {role}
+    execution_mode: serial | parallel
+    parallel_safe: true
+    recommended_workers: 1
+    retry_policy: none | on-failure-once | flaky-only
+    trace_policy: off | on-failure | on-retry | always
+    abstraction_mode: inline | helper | page-object | keyword
     last_passed: {YYYY-MM-DD} | null
     last_failed: {YYYY-MM-DD} | null
     fail_count: 0
@@ -38,7 +44,15 @@ scripts:
     last_updated: {YYYY-MM-DD}
 ```
 
-必填：type, path, scenario, business_scenario, risk_level, api_endpoints, source_paths, persona, automation_confidence
+必填：type, path, scenario, business_scenario, risk_level, api_endpoints, source_paths, persona, execution_mode, parallel_safe, recommended_workers, retry_policy, trace_policy, abstraction_mode, automation_confidence
+
+兼容旧条目时，缺失字段按以下默认值理解：
+- `execution_mode: serial`
+- `parallel_safe: false`
+- `recommended_workers: 1`
+- `retry_policy: none`
+- `trace_policy: on-failure`
+- `abstraction_mode: inline`
 
 更新时机：新建（全字段）| PASS（last_passed, fail_count=0）| FAIL（last_failed, fail_count+=1）| 修复（last_passed, fail_count=0, last_updated）
 
@@ -55,7 +69,7 @@ suites:
     filter: { risk_level: High }
 ```
 
-scripts 优先于 filter。过滤器支持：risk_level, tags, covers, domain, type, stale。多条件 AND。
+scripts 优先于 filter。过滤器支持：risk_level, tags, covers, domain, type, stale, execution_mode, parallel_safe。多条件 AND。
 
 ## 资产目录 — `shared/asset-catalog.md`
 
