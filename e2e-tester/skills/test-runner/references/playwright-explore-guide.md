@@ -1,6 +1,6 @@
 # Playwright 探索执行指南
 
-仅路径 C 时加载。探索是侦察手段：验证场景 + 提炼 API 调用链（为后续 API 脚本沉淀提供输入）。
+仅路径 C 时加载。探索是侦察手段：真实浏览器验证场景 + 执行自然语言/Markdown 验收步骤 + 采集截图/console/network + 提炼 API 调用链（为后续 Playwright/API 脚本沉淀提供输入）。
 
 ## 路径纪律
 
@@ -19,18 +19,22 @@
 
 从 `index.md` frontmatter 读取 `evidence_level`（light / standard / strict）。缺失时视为 `standard`。
 
-先创建证据目录结构：`mkdir -p {evidence_root}/{screenshots,videos,api}`
+先创建证据目录结构：`mkdir -p {evidence_root}/{screenshots,snapshots,videos,api,network,console}`
 
 再按级别补充子目录：
 - `screenshots/` — 所有级别
 - `api/` — 所有级别
+- `network/` — standard / strict 或失败时
+- `console/` — standard 出错时、strict 全程
 - `videos/` — 按需录屏
-- `snapshots/` — 仅 strict
+- `snapshots/` — strict 或页面探索关键点
 - strict 时立即调用 `browser_console_messages(level: "debug", filename: "{evidence_root}/console-full.txt")` 开始全量日志采集
 
-### C.1 打开浏览器
+### C.1 打开浏览器并自动探索
 
-开启后立即关注网络请求——每步操作触发的 API 调用都要记录。
+从 `shared/env/{target_env}.yaml` 读取 `browser`、`start_urls`、`preflight_checks` 和 `stability`。先执行 preflight；失败则 BLOCKED。
+
+打开页面后先调用 `browser_snapshot` 建立可访问性视图，再决定点击/输入目标。不要盲点坐标或依赖截图猜测。开启后立即关注网络请求——每步操作触发的 API 调用都要记录。
 
 ### C.1.1 屏蔽第三方干扰脚本
 
@@ -57,10 +61,12 @@ async (page) => {
 
 对每个 case：
 
-1. **Given**：确认角色/登录/数据状态。不成立 → BLOCKED。记录认证 API。
+先读取 scenario 的 Step Mapping。将用户原始验收步骤映射为 `AS-001`、`AS-002` 等 step ref；每次操作、截图、console/network 记录都标注对应 step ref。
+
+1. **Given**：确认角色/登录/数据状态。不成立 → BLOCKED。记录认证 API、账号角色、start URL、preflight 结果。
    - 截图：`browser_take_screenshot(filename: "{evidence_root}/screenshots/given-verified.png")`（所有级别）
 
-2. **When**：`browser_snapshot` 定位 → `browser_click/type/fill_form` 操作 → `browser_wait_for` 等待。
+2. **When**：`browser_snapshot` 定位 → `browser_click/type/fill_form/select_option` 操作 → `browser_wait_for` 等待。每一步优先使用 role/text/testid 等稳定目标，避免脆弱 CSS 层级。
 
    按 evidence_level 分级采集：
 
@@ -71,16 +77,18 @@ async (page) => {
    **standard**：
    - 每个 When 步骤完成后截图：`browser_take_screenshot(filename: "{evidence_root}/screenshots/step-{NN}-{slug}.png")`
    - 每步操作前后调用 `browser_network_requests`（见 C.2.1）
+   - 出现错误或 oracle 未满足时调用 `browser_console_messages(level: "error", filename: "{evidence_root}/console/step-{NN}-error.txt")`
 
    **strict**：
    - 每个原子操作（click/type/fill/select/等待完成）后截图，使用子步骤编号：`{evidence_root}/screenshots/step-{NN}a-{slug}.png`、`step-{NN}b-{slug}.png`
    - 每个原子操作后调用 `browser_snapshot(filename: "{evidence_root}/snapshots/step-{NN}-snapshot.md")`
    - 每步操作前后调用 `browser_network_requests`（见 C.2.1）
+   - 出现错误或 oracle 未满足时调用 `browser_console_messages(level: "error", filename: "{evidence_root}/console/step-{NN}-error.txt")`
 
 3. **Then**：按 oracle_types 分层验证（UI snapshot / API 捕获 / 数据查询 / 副作用检查）。关键 oracle 缺证据 → 不判 PASS。
    - 截图：`browser_take_screenshot(filename: "{evidence_root}/screenshots/then-result.png")`（所有级别）
-   - standard 出错时：`browser_console_messages(level: "error", filename: "{evidence_root}/console-error.txt")`
-   - strict：`browser_console_messages(level: "debug", filename: "{evidence_root}/console-full.txt")` 刷新全量日志
+   - standard 出错时：`browser_console_messages(level: "error", filename: "{evidence_root}/console/then-error.txt")`
+   - strict：`browser_console_messages(level: "debug", filename: "{evidence_root}/console/console-full.txt")` 刷新全量日志
    - 若控制台日志包含被屏蔽域名报错，在报告中归类到 `third-party-noise`，不计入失败归因
 
 ### C.2.1 网络请求捕获
@@ -99,11 +107,11 @@ browser_network_requests:
 **light**：
 - 仅在核心业务操作前后各调一次
 - 从 diff 中识别最关键的业务 API（POST/PUT/DELETE 优先）
-- 保存为 `{evidence_root}/api/key-api-{slug}.json`，内容为 `{request: {method, url, body}, response: {status, body}}`
+- 保存为 `{evidence_root}/api/key-api-{slug}.json`，内容为 `{request: {method, url, body}, response: {status, body}}`；原始 network 摘要保存到 `{evidence_root}/network/key-network-{slug}.txt`
 
 **standard / strict**：
 - 每步操作前后各调一次，对比识别新增请求
-- 每个新增 API 调用单独保存为 `{evidence_root}/api/step-{NN}-{METHOD}-{slug}.json`
+- 每个新增 API 调用单独保存为 `{evidence_root}/api/step-{NN}-{METHOD}-{slug}.json`，对应原始 network 片段保存到 `{evidence_root}/network/step-{NN}-{slug}.txt`
 - POST/PUT/DELETE 记录 requestBody，认证请求记录 token 方式
 
 备用方案（信息不足时）：用 `browser_evaluate` 注入 fetch 拦截器记录 `window.__apiLog`。
@@ -119,12 +127,12 @@ browser_network_requests:
 ```markdown
 # 证据清单: {case-id}
 
-| 序号 | 类型 | 文件路径 | 步骤 | 说明 |
-|------|------|----------|------|------|
-| 1 | screenshot | screenshots/given-verified.png | Given | 前置状态确认 |
-| 2 | screenshot | screenshots/step-01-click-submit.png | When-1 | 提交按钮点击后 |
-| 3 | api | api/step-01-POST-create-order.json | When-1 | 创建订单请求/响应 |
-| ... | | | | |
+| 序号 | 类型 | 文件路径 | 步骤 | Acceptance Step | 说明 |
+|------|------|----------|------|-----------------|------|
+| 1 | screenshot | screenshots/given-verified.png | Given | AS-000 | 前置状态确认 |
+| 2 | screenshot | screenshots/step-01-click-submit.png | When-1 | AS-001 | 提交按钮点击后 |
+| 3 | api | api/step-01-POST-create-order.json | When-1 | AS-001 | 创建订单请求/响应 |
+| ... | | | | | |
 ```
 
 ### C.3 提炼 API 调用链摘要
@@ -132,10 +140,15 @@ browser_network_requests:
 每 case 执行后整理：认证 API → 业务操作 API（含参数和返回）→ 验证查询 API → 不可 API 化的操作。
 此摘要是 `test-automation-builder` 生成 API 脚本的核心输入。
 
-### C.4 失败分类
+### C.4 失败分类与 guardrails
 
-product defect / environment defect / data-setup defect / automation defect / requirement-oracle unclear / third-party-noise
-疑似偶发标记 flaky suspicion: low/medium/high。
+失败类型：product defect / environment defect / data-setup defect / automation defect / requirement-oracle unclear / third-party-noise。疑似偶发标记 flaky suspicion: low/medium/high。
+
+重试规则：
+- 每 case 最多一次同条件重试；只允许页面未稳定、短暂网络抖动、flaky suspicion 为 medium/high 时触发。
+- 浏览器会话最多重建一次；重建后仍失败则停止并归因。
+- 权限不足、业务状态错误、真实产品报错、oracle 不清、preflight 失败不重试。
+- automation defect 才建议交给 `fix-script`，并附上报告、evidence manifest、console/network artifact。
 
 ### C.5 关闭浏览器
 
@@ -148,5 +161,9 @@ product defect / environment defect / data-setup defect / automation defect / re
 - 每 case 的截图文件列表
 - 每 case 的 API 记录文件列表
 - evidence_level 实际执行级别
+- acceptance step ref 到 artifact 的映射
+- console/network artifact 列表
+- retry/restart/fix history
 - 第三方脚本屏蔽规则来源（env/default）
 - 认证 API 调用链摘要（供认证脚本沉淀使用）
+- export recommendation：none / recommended / blocked，及原因

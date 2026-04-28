@@ -28,8 +28,10 @@ allowed-tools: Read, Write, Glob, AskUserQuestion
 | 触发原因 | 发布前 / 缺陷 / 变更 / 巡检 |
 | 成功判据 | 具体到业务承诺或放行条件 |
 | 不可接受结果 | 一出现就判失败的信号 |
-| 交付物 | 报告 / 证据 / 脚本 |
+| 交付物 | 报告 / 证据 / 脚本 / Playwright 用例导出 |
 | 证据级别 | light / standard / strict（默认建议：release-gate→strict，design-lite→light，其他→standard） |
+| 验收来源 | 用户口述 / Markdown checklist / 外部文档 / issue；保留原文，不要只摘要 |
+| 导出意图 | 成功后是否需要沉淀 `.spec.ts` 或 auth/helper 脚本 |
 
 ### Step 2: 边界、角色、依赖
 
@@ -58,6 +60,12 @@ allowed-tools: Read, Write, Glob, AskUserQuestion
 ## 基本信息
 - 被测对象 / 风险等级 / 入口 / 环境
 
+## Acceptance Source
+- source_type: 用户口述 / Markdown checklist / 外部文档 / issue
+- raw_text: |
+  {保留用户原始验收步骤或链接摘要}
+- export_intent: none | suggest | required
+
 ## 成功判据 / 不可接受结果 / 边界
 ## 角色与权限 / 前置状态
 ## 依赖与策略（表格）
@@ -69,7 +77,7 @@ allowed-tools: Read, Write, Glob, AskUserQuestion
 
 已有文件时补充修订，不无条件覆盖。
 
-**环境配置主动沉淀**：若用户在装配过程中提供了测试 URL + 账号信息，立即检查 `.e2e-tests/shared/env/` 是否已有匹配配置。不存在时立即落盘，不等到后续阶段。
+**环境配置主动沉淀**：若用户在装配过程中提供了测试 URL、账号信息、浏览器参数、启动 URL、feature flags、部署/重置脚本或等待窗口，立即检查 `.e2e-tests/shared/env/` 是否已有匹配配置。不存在时按 `skills/e2e/references/env-config-template.md` 落盘，不等到后续阶段。
 
 ### Step 5: 更新索引并确认
 
@@ -95,3 +103,4 @@ allowed-tools: Read, Write, Glob, AskUserQuestion
 5. 优先复用，只追问缺口
 6. workflow 决策要可追溯
 7. 支持中断接续
+8. 用户给出的验收步骤必须保留原文，并在后续剧本中映射到 case/oracle/evidence

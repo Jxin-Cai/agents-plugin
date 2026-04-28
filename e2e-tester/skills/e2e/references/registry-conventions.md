@@ -40,11 +40,19 @@ scripts:
     stale: false
     suites: []
     automation_confidence: high | medium | low
+    export_confidence: high | medium | low
+    source_run: .e2e-tests/scenarios/{scenario}/runs/{run}
+    source_report: runs/{date}-{run-slug}/reports/TS-{NNN}-run-{RRR}.md
+    source_evidence:
+      - runs/{date}-{run-slug}/evidence/{case-id}/evidence-manifest.md
+    covered_acceptance_steps: []
+    auth_dependency: null | .e2e-tests/shared/automation/auth/login-{env}.test.ts
+    export_notes: []
     created: {YYYY-MM-DD}
     last_updated: {YYYY-MM-DD}
 ```
 
-必填：type, path, scenario, business_scenario, risk_level, api_endpoints, source_paths, persona, execution_mode, parallel_safe, recommended_workers, retry_policy, trace_policy, abstraction_mode, automation_confidence
+必填：type, path, scenario, business_scenario, risk_level, api_endpoints, source_paths, persona, execution_mode, parallel_safe, recommended_workers, retry_policy, trace_policy, abstraction_mode, automation_confidence。由 Path C 导出的脚本还必须填写 export_confidence、source_run、source_report、source_evidence、covered_acceptance_steps、auth_dependency、export_notes
 
 兼容旧条目时，缺失字段按以下默认值理解：
 - `execution_mode: serial`
@@ -53,8 +61,10 @@ scripts:
 - `retry_policy: none`
 - `trace_policy: on-failure`
 - `abstraction_mode: inline`
+- `export_confidence: medium`（仅旧条目兼容理解；新导出不得省略）
+- `covered_acceptance_steps: []`
 
-更新时机：新建（全字段）| PASS（last_passed, fail_count=0）| FAIL（last_failed, fail_count+=1）| 修复（last_passed, fail_count=0, last_updated）
+更新时机：新建（全字段）| Path C 导出（补 source_run/source_report/source_evidence/covered_acceptance_steps/export_confidence）| PASS（last_passed, fail_count=0）| FAIL（last_failed, fail_count+=1）| 修复（last_passed, fail_count=0, last_updated）
 
 ## 套件 — `shared/registry/suites.yaml`
 
@@ -69,7 +79,7 @@ suites:
     filter: { risk_level: High }
 ```
 
-scripts 优先于 filter。过滤器支持：risk_level, tags, covers, domain, type, stale, execution_mode, parallel_safe。多条件 AND。
+scripts 优先于 filter。过滤器支持：risk_level, tags, covers, domain, type, stale, execution_mode, parallel_safe, export_confidence。多条件 AND。
 
 ## 资产目录 — `shared/asset-catalog.md`
 

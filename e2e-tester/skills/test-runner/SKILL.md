@@ -1,7 +1,7 @@
 ---
 name: test-runner
-description: 基于剧本和准备方案执行测试并生成质量报告
-allowed-tools: Read, Glob, Write, Skill, AskUserQuestion, Bash(npx playwright*), Bash(npx tsx*), Bash(mkdir*)
+description: 基于剧本、准备方案和自然语言/Markdown 验收步骤执行测试并生成质量报告。需要真实浏览器操作、Playwright 探索、截图、console/network 采集、失败归因或导出测试用例时优先使用本 skill。
+allowed-tools: Read, Glob, Write, Skill, AskUserQuestion, Bash(npx playwright*), Bash(npx tsx*), Bash(mkdir*), mcp__plugin_playwright_playwright__browser_navigate, mcp__plugin_playwright_playwright__browser_snapshot, mcp__plugin_playwright_playwright__browser_click, mcp__plugin_playwright_playwright__browser_type, mcp__plugin_playwright_playwright__browser_fill_form, mcp__plugin_playwright_playwright__browser_select_option, mcp__plugin_playwright_playwright__browser_wait_for, mcp__plugin_playwright_playwright__browser_take_screenshot, mcp__plugin_playwright_playwright__browser_console_messages, mcp__plugin_playwright_playwright__browser_network_requests, mcp__plugin_playwright_playwright__browser_evaluate, mcp__plugin_playwright_playwright__browser_run_code, mcp__plugin_playwright_playwright__browser_close
 ---
 
 # 测试执行器
@@ -16,7 +16,7 @@ allowed-tools: Read, Glob, Write, Skill, AskUserQuestion, Bash(npx playwright*),
 
 ### 阶段 0: 读取输入与 readiness gate
 
-读取当前 run 的 `task.md`、`index.md`、`.e2e-tests/scenarios/{scenario}/scenario.md`（剧本）、`.e2e-tests/scenarios/{scenario}/runs/{run}/prep/` 下的方案、已有报告、`.e2e-tests/shared/quality-ledger.md`（只提取与当前 domain 相关的时序基线、失败模式、环境陷阱条目）、`.e2e-tests/shared/env/{target_env}.yaml`（如存在）。
+读取当前 run 的 `task.md`（含 Acceptance Source 原文和 export_intent）、`index.md`、`.e2e-tests/scenarios/{scenario}/scenario.md`（剧本与 Step Mapping）、`.e2e-tests/scenarios/{scenario}/runs/{run}/prep/` 下的方案、已有报告、`.e2e-tests/shared/quality-ledger.md`（只提取与当前 domain 相关的时序基线、失败模式、环境陷阱条目）、`.e2e-tests/shared/env/{target_env}.yaml`（如存在，含 browser/start_urls/preflight/deploy/stability）。
 - readiness = BLOCKED → 停止执行
 - real 依赖不可用且无降级 → BLOCKED
 
@@ -38,7 +38,7 @@ allowed-tools: Read, Glob, Write, Skill, AskUserQuestion, Bash(npx playwright*),
 |------|------|
 | A 自动化 | 已有脚本匹配 |
 | B 生成后执行 | oracle 可机械验证 + prep 完整 + 页面稳定 |
-| C Playwright 探索 | 其他情况（不确定时默认 C） |
+| C Playwright 探索 | 其他情况（不确定时默认 C）；用户给自然语言/Markdown 验收步骤、需要真实浏览器操作、需要 console/network 证据或成功后导出 `.spec.ts` 时优先 C |
 
 ### 阶段 2: 执行
 
@@ -54,7 +54,13 @@ allowed-tools: Read, Glob, Write, Skill, AskUserQuestion, Bash(npx playwright*),
 #### 路径 C
 > **条件加载**：仅此时读取 `references/playwright-explore-guide.md`。
 
-按 `evidence_level` 执行分级证据采集。逐 case 探索，拦截 API 调用链，收集证据，提炼接口知识。
+按 `evidence_level` 执行分级证据采集。逐 case 先用 `browser_snapshot` 探索页面，再执行 Step Mapping 中的验收步骤，采集截图、可访问性 snapshot、console、network、API 调用链和 evidence manifest，最后提炼接口知识与自动化导出建议。
+
+Path C guardrails：
+- 每个 case 最多一次同条件重试，仅用于页面未稳定、疑似 flaky、短暂网络抖动。
+- 浏览器会话最多重建一次；重建后仍失败则归因，不继续循环。
+- 权限错误、产品缺陷、oracle 缺失、环境阻塞、前置数据不可用不盲目重试。
+- automation defect 才进入 `fix-script`；product defect / env issue / requirement-oracle unclear 只留证和报告。
 
 ### 阶段 3: 质量报告
 
@@ -62,7 +68,7 @@ allowed-tools: Read, Glob, Write, Skill, AskUserQuestion, Bash(npx playwright*),
 
 写报告前确保目录存在：`mkdir -p .e2e-tests/scenarios/{scenario}/runs/{run}/reports`
 
-生成 `.e2e-tests/scenarios/{scenario}/runs/{run}/reports/TS-{NNN}-run-{RRR}.md`。按 case 给出 PASS/FAIL/BLOCKED/SKIP。证据引用使用文件路径（如 `evidence/{case-id}/screenshots/then-result.png`），不用自由文本。
+生成 `.e2e-tests/scenarios/{scenario}/runs/{run}/reports/TS-{NNN}-run-{RRR}.md`。按 case 给出 PASS/FAIL/BLOCKED/SKIP。证据引用使用文件路径（如 `evidence/{case-id}/screenshots/then-result.png`），不用自由文本。报告必须包含 acceptance_step_ref、evidence_root、console/network artifacts、retry/fix history、export recommendation。
 
 ### 阶段 4: 沉淀判断与索引回写
 
@@ -72,7 +78,7 @@ allowed-tools: Read, Glob, Write, Skill, AskUserQuestion, Bash(npx playwright*),
 - 报告已在 `.e2e-tests/scenarios/{scenario}/runs/{run}/reports/` ✓
 - 证据已在 `.e2e-tests/scenarios/{scenario}/runs/{run}/evidence/` ✓
 
-**脚本沉淀判断**（需条件）：路径成立 + 证据完整 + 有 API 端点 + 准备可重复 → 建议沉淀为自动化脚本。条件不满足时在 index.md 记录原因，不强制。
+**脚本沉淀判断**（需条件）：路径成立 + 证据完整 + oracle 可判定 + 选择器稳定 + 准备可重复 + 登录/重置链路可复用 → 建议沉淀为 Playwright `.spec.ts` 或 API `.test.ts`。条件不满足时在 index.md 记录 `export_status=blocked` 和原因，不强制导出。
 
 回写当前 run 的 `index.md`（报告路径、路径决策、case 结果、资产）。
 
@@ -87,6 +93,7 @@ allowed-tools: Read, Glob, Write, Skill, AskUserQuestion, Bash(npx playwright*),
 - 新确认的关键 API 端点
 - 需要屏蔽的第三方脚本模式
 - 环境陷阱 / known_traps
+- 新确认的 start_urls / browser profile / preflight checks / stability windows / deploy_scripts
 
 **认证脚本沉淀检查**：如果路径 C 执行了登录操作：
 - 捕获到登录 API 调用链（认证端点 + token 返回）
@@ -96,9 +103,9 @@ allowed-tools: Read, Glob, Write, Skill, AskUserQuestion, Bash(npx playwright*),
 
 ### 阶段 5: 后续动作
 
-`AskUserQuestion`（multiSelect）：补证据 / 重测 / 修改剧本 / 沉淀为自动化脚本 / 沉淀认证脚本 / 结束。
+`AskUserQuestion`（multiSelect）：补证据 / 重测 / 修改剧本 / 沉淀为 Playwright 用例 / 沉淀认证脚本 / 将 automation defect 交给 fix-script / 结束。
 
-**主动推荐**：如果脚本沉淀条件满足，将"沉淀为自动化脚本"标注为 (Recommended)。如果认证脚本缺失，将"沉淀认证脚本"标注为 (Recommended)。
+**主动推荐**：如果脚本沉淀条件满足，将"沉淀为 Playwright 用例"标注为 (Recommended)。如果认证脚本缺失，将"沉淀认证脚本"标注为 (Recommended)。如果失败归因为 automation defect，将"交给 fix-script"标注为 (Recommended)。
 
 ### 落盘检查
 
@@ -117,6 +124,9 @@ allowed-tools: Read, Glob, Write, Skill, AskUserQuestion, Bash(npx playwright*),
 4. 不确定时优先路径 C
 5. 优先复用已有资产
 6. 按 case 逐个判定
+7. Path C 必须真实操作浏览器，不能只靠静态推断
+8. console/network 错误必须落 artifact 并在报告中引用
+9. 重试必须受 guardrails 限制并记录次数与原因
 
 <IMPORTANT>
 关键 oracle 缺失时，即使页面表现正常，也不能判 PASS。

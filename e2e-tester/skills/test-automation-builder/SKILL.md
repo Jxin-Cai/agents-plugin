@@ -1,12 +1,12 @@
 ---
 name: test-automation-builder
-description: 将高价值测试路径沉淀为自动化脚本（api-script 或 e2e-script）
+description: 将高价值测试路径沉淀为自动化脚本（api-script 或 e2e-script）。当 test-runner Path C 真实浏览器探索成功、需要把自然语言/Markdown 验收步骤导出为 Playwright `.spec.ts` 或复用 API/auth 脚本时使用。
 allowed-tools: Read, Glob, Write, Agent, AskUserQuestion, Bash(mkdir*), Bash(npx tsc --noEmit*), Bash(npx tsx*), Bash(npx playwright*)
 ---
 
 # 自动化测试资产构建器
 
-通过 subagent 将剧本 + prep + 报告转化为可回归的自动化脚本。
+通过 subagent 将剧本 + prep + 报告 + evidence manifest + console/network artifacts 转化为可回归的自动化脚本。
 
 ## 脚本类型
 
@@ -18,15 +18,15 @@ allowed-tools: Read, Glob, Write, Agent, AskUserQuestion, Bash(mkdir*), Bash(npx
 
 ### Step 1: 收集上下文与资产检索
 
-读取 `.e2e-tests/scenarios/{scenario}/scenario.md`（剧本）、当前 run 的 `prep/` 下的方案、`task.md`、`reports/` 下的报告（重点提取 API 调用链）、`.e2e-tests/shared/helpers/`、`.e2e-tests/shared/registry/`、`.e2e-tests/shared/asset-catalog.md`、`.e2e-tests/shared/automation/auth/`（认证脚本）。
+读取 `.e2e-tests/scenarios/{scenario}/scenario.md`（剧本与 Step Mapping）、当前 run 的 `prep/` 下的方案、`task.md`（Acceptance Source 与 export_intent）、`reports/` 下的报告（重点提取 API 调用链、export recommendation、失败/重试历史）、`evidence/**/evidence-manifest.md`、console/network artifacts、`.e2e-tests/shared/helpers/`、`.e2e-tests/shared/registry/`、`.e2e-tests/shared/asset-catalog.md`、`.e2e-tests/shared/automation/auth/`（认证脚本）。
 判断已有脚本/helper/数据集是否可直接复用。
 
 ### Step 2: 适配性判断
 
 - 适合 api-script：核心操作有 API + 状态可查询
-- 适合 e2e-script：部分操作必须 UI + 验证点包含 UI 状态
+- 适合 e2e-script：部分操作必须 UI + 验证点包含 UI 状态；Path C 成功跑通且 selector/oracle/prep 可复现时，优先导出 Playwright `.spec.ts`
 - 适合 auth-script：登录认证流程，提取 token/cookie
-- 不适合：纯前端逻辑 / 视觉判断 / 无可查询接口 → 明确告知，不硬生成
+- 不适合：纯视觉判断、缺 oracle、缺稳定选择器、缺可复现 prep、登录/重置链路不可复用 → 明确告知，不硬生成
 
 ### Step 3: subagent 生成
 
@@ -40,9 +40,11 @@ allowed-tools: Read, Glob, Write, Agent, AskUserQuestion, Bash(mkdir*), Bash(npx
 - 业务脚本写入 `.e2e-tests/shared/automation/{domain}/ts-{nnn}-{slug}.{test|spec}.ts`
 - 认证脚本写入 `.e2e-tests/shared/automation/auth/login-{env}.test.ts`
 
+生成 e2e-script 时，把 Step Mapping 写入测试结构：每个 test 或 test.step 关联 acceptance step ref，并用报告/evidence 中验证过的稳定定位方式，不把一次性探索痕迹硬编码。
+
 ### Step 4: 校验
 
-文件存在 + 元数据完整 + 断言与 oracle_types 一致 + api-script 无 playwright 依赖 / e2e-script 有 playwright 结构。
+文件存在 + 元数据完整 + 断言与 oracle_types 一致 + source run/report/evidence 可追溯 + api-script 无 playwright 依赖 / e2e-script 有 Playwright Test 结构和稳定 selector。
 
 ### Step 5: 更新注册表与索引
 
@@ -53,7 +55,7 @@ allowed-tools: Read, Glob, Write, Agent, AskUserQuestion, Bash(mkdir*), Bash(npx
 - 当前 run 的 `index.md`（已沉淀资产区块）
 
 必须登记：
-- 脚本路径、覆盖场景/case、依赖资产、source_paths、automation_confidence、限制说明
+- 脚本路径、覆盖场景/case、覆盖的 acceptance steps、依赖资产、source_paths、source run/report/evidence、automation_confidence、export_confidence、限制说明
 - `execution_mode`：`serial | parallel`
 - `parallel_safe`：是否允许与其他脚本并行
 - `recommended_workers`：推荐并行度
@@ -82,6 +84,8 @@ allowed-tools: Read, Glob, Write, Agent, AskUserQuestion, Bash(mkdir*), Bash(npx
 5. 优先复用再新建
 6. 资产必须可追溯
 7. 沉淀脚本统一进入 shared/automation/，不留 run 目录副本
+8. 从 Path C 导出时必须保留 report/evidence/console/network 的来源引用
+9. 不满足 export gate 时只记录 blocked reason，不生成脆弱脚本
 
 <IMPORTANT>
 业务场景只能通过 UI 验证时，应生成 e2e-script，而不是在 limitations 标注"不支持"然后放弃。

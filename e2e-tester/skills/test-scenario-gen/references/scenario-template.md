@@ -35,6 +35,8 @@ reused_assets:
   helpers: []
   scripts: []
 preconditions: []
+acceptance_source_type: none | user-text | markdown | external-doc | issue
+acceptance_step_count: 0
 out_of_scope: []
 ---
 ```
@@ -53,6 +55,16 @@ out_of_scope: []
 ## Reused Assets
 数据集 / Mock / Helper / 历史脚本
 
+## Acceptance Source
+- source_type: none | user-text | markdown | external-doc | issue
+- source_ref: task.md#acceptance-source 或外部引用
+- raw_steps_preserved_in: runs/{date}-{run-slug}/task.md
+
+## Step Mapping
+| Step Ref | 原始验收步骤 | 覆盖 Case | Oracle | Evidence Requirement | 状态 |
+|----------|--------------|-----------|--------|----------------------|------|
+| AS-001 | {原始步骤} | C1 | ui/api/data | screenshot + network | mapped |
+
 ## Case Matrix
 | Case | 类型 | 风险 | 主要 Oracle | 自动化优先 | 说明 |
 
@@ -60,7 +72,7 @@ out_of_scope: []
 
 ### Case C1: {名称}
 
-**Goal** / **Risk** / **Preconditions**
+**Goal** / **Risk** / **Preconditions** / **Acceptance Step Refs**
 
 **When**
 - Step 1: {操作} → 等待: {可观测变化}
@@ -94,4 +106,5 @@ data_matrix:
 - 一文件一业务场景，至少 2 个 case
 - 每个 case 可独立判定
 - Reused Assets 和 Test Data 必须可追溯
+- Acceptance Source 必须通过 Step Mapping 关联到 case/oracle/evidence，缺 oracle 的步骤不得判定为可执行 PASS
 - 已有 scenario.md 时追加 case 而非推倒重来
