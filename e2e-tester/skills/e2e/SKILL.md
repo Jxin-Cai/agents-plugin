@@ -23,7 +23,20 @@ allowed-tools: Read, Write, Glob, Bash(mkdir*), AskUserQuestion, Skill
 - 回归（"跑回归""run smoke""只跑已有脚本"）→ `run-suite`
 - 修复（"fix ts-001""脚本跑不过""只修自动化脚本"）→ `fix-script`
 - 影响分析（"这次改动影响什么"）→ `impact-analysis`
+- 快速验收（用户贴了 URL + 验收步骤，且未要求完整设计/沉淀/发布验证）→ `quick-run`
 - 泛化验收（"用浏览器测一下"、"这是验收清单"、"成功后沉淀 Playwright 用例"）→ 仍留在入口装配，不直达下游
+
+### 自动推断（减少补问）
+
+在发起 `AskUserQuestion` 前，先读取 `.e2e-tests/shared/knowledge-index.md`（如存在），利用已有知识加速推断：
+- **环境**：knowledge-index「环境配置」表仅一行 → 直接使用，不问；多行 → 展示选择
+- **scenario**：已有同名 scenario → 自动关联，创建新 run
+- **已有脚本**：knowledge-index「自动化脚本」表命中 → 标记路径 A 候选，workflow 可推断为 `regression-batch`
+- **URL + 步骤齐全 + 无显式设计需求**：自动推断 workflow = `express`，直达 `quick-run`
+- **用户给了验收步骤但要求沉淀/发布验证**：推断 workflow = `design-lite` 或 `release-gate`
+- **已知陷阱**：knowledge-index「已知陷阱」与当前场景匹配 → 自动注入 prep 注意事项
+
+只有推断不了的字段才发起补问（合并为一次 `AskUserQuestion`）。
 
 ### 意图装配
 
@@ -40,6 +53,7 @@ allowed-tools: Read, Write, Glob, Bash(mkdir*), AskUserQuestion, Skill
 | `impact-first` | 先影响分析再决定跑什么 |
 | `repro-loop` | 缺陷复现，证据优先 |
 | `script-maintenance` | 修脚本 / 沉淀脚本 |
+| `express` | 快速验收，贴 URL + 步骤直达浏览器（由 quick-run 承接）|
 
 ### design-lite 确认关卡
 
@@ -115,6 +129,7 @@ workflow 确定后，**必须先向用户宣告场景**再开始执行：
 4. 逐阶段停顿等用户确认
 5. quality-ledger 存在时加速，缺失不阻塞
 6. workflow 可重判，切换时记入决策日志
+7. 状态文件写入前检查行数，按 `references/file-size-control.md` 的阈值执行分片
 
 <IMPORTANT>
 默认心智是"先装配 QA 工作，再进入合适 workflow"，不是"所有事情都走新功能测试六阶段"。泛化测试消息不要绕过入口；入口负责把验收文本、环境参数、证据级别和导出意图稳定落盘。

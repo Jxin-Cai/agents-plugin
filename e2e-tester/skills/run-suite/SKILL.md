@@ -21,7 +21,8 @@ allowed-tools: Read, Glob, Write, Skill, Bash(npx tsx*), Bash(npx playwright*), 
 - `.e2e-tests/shared/registry/suites.yaml`
 - `.e2e-tests/shared/registry/{domain}.yaml`
 - `.e2e-tests/shared/quality-ledger.md`（若存在，提取时序基线与环境陷阱）
-- 最近一次 `.e2e-tests/shared/reports/regression-*.md`（仅当用户要求“只重跑失败项”且未显式给脚本列表时）
+- `.e2e-tests/shared/execution-history.yaml`（若存在，用于智能排序——最近失败优先、flaky 优先、久未执行优先；规则见 `skills/e2e/references/execution-history-template.md`）
+- 最近一次 `.e2e-tests/shared/reports/regression-*.md`（仅当用户要求”只重跑失败项”且未显式给脚本列表时）
 
 对每个脚本合并执行元数据（缺失时使用注册表默认值）：
 - `execution_mode: serial`
@@ -77,7 +78,7 @@ allowed-tools: Read, Glob, Write, Skill, Bash(npx tsx*), Bash(npx playwright*), 
 
 一行一脚本摘要，仅失败展开详情。
 
-### Step 3: 更新注册表
+### Step 3: 更新注册表与执行历史
 
 更新 `.e2e-tests/shared/registry/{domain}.yaml`：
 - PASS → `last_passed=today, fail_count=0`
@@ -85,6 +86,11 @@ allowed-tools: Read, Glob, Write, Skill, Bash(npx tsx*), Bash(npx playwright*), 
 - 如果本次通过用户覆盖了 `retry_policy / trace_policy / execution_mode`，只在报告中记录，不回写覆盖注册表默认值
 
 同步更新 `.e2e-tests/shared/registry/index.yaml` 的 `last_updated`。
+
+更新 `.e2e-tests/shared/execution-history.yaml`（不存在时按 `skills/e2e/references/execution-history-template.md` 创建）：
+- 每个执行过的脚本追加 `recent` 记录（date、result、duration_ms、batch、retry、failure_category）
+- 重算 `stats`（total_runs、pass_count、fail_count、pass_rate、avg_duration_ms、consecutive_fails、flaky_score）
+- 容量控制：每脚本 recent 最多 20 条
 
 ### Step 4: 展示结果
 
@@ -99,6 +105,7 @@ allowed-tools: Read, Glob, Write, Skill, Bash(npx tsx*), Bash(npx playwright*), 
 确认以下文件已写入/更新：
 - `.e2e-tests/shared/reports/regression-{YYYY-MM-DD}-{HHmm}.md`（报告）
 - `.e2e-tests/shared/registry/{domain}.yaml`（已更新）
+- `.e2e-tests/shared/execution-history.yaml`（已更新）
 
 缺失则补写。
 

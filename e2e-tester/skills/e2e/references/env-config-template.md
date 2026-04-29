@@ -2,80 +2,30 @@
 
 路径：`.e2e-tests/shared/env/{env-name}.yaml`
 
-```yaml
-name: {env-name}
-base_url: http://localhost:3000
-api_base_url: http://localhost:3000/api
-start_urls:
-  - name: home
-    url: http://localhost:3000
-  - name: target-flow
-    url: http://localhost:3000/{path}
+## 字段
 
-auth:
-  method: bearer | cookie | basic | none
-  login_endpoint: /api/auth/login
-  accounts:
-    admin:
-      username: admin
-      password: ${ADMIN_PASSWORD}    # 引用环境变量
-    user:
-      username: test-user
-      password: ${USER_PASSWORD}
-
-browser:
-  device: desktop | mobile | tablet
-  viewport:
-    width: 1440
-    height: 900
-  locale: zh-CN
-  timezone: Asia/Shanghai
-  color_scheme: light | dark | no-preference
-
-blocked_scripts:
-  - /piwik\.js/
-  - /matomo\.js/
-  - /google-analytics\.com/
-  - /googletagmanager\.com/
-  - /sentry\.io/
-  - /browser\.sentry-cdn\.com/
-  - /hotjar\.com/
-  - /clarity\.ms/
-
-preflight_checks:
-  - name: frontend-health
-    type: url
-    target: ${BASE_URL}
-  - name: api-health
-    type: url
-    target: ${API_BASE_URL}/health
-
-deploy_scripts:
-  preflight: scripts/deploy/preflight.sh
-  smoke_bootstrap: scripts/deploy/smoke-bootstrap.sh
-  reset_data: scripts/deploy/reset-test-data.sh
-  teardown: scripts/deploy/teardown-test-data.sh
-
-timeouts:
-  api: 30000
-  page_load: 60000
-  async_poll: 120000
-  poll_interval: 2000
-
-stability:
-  wait_for_network_idle: true
-  known_async_windows:
-    - name: eventual-consistency
-      max_ms: 120000
-      poll_interval_ms: 2000
-
-feature_flags: {}
-notes:
-  owner: ""
-  access_hint: ""
-  known_traps: []
-  dependencies: []
-```
+| 分组 | 字段 | 类型 | 说明 |
+|------|------|------|------|
+| 基础 | name | string | 环境名 |
+| 基础 | base_url | string | 前端地址 |
+| 基础 | api_base_url | string | API 地址 |
+| 基础 | start_urls | list | `[{name, url}]` 入口列表 |
+| 认证 | auth.method | enum | bearer / cookie / basic / none |
+| 认证 | auth.login_endpoint | string | 登录接口路径 |
+| 认证 | auth.accounts.{role} | object | `{username, password: ${ENV_VAR}}` |
+| 浏览器 | browser.device | enum | desktop / mobile / tablet |
+| 浏览器 | browser.viewport | object | `{width, height}` 默认 1440×900 |
+| 浏览器 | browser.locale | string | 默认 zh-CN |
+| 浏览器 | browser.timezone | string | 默认 Asia/Shanghai |
+| 浏览器 | browser.color_scheme | enum | light / dark / no-preference |
+| 屏蔽 | blocked_scripts | list | 正则列表，默认含 piwik/matomo/GA/GTM/Sentry/Hotjar/Clarity |
+| 健康 | preflight_checks | list | `[{name, type: url, target}]` |
+| 部署 | deploy_scripts | object | preflight / smoke_bootstrap / reset_data / teardown 脚本路径 |
+| 超时 | timeouts | object | api: 30s / page_load: 60s / async_poll: 120s / poll_interval: 2s |
+| 稳定性 | stability.wait_for_network_idle | bool | 默认 true |
+| 稳定性 | stability.known_async_windows | list | `[{name, max_ms, poll_interval_ms}]` |
+| 其他 | feature_flags | object | 特性开关 |
+| 其他 | notes | object | owner / access_hint / known_traps / dependencies |
 
 ## 规则
 

@@ -25,7 +25,8 @@ allowed-tools: Read, Write, Glob, Agent, AskUserQuestion
 1. Glob 识别技术栈
 2. **Agent**（Explore, "very thorough"）按 9 段维度扫描。多服务时可并行多个 Explore
 3. 结果写入 **场景级** `.e2e-tests/scenarios/{scenario}/context/context-{slug}.md`（跨 run 共享）
-4. `AskUserQuestion` 确认充分性
+4. 更新 `.e2e-tests/shared/knowledge-index.md`「项目技术栈」表（前端/后端/测试框架/包管理器/部署方式）
+5. `AskUserQuestion` 确认充分性
 
 > 已有场景级 context 时，确认仍有效即可跳过重新扫描。
 

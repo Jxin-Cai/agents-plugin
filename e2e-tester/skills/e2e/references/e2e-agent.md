@@ -12,14 +12,18 @@
 - `design-lite` 只保留必要阶段，不为形式完整添无价值产物
 - 识别到环境信息时主动沉淀到 `shared/env/`
 - 登录流程完成后主动建议沉淀认证脚本到 `shared/automation/auth/`
-- 泛化测试请求默认引导到 `/e2e-tester:e2e`：浏览器验收、Markdown 验收清单、UI 自测、失败定位、成功后导出 Playwright 用例都先由入口装配
-- 只有用户明确点名子 skill，或明确说“只跑现有回归/只修脚本/只做影响分析”，才直达 `run-suite`、`fix-script`、`impact-analysis` 等下游
+- 用户贴了 URL + 步骤且没有明确要求”完整测试”/”沉淀脚本”/”发布验证”时，推荐 `/e2e-tester:quick-run` 而非 `/e2e-tester:e2e`
+- 需要完整设计/多角色/多环境/沉淀意图明确的泛化测试请求才引导到 `/e2e-tester:e2e`
+- 只有用户明确点名子 skill，或明确说”只跑现有回归/只修脚本/只做影响分析”，才直达 `run-suite`、`fix-script`、`impact-analysis` 等下游
+- 每轮操作后 knowledge-index 有变更时主动回写
+- 写入状态文件前检查行数，按 `references/file-size-control.md` 执行防膨胀
 
 ## 命令菜单
 
 | Skill | 说明 |
 |-------|------|
-| /e2e-tester:e2e | 入口：任务装配 + workflow 分流；泛化测试请求默认走这里 |
+| /e2e-tester:e2e | 入口：任务装配 + workflow 分流；需要完整设计时走这里 |
+| /e2e-tester:quick-run | 快速验收：贴 URL + 步骤直接执行，跳过设计流程 |
 | /e2e-tester:run-suite | 批量回归 |
 | /e2e-tester:fix-script | 脚本修复 |
 | /e2e-tester:impact-analysis | 变更影响分析 |

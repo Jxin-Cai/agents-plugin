@@ -1,6 +1,6 @@
-# 测试质量报告模板
+# 测试质量报告完整模板
 
-目标：给出测试结论的可信度说明，明确复用了什么、沉淀了什么。
+> 规则与骨架见 report-rules.md。本文件仅在实际生成报告时加载。
 
 ```markdown
 # 测试报告: TS-{NNN} — {标题}
@@ -23,7 +23,7 @@
 | evidence_root | evidence/{case-id} | 证据根目录 |
 | export_status | none / recommended / exported / blocked | 是否建议导出 Playwright 用例 |
 
-> 若某字段由注册表继承，应在说明列标注“registry default”；本次临时覆盖则标注“run override”。
+> 若某字段由注册表继承，应在说明列标注"registry default"；本次临时覆盖则标注"run override"。
 
 ## 二、准备度结论
 | 项目 | 状态 | 说明 |
@@ -53,7 +53,7 @@
 ## 五、Case 执行汇总
 | Case | 类型 | 执行方式 | 结果 | 主要证据 | 重试/重跑 | 结论 |
 
-> "主要证据"列引用证据文件路径；如发生重试/重跑，在“重试/重跑”列记录 `retry x1`、`rerun failed-only` 等。
+> "主要证据"列引用证据文件路径；如发生重试/重跑，在"重试/重跑"列记录 `retry x1`、`rerun failed-only` 等。
 
 ## 六、场景详情
 ### Case C1: {名称} — {结果}
@@ -82,21 +82,3 @@ suspicion / 首次结果 / 重试结果 / 是否触发 rerun / 根因分类 / �
 ## 十一、总结与建议
 证明了什么 / 没证明什么 / 下一步
 ```
-
-## 规则
-
-1. BLOCKED → 总结论不得 PASS
-2. 关键 oracle 缺失 → 不得 PASS
-3. 每个 FAIL 必须归因
-4. 每个 case 单独结论
-5. 异步超时需区分"业务失败"和"窗口不够"
-6. flaky 必须标根因分类
-7. 必须交代复用和沉淀
-8. evidence_level=light 时：Oracle 证据允许引用关键截图（Given + Then）而非逐步截图，证据清单章节可省略
-9. evidence_level=strict 时：Oracle 证据必须包含 snapshot 文件引用，证据清单章节必填
-10. `third-party-noise` 只记录，不单独导致 FAIL；除非能证明它直接破坏业务链路
-11. 发生重试、重跑或 trace 采集时，必须在“执行配置”“Case 执行汇总”“失败分析与归因”三个位置至少出现一次
-12. 若当前仅做人工探索且尚未沉淀脚本，`abstraction_mode` 可填 `inline`，并在总结中说明是否建议升级为 `helper / page-object / keyword`
-13. Path C 报告必须包含 acceptance step ref、console/network artifact、retry/fix history 和 export recommendation
-
-轻量回归报告见 `skills/run-suite/references/regression-report-template.md`。

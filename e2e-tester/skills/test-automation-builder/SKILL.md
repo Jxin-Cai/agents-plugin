@@ -30,7 +30,7 @@ allowed-tools: Read, Glob, Write, Agent, AskUserQuestion, Bash(mkdir*), Bash(npx
 
 ### Step 3: subagent 生成
 
-> **条件加载**：此时读取 `references/script-conventions.md`（含 subagent prompt 模板）。registry schema 见 `skills/e2e/references/registry-conventions.md`。
+> **条件加载**：此时读取 `references/script-conventions.md`（命名与规则）和 `references/script-subagent-prompt.md`（生成 prompt 与导出门禁）。registry schema 见 `skills/e2e/references/registry-conventions.md`。
 
 写入前确保目录存在：
 - 业务脚本：`mkdir -p .e2e-tests/shared/automation/{domain}`
@@ -52,6 +52,7 @@ allowed-tools: Read, Glob, Write, Agent, AskUserQuestion, Bash(mkdir*), Bash(npx
 - `.e2e-tests/shared/registry/{domain}.yaml`（脚本条目）
 - `.e2e-tests/shared/registry/index.yaml`（全局索引 script_count + last_updated）
 - `.e2e-tests/shared/asset-catalog.md`（跨域脚本参考）
+- `.e2e-tests/shared/knowledge-index.md`（「自动化脚本」表 + 「认证脚本」表——新增或更新对应行）
 - 当前 run 的 `index.md`（已沉淀资产区块）
 
 必须登记：
@@ -71,9 +72,18 @@ allowed-tools: Read, Glob, Write, Agent, AskUserQuestion, Bash(mkdir*), Bash(npx
 - `.e2e-tests/shared/automation/{domain}/ts-{nnn}-{slug}.{test|spec}.ts`（脚本文件）或 `.e2e-tests/shared/automation/auth/login-{env}.test.ts`（认证脚本）
 - `.e2e-tests/shared/registry/{domain}.yaml`
 - `.e2e-tests/shared/registry/index.yaml`
+- `.e2e-tests/shared/knowledge-index.md`（已更新）
 - 当前 run 的 `index.md`
 
 缺失则补写。
+
+### 可选：Registry 校验
+
+写入完成后可运行校验确认一致性：
+```bash
+npx tsx .e2e-tests/shared/helpers/registry-validate.ts
+```
+校验不通过时用 `--fix` 自动修复计数和 stale 标记。
 
 ## 约束
 

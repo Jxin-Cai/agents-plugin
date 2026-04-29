@@ -43,6 +43,7 @@ Frontmatter 必含：goal、risk_level、persona、business_scenario、case_coun
 写入 `.e2e-tests/scenarios/{scenario}/scenario.md`。
 - **已有 scenario.md 时**：在现有 case 池基础上追加/修改，不推倒重来
 - **新建时**：完整生成
+- **膨胀检查**：写入后检查行数，超过 150 行时按 `skills/e2e/references/file-size-control.md` 的 scenario.md 分片规则拆分到 `scenario-cases/`
 
 ### Step 5: 更新索引并确认
 

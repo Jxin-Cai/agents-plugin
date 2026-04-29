@@ -8,35 +8,31 @@
 
 ## JSDoc 元数据（必须）
 
-```typescript
-/**
- * @type {api-script | e2e-script | auth-script}
- * @scenario TS-{NNN}
- * @domain {domain}
- * @scenario_slug {scenario-slug}
- * @title {中文标题}
- * @business_scenario {场景}
- * @cases C1, C2, C3
- * @risk {High | Medium | Low}
- * @persona {role}
- * @covers {feature1}, {feature2}
- * @tags {tag1}, {tag2}
- * @oracle {api, data, side-effect}
- * @prep runs/{date}-{run-slug}/prep/TP-{NNN}-{slug}.md
- * @task runs/{date}-{run-slug}/task.md
- * @api_endpoints {POST /api/xxx}, {GET /api/yyy}
- * @acceptance_steps AS-001, AS-002
- * @source_run .e2e-tests/scenarios/{scenario}/runs/{run}
- * @source_report runs/{date}-{run-slug}/reports/TS-{NNN}-run-{RRR}.md
- * @source_evidence runs/{date}-{run-slug}/evidence/{case-id}/evidence-manifest.md
- * @datasets / @mock_assets / @helpers {paths}
- * @created / @last_updated {YYYY-MM-DD}
- * @automation_confidence {high | medium | low}
- * 限制: {未自动化覆盖的部分}
- */
-```
-
-强制字段：`@type`、`@business_scenario`、`@cases`、`@risk`、`@persona`、`@oracle`、`@prep`、`@task`、`@api_endpoints`、`@acceptance_steps`、`@source_run`、`@source_report`、`@source_evidence`、`@automation_confidence`、`限制`
+| 字段 | 必填 | 说明 |
+|------|------|------|
+| @type | ✓ | api-script / e2e-script / auth-script |
+| @scenario | ✓ | TS-{NNN} |
+| @domain | | 业务域 |
+| @scenario_slug | | 场景 slug |
+| @title | | 中文标题 |
+| @business_scenario | ✓ | 场景描述 |
+| @cases | ✓ | C1, C2, C3 |
+| @risk | ✓ | High / Medium / Low |
+| @persona | ✓ | 角色 |
+| @covers | | feature 列表 |
+| @tags | | 标签列表 |
+| @oracle | ✓ | api, data, side-effect |
+| @prep | ✓ | 准备方案路径 |
+| @task | ✓ | 任务文件路径 |
+| @api_endpoints | ✓ | POST /api/xxx, GET /api/yyy |
+| @acceptance_steps | ✓ | AS-001, AS-002 |
+| @source_run | ✓ | 来源 run 路径 |
+| @source_report | ✓ | 来源报告路径 |
+| @source_evidence | ✓ | 来源证据路径 |
+| @datasets / @mock_assets / @helpers | | 资产路径 |
+| @created / @last_updated | | 日期 |
+| @automation_confidence | ✓ | high / medium / low |
+| 限制 | ✓ | 未自动化覆盖的部分 |
 
 ## api-script 规则
 
@@ -71,32 +67,4 @@
 - 多 case 时每个 case 独立断言块
 - 不接受：只检查 200 不看 body / 只看页面文本 / 只复刻探索点击而没有 oracle / 使用一次性 DOM 层级 selector
 
-## Subagent 生成 Prompt 模板
-
-```text
-你是自动化测试脚本生成器。
-生成类型：{api-script | e2e-script | auth-script}
-可用工具：仅 Read, Write。不读 node_modules/，不执行命令。
-
-【api-script】纯 TS 脚本（.test.ts），fetch 调接口，assert 验证，npx tsx 运行。绝对不用 Playwright。
-【e2e-script】Playwright 脚本（.spec.ts），test.describe/test 结构，数据准备用 API，UI 仅用于必须操作。
-【auth-script】认证脚本（.test.ts），export login 函数，传入账号密码返回 token/cookie。
-
-通用：复用已有 helper/数据集/mock。头部含完整 JSDoc。断言覆盖关键 oracle。每 case 独立。含清理逻辑。
-
-输入：剧本、Step Mapping、prep、任务文件、报告、evidence manifest、console/network artifact、API 调用链摘要、可复用资产
-输出：写入对应路径
-```
-
-
-## Path C 导出 gate
-
-只有同时满足以下条件，才把成功探索导出为 `.spec.ts`：
-
-- 关键 oracle 已在报告中判定，且证据文件可追溯。
-- 选择器稳定，能用 testid、role、label 或稳定文本表达。
-- 登录、前置数据、重置和清理策略可复跑。
-- network/API 证据能解释关键业务副作用。
-- console 错误已分类，不存在未解释的业务错误。
-
-不满足时更新 report/index/registry 的 blocked reason，不生成脆弱脚本。
+> Subagent prompt 和 Path C 导出门禁见 script-subagent-prompt.md。

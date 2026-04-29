@@ -52,7 +52,10 @@ allowed-tools: Read, Glob, Write, Skill, AskUserQuestion, Bash(npx playwright*),
 调用 `test-automation-builder` 生成 → 执行 → 失败则降级到 C。
 
 #### 路径 C
-> **条件加载**：仅此时读取 `references/playwright-explore-guide.md`。
+> **条件加载**：仅此时读取 `references/playwright-explore-guide.md`（索引），再按阶段加载子文件：
+> - 开始前：`references/explore-setup.md`（证据级别 + 浏览器启动 + 第三方脚本屏蔽）
+> - 逐 case 执行时：`references/explore-evidence-rules.md`（截图/网络/console 分级采集）
+> - 失败或完成时：`references/explore-failure-and-output.md`（归因 + 输出格式）
 
 按 `evidence_level` 执行分级证据采集。逐 case 先用 `browser_snapshot` 探索页面，再执行 Step Mapping 中的验收步骤，采集截图、可访问性 snapshot、console、network、API 调用链和 evidence manifest，最后提炼接口知识与自动化导出建议。
 
@@ -64,7 +67,7 @@ Path C guardrails：
 
 ### 阶段 3: 质量报告
 
-> **条件加载**：此时读取 `references/report-template.md`。含 async/flaky 时才读 `references/async-and-flaky-guide.md`。
+> **条件加载**：此时先读 `references/report-rules.md`（骨架与规则），生成时再读 `references/report-template.md`（完整模板）。含 async/flaky 时才读 `references/async-and-flaky-guide.md`。
 
 写报告前确保目录存在：`mkdir -p .e2e-tests/scenarios/{scenario}/runs/{run}/reports`
 
@@ -82,7 +85,7 @@ Path C guardrails：
 
 回写当前 run 的 `index.md`（报告路径、路径决策、case 结果、资产）。
 
-### 阶段 4.5: 回写 quality-ledger、环境信息与认证脚本
+### 阶段 4.5: 回写 quality-ledger、环境信息、认证脚本与知识索引
 
 写入 `.e2e-tests/shared/quality-ledger.md`（不存在时按 `skills/e2e/references/quality-ledger-template.md` 创建空结构后再写入）。
 
@@ -100,6 +103,11 @@ Path C guardrails：
 - 且 `shared/automation/auth/` 下没有对应环境的认证脚本
 - → 建议通过 `test-automation-builder` 沉淀为 `shared/automation/auth/login-{env}.test.ts`
 - 脚本功能：传入账号密码 → 返回 token/cookie
+
+**知识索引回写**：更新 `.e2e-tests/shared/knowledge-index.md`：
+- 「活跃剧本」表：更新当前 scenario 的最后 run、状态、case 数
+- 「已知陷阱」表：如本次发现新失败模式/环境陷阱，追加（保持 Top 5 Active）
+- 「环境配置」表：如本次使用了新环境配置，确保已登记
 
 ### 阶段 5: 后续动作
 
