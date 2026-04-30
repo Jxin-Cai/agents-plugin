@@ -53,7 +53,7 @@ allowed-tools: Read, Write, Glob, Bash(mkdir*), AskUserQuestion, Skill
 | `impact-first` | 先影响分析再决定跑什么 |
 | `repro-loop` | 缺陷复现，证据优先 |
 | `script-maintenance` | 修脚本 / 沉淀脚本 |
-| `express` | 快速验收，贴 URL + 步骤直达浏览器（由 quick-run 承接）|
+| `express` | 快速验收，贴 URL + 步骤直达浏览器（由 quick-run 承接，但仍须满足落盘铁律）|
 
 ### design-lite 确认关卡
 
@@ -133,4 +133,13 @@ workflow 确定后，**必须先向用户宣告场景**再开始执行：
 
 <IMPORTANT>
 默认心智是"先装配 QA 工作，再进入合适 workflow"，不是"所有事情都走新功能测试六阶段"。泛化测试消息不要绕过入口；入口负责把验收文本、环境参数、证据级别和导出意图稳定落盘。
+
+## 产物落盘铁律（所有 workflow 共守）
+
+1. NEVER 在 `.e2e-tests/` 以外的任何位置写入测试产物（报告、截图、脚本、配置）。禁止写入 `task/`、`temp/`、`output/`、项目根目录。
+2. 任何 workflow 进入执行前，必须先用 `mkdir -p` 创建完整的 `.e2e-tests/` 目录树。目录不存在则不执行。
+3. 环境数据（URL/账号/API 端点/认证方式）一旦获取，立即写入 `.e2e-tests/shared/env/`，不允许只存在对话中。
+4. 即使是 `express` / `quick-run` 路径，也必须在 `.e2e-tests/scenarios/{scenario}/` 下生成最小 scenario.md。
+5. 脚本沉淀默认触发：Path C 成功后自动进入 `test-automation-builder`，用户可主动选择跳过。
+6. 每个 skill 执行完成后用 `Glob` 校验产物是否落在 `.e2e-tests/` 下正确位置，缺失则补写。
 </IMPORTANT>

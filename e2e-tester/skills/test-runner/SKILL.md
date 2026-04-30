@@ -8,6 +8,15 @@ allowed-tools: Read, Glob, Write, Skill, AskUserQuestion, Bash(npx playwright*),
 
 通过准备度门禁、三路径策略和多层 oracle 验证执行测试，给出可信测试结论。
 
+## 产物落盘铁律
+
+> 以下规则不可违反，无论哪个路径、哪个 workflow。
+
+1. **所有截图、报告、证据只能写入 `.e2e-tests/` 目录内**。NEVER 写入 `task/`、`temp/`、项目根目录等其他位置。
+2. **截图必须保存到 `.e2e-tests/scenarios/{scenario}/runs/{run}/evidence/{case-id}/screenshots/`**。使用 `browser_take_screenshot` 时，必须指定保存路径到此目录。如果截图工具不支持指定路径，截取后必须立即复制到此目录。
+3. **执行前必须 mkdir -p 创建证据目录**。每个 case 开始执行前：`mkdir -p .e2e-tests/scenarios/{scenario}/runs/{run}/evidence/{case-id}/screenshots`
+4. **环境信息必须立即沉淀**。执行过程中获取到的 URL、API 端点、认证信息、浏览器配置，必须写入 `.e2e-tests/shared/env/{target_env}.yaml`，不允许只记在对话中。
+
 ## 路径变量
 
 以下用 `{scenario}` 代替 `{scenario-slug}`，`{run}` 代替 `{YYYY-MM-DD}-{run-slug}`。
@@ -81,7 +90,7 @@ Path C guardrails：
 - 报告已在 `.e2e-tests/scenarios/{scenario}/runs/{run}/reports/` ✓
 - 证据已在 `.e2e-tests/scenarios/{scenario}/runs/{run}/evidence/` ✓
 
-**脚本沉淀判断**（需条件）：路径成立 + 证据完整 + oracle 可判定 + 选择器稳定 + 准备可重复 + 登录/重置链路可复用 → 建议沉淀为 Playwright `.spec.ts` 或 API `.test.ts`。条件不满足时在 index.md 记录 `export_status=blocked` 和原因，不强制导出。
+**脚本沉淀判断**（默认触发）：路径 C 执行成功时，默认调用 `test-automation-builder` 沉淀为 Playwright `.spec.ts` 或 API `.test.ts`。仅当以下条件**全部不满足**时阻止沉淀：oracle 不可判定、选择器不稳定、准备不可重复、登录/重置链路不可复用。条件不满足时在 index.md 记录 `export_status=blocked` 和具体原因。
 
 回写当前 run 的 `index.md`（报告路径、路径决策、case 结果、资产）。
 
@@ -101,7 +110,7 @@ Path C guardrails：
 **认证脚本沉淀检查**：如果路径 C 执行了登录操作：
 - 捕获到登录 API 调用链（认证端点 + token 返回）
 - 且 `shared/automation/auth/` 下没有对应环境的认证脚本
-- → 建议通过 `test-automation-builder` 沉淀为 `shared/automation/auth/login-{env}.test.ts`
+- → 建议通过 `test-automation-builder` 沉淀为 `shared/automation/auth/login-{env}.test.ts`（默认执行，不等用户选择）
 - 脚本功能：传入账号密码 → 返回 token/cookie
 
 **知识索引回写**：更新 `.e2e-tests/shared/knowledge-index.md`：
@@ -111,18 +120,25 @@ Path C guardrails：
 
 ### 阶段 5: 后续动作
 
-`AskUserQuestion`（multiSelect）：补证据 / 重测 / 修改剧本 / 沉淀为 Playwright 用例 / 沉淀认证脚本 / 将 automation defect 交给 fix-script / 结束。
+**脚本沉淀自动执行**：如果 Path C 成功且脚本沉淀条件满足（阶段 4 判定），直接调用 `test-automation-builder` 执行沉淀，不等用户选择。沉淀完成后再提供后续选项。
 
-**主动推荐**：如果脚本沉淀条件满足，将"沉淀为 Playwright 用例"标注为 (Recommended)。如果认证脚本缺失，将"沉淀认证脚本"标注为 (Recommended)。如果失败归因为 automation defect，将"交给 fix-script"标注为 (Recommended)。
+`AskUserQuestion`（multiSelect）：补证据 / 重测 / 修改剧本 / 沉淀认证脚本 / 将 automation defect 交给 fix-script / 结束。
+
+**主动推荐**：如果认证脚本缺失，将"沉淀认证脚本"标注为 (Recommended)。如果失败归因为 automation defect，将"交给 fix-script"标注为 (Recommended)。
 
 ### 落盘检查
 
-确认以下文件已写入：
+用 `Glob` 逐项确认以下文件已写入 `.e2e-tests/` 下正确位置：
 - `.e2e-tests/scenarios/{scenario}/runs/{run}/reports/TS-{NNN}-run-{RRR}.md`（报告）
-- 当前 run 的 `index.md`（已更新）
+- `.e2e-tests/scenarios/{scenario}/runs/{run}/evidence/`（至少有一个 case 子目录含截图）
+- `.e2e-tests/scenarios/{scenario}/scenario.md`（剧本，即使是 quick-run 也需要最小版本）
+- `.e2e-tests/shared/env/{target_env}.yaml`（环境配置）
+- `.e2e-tests/shared/knowledge-index.md`（已更新）
 - `.e2e-tests/shared/quality-ledger.md`（已更新或新建）
+- 当前 run 的 `index.md`（已更新）
 
-缺失则补写。
+**任何一项缺失则立即补写，不能跳过。**
+**如果发现报告、截图等产物错误地写到了 `.e2e-tests/` 以外的位置，必须将其移动到正确位置。**
 
 ## 约束
 
@@ -135,7 +151,11 @@ Path C guardrails：
 7. Path C 必须真实操作浏览器，不能只靠静态推断
 8. console/network 错误必须落 artifact 并在报告中引用
 9. 重试必须受 guardrails 限制并记录次数与原因
+10. NEVER 在 `.e2e-tests/` 以外写入任何测试产物（报告、截图、脚本、日志）
+11. 环境数据一旦获取必须立即写入 `.e2e-tests/shared/env/`
+12. Path C 成功后默认沉淀脚本，不等用户选择
 
 <IMPORTANT>
 关键 oracle 缺失时，即使页面表现正常，也不能判 PASS。
+测试产物 NEVER 写到 `.e2e-tests/` 以外——这是不可商量的铁律。
 </IMPORTANT>

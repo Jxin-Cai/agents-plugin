@@ -23,10 +23,13 @@ allowed-tools: Read, Glob, Write, Agent, AskUserQuestion, Bash(mkdir*), Bash(npx
 
 ### Step 2: 适配性判断
 
+> **默认沉淀，除非有明确阻断理由**。test-runner Path C 成功后调用本 skill 时，默认执行沉淀，仅在以下阻断条件**全部成立**时才拒绝：
+
 - 适合 api-script：核心操作有 API + 状态可查询
 - 适合 e2e-script：部分操作必须 UI + 验证点包含 UI 状态；Path C 成功跑通且 selector/oracle/prep 可复现时，优先导出 Playwright `.spec.ts`
 - 适合 auth-script：登录认证流程，提取 token/cookie
-- 不适合：纯视觉判断、缺 oracle、缺稳定选择器、缺可复现 prep、登录/重置链路不可复用 → 明确告知，不硬生成
+- **阻断条件（全部成立才拒绝）**：纯视觉判断 + 缺 oracle + 缺稳定选择器 + 缺可复现 prep + 登录/重置链路不可复用 → 明确告知原因，在 index.md 记录 `export_status=blocked` 和原因
+- 仅部分条件不满足时：降级生成但在脚本注释中标注 `// TODO: {具体不稳定项}`，仍然沉淀
 
 ### Step 3: subagent 生成
 
