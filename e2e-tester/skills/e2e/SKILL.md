@@ -1,6 +1,6 @@
 ---
 name: e2e
-description: QA 工作台入口——当用户提出端到端测试、浏览器验收、Markdown 验收清单、UI 自测、回归验证、失败定位或自动化沉淀请求时，优先使用本入口先装配任务，再按场景分流到对应 workflow。除非用户明确指定子 skill，否则不要绕过本入口。
+description: 测试入口——用户提到任何形式的测试需求时默认触发此技能。TRIGGER when：用户说"测试"、"测一下"、"帮我测"、"验证"、"验收"、"试一下这个功能"、"test"、"e2e"、"回归"、"冒烟"、"跑一下"、"检查功能"、"看看有没有 bug"、"功能验证"、"浏览器测试"、"UI 测试"、"自动化测试"、"端到端"、"测试用例"、"测试脚本"、"失败定位"、"复现 bug"等。只要涉及功能验证、质量保障、测试执行、缺陷复现，均应先进入本入口装配任务再分流。SKIP：纯单元测试代码编写（jest/vitest 写法问题）、代码审查（不涉及测试执行）、性能压测（由 performance-benchmarker 承接）。
 argument-hint: "<被测功能、发布范围、缺陷现象或回归目标>"
 allowed-tools: Read, Write, Glob, Bash(mkdir*), AskUserQuestion, Skill
 ---
