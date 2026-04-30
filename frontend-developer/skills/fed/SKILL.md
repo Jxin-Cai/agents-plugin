@@ -1,6 +1,6 @@
 ---
 name: fed
-description: 前端审查工作台——按意图路由到对应 workflow（组件审查 / 性能检查 / 响应式审计 / 快速扫描 / 完整审查 / 自定义）
+description: 前端审查工作台——先装配任务，再按意图路由到组件审查 / 性能检查 / 响应式审计 / 快速扫描 / 完整审查 / 自定义组合
 argument-hint: "<审查任务描述或目标组件/页面路径>"
 allowed-tools: ["Read", "Write", "Glob", "Grep", "Bash(mkdir*|wc*)", "AskUserQuestion", "Skill"]
 ---
@@ -9,14 +9,16 @@ allowed-tools: ["Read", "Write", "Glob", "Grep", "Bash(mkdir*|wc*)", "AskUserQue
 
 用户传入的参数：`$ARGUMENTS`
 
-先判断用户此刻要完成的工作，再带他进入对应 workflow。不是所有需求都需要走完整 组件审查 → 响应式审计 → 性能检查 管道。
+先装配前端审查任务，再带他进入对应 workflow。不是所有需求都需要走完整 组件审查 → 响应式审计 → 性能检查 管道。
+
+**入口纪律**：除非用户明确点名 `/component-review`、`/responsive-audit`、`/performance-check`，或明确要求“只做组件审查 / 只做响应式 / 只做性能检查 / 只做快速扫描”，否则都先走 `/frontend-developer:fed` 入口。像“帮我看下这个页面组件结构”“前端发版前过一遍”“看看性能和适配风险”这类泛化请求，一律先完成任务装配，再决定 workflow。
 
 ---
 
 ## 强制执行规则
 
 - ✅ 始终用中文与用户沟通
-- ✅ 先识别 workflow 类型，再进入对应流程
+- ✅ 先装配任务卡，再识别 workflow 类型
 - ✅ 使用 `AskUserQuestion` 让用户做选择，不假设
 - ✅ 所有审查结论基于代码事实和行业标准，绝不凭空臆断
 - 🚫 不默认跑完整 组件 → 响应式 → 性能 管道
@@ -26,9 +28,9 @@ allowed-tools: ["Read", "Write", "Glob", "Grep", "Bash(mkdir*|wc*)", "AskUserQue
 
 ---
 
-## Step 0: 意图识别与 Workflow 路由
+## Step 0: 任务装配与 Workflow 路由
 
-根据 `$ARGUMENTS` 判断工作类型：
+### 显式快路由
 
 | 意图信号 | Workflow | 动作 |
 |----------|----------|------|
@@ -36,17 +38,23 @@ allowed-tools: ["Read", "Write", "Glob", "Grep", "Bash(mkdir*|wc*)", "AskUserQue
 | "性能 / Core Web Vitals / LCP / INP / CLS / bundle" | performance-only | 调用 `/performance-check $ARGUMENTS` |
 | "响应式 / 断点 / 移动端 / 适配 / 多端" | responsive-only | 调用 `/responsive-audit $ARGUMENTS` |
 | "快速扫描 / 快扫 / 快速检查 / 概览" | quick-scan | → Step 3 |
+| "继续上次前端任务 / 恢复任务" | resume | 优先进入断点恢复 |
 | "完整审查 / 全套 / 全面审查" 或复杂需求 | full-audit | → Step 1 |
-| 混合需求（如"组件和性能"） | custom | → Step 4 |
+| 混合需求（如“组件和性能”） | custom | → Step 4 |
 
-如果无法唯一判断，使用 `AskUserQuestion` 让用户选择：
-- 完整前端审查（推荐）— 组件 → 响应式 → 性能 全链路
-- 仅组件架构审查
-- 仅响应式审计
-- 仅性能检查
-- 快速扫描（轻量概览）
+### 任务装配
 
-**⏸️ 等待用户选择。**
+意图不明确时，用 `AskUserQuestion` 一次性补齐最小任务卡：
+- `task_type`：component-audit / responsive-audit / performance-audit / full-audit / quick-scan / custom
+- `target_scope`：页面 / 组件 / 路由 / 模块
+- `acceptance_source`：user-text / markdown / issue / none
+- `evidence_level`：light / standard / strict
+- `entry_intent`：用户原话
+- `current_stage`：当前阶段
+- `completed_stages`：已完成阶段
+- `next_step`：下一步动作
+
+workflow 确定后，先向用户宣告本次场景、目标和执行链路，再进入后续步骤。
 
 ---
 
@@ -61,16 +69,20 @@ allowed-tools: ["Read", "Write", "Glob", "Grep", "Bash(mkdir*|wc*)", "AskUserQue
 
 ```markdown
 workflow_mode: full-audit
-slug: {缩写}
-completed_steps: []
+task_type: full-audit
+entry_intent: {用户原话}
+target_scope: {页面/组件/模块}
+acceptance_source: none
+evidence_level: standard
+current_stage: component-review
+completed_stages: []
 next_step: component-review
-artifact_paths: {}
-decisions: []
+last_updated: {YYYY-MM-DD}
+last_artifact: 
 ```
 
-5. 扫描 `_frontend-review/` 已有目录，简要报告
-6. 快速扫描项目根目录的 `package.json`、`tsconfig.json`、构建配置（vite.config / next.config / webpack.config 等），提取技术栈信息保存到 `context/tech-stack.md`
-7. 检查 `meta/review-state.md` 和实际产物做接续判断（产物优先）
+5. 扫描 `_frontend-review/{目录}/components/`、`responsive/`、`performance/` 中的产物文件，判断接续点——产物存在则跳过对应阶段
+6. 重新 Read `meta/review-state.md`，产物与状态冲突时以产物为准
 
 **⏸️ 使用 `AskUserQuestion` 确认从哪里开始。**
 
@@ -121,16 +133,17 @@ decisions: []
 
 当用户中途返回时：
 1. 扫描 `_frontend-review/` 下未完成目录
-2. Read `meta/review-state.md`，结合实际产物推断进度
-3. 使用 `AskUserQuestion`：从断点继续 / 重新开始
+2. 先 Read `meta/review-state.md`，再核对 `components/`、`responsive/`、`performance/` 产物
+3. 产物优先于状态文件；旧任务缺字段时，续跑时补齐，不阻塞执行
+4. 使用 `AskUserQuestion`：从断点继续 / 从某阶段重开 / 重新开始
 
 <IMPORTANT>
-工作台的职责是"意图识别 + 路由 + 接续"，不是把所有请求都塞进 组件 → 响应式 → 性能 管道。
+工作台的职责是"先装配前端审查任务，再做路由 + 接续"，不是把所有请求都塞进 组件 → 响应式 → 性能 管道。
 快速扫描和单项子技能是独立 workflow，不经过完整管道。
 每个阶段完成后必须等待用户确认再进入下一阶段。
 产出文件与状态文件冲突时，以产出文件为准。
 绝不在没有 Read 实际源代码文件的情况下给出审查结论——所有发现必须附带文件路径和行号。
 组件审查必须覆盖四个维度（层级职责 / Props 接口 / 状态管理 / 可复用性），缺一视为未完成。
-性能问题必须量化预估影响（kB / ms 级别），禁止"减少 JS 大小"等无量化结论。
+性能问题必须量化预估影响（kB / ms 级别），禁止“减少 JS 大小”等无量化结论。
 响应式审计必须从 320px 起覆盖全断点范围，不可只检查桌面端。
 </IMPORTANT>

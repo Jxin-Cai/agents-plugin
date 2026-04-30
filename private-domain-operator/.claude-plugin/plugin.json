@@ -1,13 +1,13 @@
 {
   "name": "private-domain-operator",
-  "description": "Private domain operations: WeCom ecosystem, community management, user lifecycle, and conversion funnels",
-  "version": "1.0.0",
+  "description": "Private domain operator workbench: route across WeCom ecosystem setup, community operations, user lifecycle, conversion funnels, and quick scan workflows",
+  "version": "2.0.0",
   "author": {
     "name": "jxin"
   },
   "homepage": "https://github.com/Jxin-Cai/agents-plugin",
   "repository": "https://github.com/Jxin-Cai/agents-plugin",
-  "keywords": ["private-domain", "wecom", "community-operations", "scrm"],
+  "keywords": ["private-domain", "wecom", "community-operations", "scrm", "workbench"],
   "agents": [],
   "skills": ["./skills/"],
   "commands": ["./commands/"]

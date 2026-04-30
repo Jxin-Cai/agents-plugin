@@ -66,3 +66,10 @@ _architecture/
 - **ADR**（Michael Nygard）— 架构决策记录标准格式
 - **MADR** — Markdown ADR 扩展模板，含备选方案对比
 - **ISO/IEC 42010** — 架构描述国际标准
+
+## 工作台编排纪律
+
+- 泛化架构请求不绕过 `/software-architect:sa`。
+- 先确认 `task_type / quality_attributes / constraints`，再决定是否调用子 skill。
+- workflow 确定后，先宣告场景、目标与执行链路，再执行。
+- 断点恢复时先读状态、再验产物；冲突时以产物为准。

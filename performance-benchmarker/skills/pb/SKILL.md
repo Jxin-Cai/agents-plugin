@@ -9,21 +9,25 @@ allowed-tools: ["Read", "Write", "Edit", "Glob", "Grep", "Bash(mkdir*|find*|ls*|
 
 用户传入的参数：`$ARGUMENTS`
 
-先判断用户此刻要完成的工作，再带他进入对应 workflow。不是所有需求都需要走完整管道。
+先装配性能任务，再带他进入对应 workflow。不是所有需求都需要直接走完整管道。
+
+**入口纪律**：除非用户明确点名 `/load-test-plan`、`/profiling-guide`、`/optimization-report`，或明确要求“只做快速体检 / 只做压测方案 / 只做分析 / 只出优化报告”，否则都先走 `/performance-benchmarker:pb` 入口。像“帮我看下性能瓶颈”“给个压测方案”“发版前评估一下容量风险”这类泛化请求，一律先完成任务装配，再决定 workflow。
 
 ---
 
 ## 强制执行规则
 
 - 始终用中文与用户沟通
-- 先识别 workflow 类型，再进入对应流程
+- 先装配任务卡，再识别 workflow 类型
 - 不默认跑完整管道
 - 不在入口全量加载所有 references
 - 每个阶段完成后等待用户确认
 
 ---
 
-## Step 0: 意图识别与 Workflow 路由
+## Step 0: 任务装配与 Workflow 路由
+
+### 显式快路由
 
 | 意图信号 | Workflow | 动作 |
 |----------|----------|------|
@@ -31,16 +35,20 @@ allowed-tools: ["Read", "Write", "Edit", "Glob", "Grep", "Bash(mkdir*|find*|ls*|
 | "分析 / profiling / 火焰图" | profiling-only | 调用 `/profiling-guide $ARGUMENTS` |
 | "优化 / 报告 / 对比" | optimization-only | 调用 `/optimization-report $ARGUMENTS` |
 | "快速诊断 / 性能体检" | quick-diagnosis | → Step 3 |
+| "继续上次性能任务 / 恢复任务" | resume | 优先进入断点恢复 |
 | "完整基准 / 全套 或复杂需求" | full-benchmark | → Step 1 |
 
-意图不明确时，用 `AskUserQuestion` 让用户选择：
-- 仅负载 
-- 仅分析 
-- 仅优化 
-- 快速性能优化检查
-- 完整性能优化流程（推荐）
+### 任务装配
 
-**⏸️ 等待用户选择。**
+意图不明确时，用 `AskUserQuestion` 让用户补齐最小任务卡：
+- `target_system`：目标系统 / 服务
+- `target_env`：压测或观察环境
+- `delivery_type`：计划 / 分析 / 报告 / 快诊 / 全流程
+- `evidence_inventory`：是否已有 baseline / APM / trace / profiling / 压测结果
+- `slo_status`：已定义 / 未定义 / 部分定义
+- `urgency_risk`：发布前 / 容量风险 / 故障复盘 / 日常优化
+
+workflow 确定后，先向用户宣告场景、目标和执行链路，再进入后续步骤。
 
 ---
 
@@ -49,7 +57,7 @@ allowed-tools: ["Read", "Write", "Edit", "Glob", "Grep", "Bash(mkdir*|find*|ls*|
 1. 从 `$ARGUMENTS` 提取任务描述，生成英文缩写（2-4 词，连字符连接）
 2. 使用 `AskUserQuestion` 确认缩写
 3. 创建 `_performance/{当前日期}-{缩写}/` 及子目录 `context/`、`meta/`、`load-tests/`、`profiling/`、`reports/`
-4. 初始化 `meta/state.md`（workflow_mode、completed_steps、next_step）
+4. 初始化 `meta/state.md`（workflow_mode、target_system、target_env、evidence_inventory、completed_steps、next_step、last_artifact）
 5. 用 Glob 扫描 `_performance/{目录}/` 下 `load-tests/`、`profiling/`、`reports/` 中的产物文件，判断接续点——产物存在则跳过对应阶段
 
 **⏸️ 使用 `AskUserQuestion` 确认从哪里开始。**
@@ -83,6 +91,8 @@ allowed-tools: ["Read", "Write", "Edit", "Glob", "Grep", "Bash(mkdir*|find*|ls*|
 | 并发安全 | 用 Grep 搜索共享可变状态（`static mut`/全局变量写入/`synchronized`），检查锁策略和竞态条件 | 风险点列表（严重度 + 修复方向） |
 | 可扩展性 | 用 Grep 搜索硬编码限制（`MAX_`/`LIMIT_`/魔数），检查有状态组件和单点瓶颈 | 改进方向（短期 + 长期） |
 
+报告结尾必须明确建议下一步：深入某项 / 进入完整流程 / 结束。
+
 使用 `AskUserQuestion`：深入某项 / 进入完整流程 / 结束。
 
 ---
@@ -90,15 +100,16 @@ allowed-tools: ["Read", "Write", "Edit", "Glob", "Grep", "Bash(mkdir*|find*|ls*|
 ## 断点恢复
 
 1. 用 Glob 扫描 `_performance/` 下各任务目录，识别未完成任务
-2. Read `meta/state.md`，获取 `completed_steps` 和 `next_step`
-3. 用 Glob 检查各阶段产物文件是否存在——**产物优先于状态文件**（如 `load-tests/*.md` 存在则视为该阶段已完成，即使 state.md 未更新）
-4. 使用 `AskUserQuestion`：从断点继续 / 重新开始
+2. 先 Read `meta/state.md`，再用 Glob 检查各阶段产物文件是否存在
+3. **产物优先于状态文件**（如 `load-tests/*.md` 存在则视为该阶段已完成，即使 state.md 未更新）
+4. 使用 `AskUserQuestion`：从断点继续 / 从某阶段重开 / 重新开始
 
 <IMPORTANT>
 ## 不可违反的规则
-工作台的职责是"意图识别 + 路由 + 接续"，不是把所有请求都塞进固定管道。
+工作台的职责是"先装配性能任务，再做路由 + 接续"，不是把所有请求都塞进固定管道。
 每个阶段完成后必须等待用户确认。
 产出文件与状态文件冲突时，以产出文件为准。
+恢复时必须先读状态、再校验产物，不可只凭对话记忆推进。
 
 ## 性能工程硬规则
 1. 延迟指标必须使用百分位（P50/P95/P99），禁止使用均值——均值掩盖长尾问题

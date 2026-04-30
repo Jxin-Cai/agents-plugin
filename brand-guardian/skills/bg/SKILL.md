@@ -1,6 +1,6 @@
 ---
 name: bg
-description: 品牌守护者工作台——按意图路由到品牌一致性审计、语气风格审查、视觉识别检查或完整流程
+description: 品牌守护者工作台——先装配任务，再按意图路由到品牌一致性审计、语气风格审查、视觉识别检查、快速检查或完整流程
 argument-hint: "<任务描述>"
 allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Skill"]
 ---
@@ -9,21 +9,25 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 
 用户传入的参数：`$ARGUMENTS`
 
-先判断用户此刻要完成的工作，再带他进入对应 workflow。不是所有需求都需要走完整管道。
+先装配品牌审查任务，再带他进入对应 workflow。不是所有需求都需要走完整管道。
+
+**入口纪律**：自然语言品牌审查请求一律先走 `/brand-guardian:bg` 做任务装配与路由。仅当用户明确点名 `/brand-consistency-audit`、`/voice-tone-review`、`/visual-identity-check`，或明确说“只做单项”时，才直达子 skill。
 
 ---
 
 ## 强制执行规则
 
 - ✅ 始终用中文与用户沟通
-- ✅ 先识别 workflow 类型，再进入对应流程
+- ✅ 先装配任务卡，再识别 workflow 类型
 - 🚫 不默认跑完整管道
 - 🚫 不在入口全量加载所有 references
 - ⏸️ 每个阶段完成后等待用户确认
 
 ---
 
-## Step 0: 意图识别与 Workflow 路由
+## Step 0: 任务装配与 Workflow 路由
+
+### 显式快路由
 
 | 意图信号 | Workflow | 动作 |
 |----------|----------|------|
@@ -31,16 +35,27 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 | "语气 / 风格 / tone / voice" | voice-only | 调用 `/voice-tone-review $ARGUMENTS` |
 | "视觉 / logo / 色彩 / VI" | visual-only | 调用 `/visual-identity-check $ARGUMENTS` |
 | "快速检查 / 快扫" | quick-scan | → Step 3 |
-| "完整审查 / 全面检查 或复杂需求" | full-review | → Step 1 |
+| "继续上次品牌任务 / 恢复任务" | resume | 优先进入断点恢复 |
+| "完整审查 / 全面检查" 或复杂需求 | full-review | → Step 1 |
 
-意图不明确时，用 `AskUserQuestion` 让用户选择：
-- 仅品牌一致性 
-- 仅语气 
-- 仅视觉 
-- 快速品牌守护检查
-- 完整品牌守护流程（推荐）
+### 任务装配
 
-**⏸️ 等待用户选择。**
+意图不明确时，用 `AskUserQuestion` 一次性补齐最小任务卡：
+- `task_type`：full-review / quick-scan / consistency-only / voice-only / visual-only
+- `workflow`：当前 workflow
+- `entry_intent`：用户原话
+- `brand_scope`：品牌 / 子品牌 / 产品线
+- `touchpoints`：官网 / 社媒 / 邮件 / 销售物料等
+- `baseline_assets`：品牌指南、tone 指南、VI 规范路径
+- `target_audience`：目标受众
+- `deliverables`：期望交付物
+- `risk_level`：P0-P3
+- `evidence_level`：light / standard / strict
+- `acceptance_criteria`：验收标准
+- `current_stage`：当前阶段
+- `completed_stages`：已完成阶段
+
+workflow 确定后，先向用户宣告本次场景、目标和执行链路，再进入后续步骤。
 
 ---
 
@@ -48,9 +63,29 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 
 1. 从 `$ARGUMENTS` 提取任务描述，生成英文缩写（2-4 词，连字符连接）
 2. 使用 `AskUserQuestion` 确认缩写
-3. 创建 `_brand-review/{当前日期}-{缩写}/` 及子目录 `context/` `meta/` 和各阶段子目录
-4. 初始化 `meta/state.md`（workflow_mode、completed_steps、next_step）
+3. 创建 `_brand-review/{当前日期}-{缩写}/` 及子目录 `context/` `consistency/` `voice-tone/` `visual/` `meta/`
+4. 初始化 `meta/state.md`：
+
+```markdown
+workflow_mode: full-review
+task_type: full-review
+entry_intent: {用户原话}
+brand_scope: {品牌/子品牌/产品线}
+touchpoints: []
+baseline_assets: []
+target_audience: []
+deliverables: []
+risk_level: P2
+evidence_level: standard
+acceptance_criteria: []
+current_stage: brand-consistency-audit
+completed_stages: []
+next_step: brand-consistency-audit
+last_artifact: 
+```
+
 5. 扫描已有目录，检查接续点（产物优先于状态文件）
+6. 重新 Read `meta/state.md`，产物与状态冲突时以产物为准
 
 **⏸️ 使用 `AskUserQuestion` 确认从哪里开始。**
 
@@ -62,9 +97,9 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 
 | 阶段 | 调用 | 完成标志 | 门控 |
 |------|------|---------|------|
-| 品牌一致性审计 | `/brand-consistency-audit $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
-| 语气风格审查 | `/voice-tone-review $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
-| 视觉识别检查 | `/visual-identity-check $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
+| 品牌一致性审计 | `/brand-consistency-audit $ARGUMENTS` | `consistency/*.md` | 继续 / 回退 / 结束 |
+| 语气风格审查 | `/voice-tone-review $ARGUMENTS` | `voice-tone/*.md` | 继续 / 回退 / 结束 |
+| 视觉识别检查 | `/visual-identity-check $ARGUMENTS` | `visual/*.md` | 继续 / 回退 / 结束 |
 
 每阶段写入摘要到 `meta/{stage}-summary.md`（不超过 20 行）。
 
@@ -91,11 +126,12 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 ## 断点恢复
 
 1. 扫描 `_brand-review/` 下未完成目录
-2. Read `meta/state.md`，结合产物推断进度
-3. 使用 `AskUserQuestion`：从断点继续 / 重新开始
+2. 先 Read `meta/state.md`，再检查 `consistency/`、`voice-tone/`、`visual/` 产物
+3. 产物优先于状态文件；恢复时必须给用户三选一：从断点继续 / 从某阶段重开 / 重新开始
+4. 每阶段结束写 `meta/{stage}-summary.md`（≤20 行），作为压缩后恢复锚点
 
 <IMPORTANT>
-工作台的职责是"意图识别 + 路由 + 接续"，不是把所有请求都塞进固定管道。
+工作台的职责是"先装配品牌任务，再做路由 + 接续"，不是把所有请求都塞进固定管道。
 品牌一致性审计必须基于已记录的品牌规范，不可凭个人审美判断。
 视觉识别偏差必须标注优先级（P0-P3）并附具体数据（色值偏差量、尺寸像素差等）。
 语气偏差判定必须引用原文片段作为证据，不可仅做定性描述。

@@ -77,3 +77,10 @@ _experiments/
 | 新奇效应 | 变化本身带来的短期提升 | 运行足够长时间，观察效果衰减 |
 | 网络效应干扰 | 用户之间互相影响 | 使用集群随机化（Cluster Randomization） |
 | 多重比较膨胀 | 多指标多变体导致假阳性率上升 | Bonferroni / Holm / Benjamini-Hochberg 校正 |
+
+## 工作台编排纪律
+
+- 默认先走 `/experiment-tracker:et` 做任务装配，只有显式单阶段诉求才直达子 skill。
+- 只补问缺口字段；统计参数必须在执行前确认。
+- 每阶段前重读状态与产物；冲突时以 `designs/metrics/results` 实物为准。
+- quick-check 默认不新建长期任务目录，除非用户明确要求落盘。

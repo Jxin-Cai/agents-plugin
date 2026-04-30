@@ -1,6 +1,6 @@
 ---
 name: tra
-description: 测试结果分析工作台——按意图路由到覆盖率分析、失败分析、质量报告或完整流程
+description: 测试结果分析工作台——先装配任务，再按意图路由到覆盖率分析、失败分析、质量报告、快速检查或完整流程
 argument-hint: "<任务描述>"
 allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Skill"]
 ---
@@ -9,21 +9,25 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 
 用户传入的参数：`$ARGUMENTS`
 
-先判断用户此刻要完成的工作，再带他进入对应 workflow。不是所有需求都需要走完整管道。
+先装配测试分析任务，再带他进入对应 workflow。不是所有需求都需要走完整管道。
+
+**入口纪律**：自然语言测试分析请求默认先走 `/test-results-analyzer:tra`，除非用户明确点名子 skill（仅覆盖率 / 仅失败 / 仅报告）或明确说明只做单项。
 
 ---
 
 ## 强制执行规则
 
 - ✅ 始终用中文与用户沟通
-- ✅ 先识别 workflow 类型，再进入对应流程
+- ✅ 先装配任务卡，再识别 workflow 类型
 - 🚫 不默认跑完整管道
 - 🚫 不在入口全量加载所有 references
 - ⏸️ 每个阶段完成后等待用户确认
 
 ---
 
-## Step 0: 意图识别与 Workflow 路由
+## Step 0: 任务装配与 Workflow 路由
+
+### 显式快路由
 
 | 意图信号 | Workflow | 动作 |
 |----------|----------|------|
@@ -31,16 +35,26 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 | "失败 / 错误 / 根因" | failure-only | 调用 `/failure-analysis $ARGUMENTS` |
 | "报告 / 质量 / 趋势" | report-only | 调用 `/quality-report $ARGUMENTS` |
 | "快速检查 / 概览" | quick-scan | → Step 3 |
-| "完整分析 / 全套 或复杂需求" | full-analysis | → Step 1 |
+| "继续上次测试分析任务 / 恢复任务" | resume | 优先进入断点恢复 |
+| "完整分析 / 全套" 或复杂需求 | full-analysis | → Step 1 |
 
-意图不明确时，用 `AskUserQuestion` 让用户选择：
-- 仅覆盖率 
-- 仅失败 
-- 仅报告 
-- 快速测试质量分析检查
-- 完整测试质量分析流程（推荐）
+### 任务装配
 
-**⏸️ 等待用户选择。**
+意图不明确时，用 `AskUserQuestion` 一次性补齐最小任务卡：
+- `task_type`：coverage-only / failure-only / report-only / quick-scan / full-analysis
+- `workflow_mode`：当前 workflow
+- `entry_intent`：用户原话
+- `analysis_scope`：模块 / 服务 / 流水线
+- `data_sources`：coverage_report / failure_log / historical_report
+- `baseline_window`：对比窗口，如 `last_3_runs`
+- `quality_gate_profile`：default / strict / custom
+- `deliverable`：覆盖率结论 / 根因归类 / 质量报告
+- `current_stage`：当前阶段
+- `completed_steps`：已完成阶段
+- `next_step`：下一步动作
+- `last_updated`：最近更新时间
+
+workflow 确定后，先向用户宣告本次场景、目标和执行链路，再进入后续步骤。
 
 ---
 
@@ -49,8 +63,22 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 1. 从 `$ARGUMENTS` 提取任务描述，生成英文缩写（2-4 词，连字符连接）
 2. 使用 `AskUserQuestion` 确认缩写
 3. 使用 Bash(mkdir*) 创建 `_test-analysis/{当前日期}-{缩写}/` 及子目录 `context/`、`meta/`、`coverage/`、`failures/`、`reports/`
-4. 使用 Write 初始化 `meta/state.md`（字段：workflow_mode=full-analysis、completed_steps=[]、next_step=coverage-analysis）
-5. 使用 Glob 搜索 `_test-analysis/{当前日期}-{缩写}/coverage/*.md`、`failures/*.md`、`reports/*.md`，若某阶段产出文件已存在则标记该阶段为已完成；再 Read `meta/state.md` 交叉验证，产出文件与 state.md 冲突时以产出文件为准
+4. 使用 Write 初始化 `meta/state.md`：
+   ```
+   workflow_mode: full-analysis
+   task_type: full-analysis
+   entry_intent: {用户原话}
+   analysis_scope: {模块/服务/流水线}
+   data_sources: []
+   baseline_window: last_3_runs
+   quality_gate_profile: default
+   deliverable: quality-pack
+   current_stage: coverage-analysis
+   completed_steps: []
+   next_step: coverage-analysis
+   last_updated: {YYYY-MM-DD}
+   ```
+5. 使用 Glob 搜索 `coverage/*.md`、`failures/*.md`、`reports/*.md`；若某阶段产出文件已存在则标记该阶段为已完成；再 Read `meta/state.md` 交叉验证，产出文件与 state.md 冲突时以产出文件为准
 
 **⏸️ 使用 `AskUserQuestion` 确认从哪里开始。**
 
@@ -91,12 +119,13 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 
 ## 断点恢复
 
-1. 使用 Glob 搜索 `_test-analysis/*/meta/state.md`，对每个匹配目录 Read 其 `state.md`，筛选 `next_step` 不为 `done` 的目录即为未完成任务
-2. 对每个未完成目录，使用 Glob 检查 `coverage/*.md`、`failures/*.md`、`reports/*.md` 是否存在，以产出文件实际存在情况确定已完成阶段（产出文件与 state.md 冲突时以产出文件为准）
-3. 向用户展示未完成任务列表及各任务进度，使用 `AskUserQuestion`：从断点继续 / 重新开始 / 忽略
+1. 使用 Glob 搜索 `_test-analysis/*/meta/state.md`，对每个匹配目录 Read 其 `state.md`
+2. 对每个目录，使用 Glob 检查 `coverage/*.md`、`failures/*.md`、`reports/*.md` 是否存在，以产出文件实际存在情况确定已完成阶段
+3. 恢复顺序固定为：产物文件 > state.md；“无 state 但有产物”也算可恢复任务
+4. 使用 `AskUserQuestion`：从断点继续 / 从某阶段重开 / 重新开始
 
 <IMPORTANT>
-工作台的职责是"意图识别 + 路由 + 接续"，不是把所有请求都塞进固定管道。
+工作台的职责是"先装配测试分析任务，再做路由 + 接续"，不是把所有请求都塞进固定管道。
 覆盖率分析必须区分行覆盖和分支覆盖。
 失败分析必须有根因分类（代码/环境/数据/flaky）。
 不可仅看覆盖率数字，需分析覆盖质量。

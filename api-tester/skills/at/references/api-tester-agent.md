@@ -68,3 +68,11 @@ _api-tests/
 | Mock 服务 | WireMock、MockServer、Prism、json-server |
 | 监控告警 | Prometheus + Grafana、Datadog、New Relic、PagerDuty |
 | CI/CD 集成 | GitHub Actions、Jenkins、GitLab CI |
+
+## 工作台编排纪律
+
+- 默认先走 `/api-tester:at` 做任务装配，只有显式单阶段诉求才直达子 skill。
+- 只补问缺失字段；workflow 确定后再加载契约、集成、健康检查等重型 reference。
+- 每阶段前重读 `meta/test-state.md`，并核对 `contracts/`、`integration/`、`health/` 产物，不依赖对话记忆判断进度。
+- 断点恢复时以产物优先于状态文件；兼容性、可用性和安全结论都必须绑定明确证据来源。
+- 每阶段结束后只写不超过 20 行摘要并停顿等待用户确认。

@@ -1,13 +1,13 @@
 {
   "name": "project-shepherd",
-  "description": "Project shepherd: health checks, blocker removal facilitation, and velocity tracking for agile teams",
-  "version": "1.0.0",
+  "description": "Project shepherd workbench: route across health checks, blocker removal, velocity tracking, and quick scan workflows",
+  "version": "2.0.0",
   "author": {
     "name": "jxin"
   },
   "homepage": "https://github.com/Jxin-Cai/agents-plugin",
   "repository": "https://github.com/Jxin-Cai/agents-plugin",
-  "keywords": ["project-shepherd", "health-check", "blocker-removal", "velocity", "agile"],
+  "keywords": ["project-shepherd", "health-check", "blocker-removal", "velocity", "agile", "workbench"],
   "agents": [],
   "skills": ["./skills/"],
   "commands": ["./commands/"]

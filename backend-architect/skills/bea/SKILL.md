@@ -9,11 +9,15 @@ allowed-tools: ["Read", "Write", "Edit", "Bash(mkdir*|ls*|find*|wc*)", "Glob", "
 
 用户传入的参数：`$ARGUMENTS`
 
-先判断用户此刻的工作意图，路由到对应 workflow。不是所有需求都需要走完整管道。
+先装配任务，再按意图路由到对应 workflow。不是所有需求都需要直接落到完整管道。
+
+**入口纪律**：除非用户明确点名 `/api-design`、`/database-modeling`、`/scalability-review`，或明确要求“只做微服务设计 / 只做技术债评估 / 只做快速扫描”，否则都先走 `/backend-architect:bea` 入口。像“帮我设计这个系统”“评估一下当前后端方案”“看看这次重构怎么落地”这类泛化请求，一律先完成任务装配，再决定 workflow。
 
 ---
 
-## Step 0: 意图识别与路由
+## Step 0: 任务装配与路由
+
+### 显式快路由
 
 根据 `$ARGUMENTS` 判断工作类型：
 
@@ -25,9 +29,17 @@ allowed-tools: ["Read", "Write", "Edit", "Bash(mkdir*|ls*|find*|wc*)", "Glob", "
 | "微服务 / 服务拆分 / 领域驱动" | microservice-design | → Step 4 |
 | "技术债 / 重构 / 代码腐化" | tech-debt-assessment | → Step 5 |
 | "快速扫描 / 架构体检 / 健康检查" | quick-scan | → Step 3 |
-| "完整架构 / 全套方案" 或复杂需求 | full-architecture | → Step 1 |
+| "继续上次架构任务 / 恢复任务" | resume | 优先进入断点恢复 |
 
-如果无法唯一判断，使用 `AskUserQuestion` 让用户选择：
+### 任务装配
+
+如果无法唯一判断，使用 `AskUserQuestion` 一次性补齐最小任务卡：
+- `goal`：要交付 API 方案 / 数据模型 / 扩展性评审 / 微服务方案 / 技术债路线 / 全套方案
+- `constraints`：QPS / SLA / 数据量级 / 上线时间 / 团队规模
+- `risk_focus`：一致性 / 成本 / 可观测性 / 容灾 / 迁移风险
+- `artifact_expectation`：方案草图 / 评审意见 / ADR 候选 / 快速诊断
+
+装配完成后再让用户确认：
 - 完整架构流程（推荐）— API + 数据库 + 扩展性评审
 - 仅 API 设计
 - 仅数据库建模
@@ -36,7 +48,7 @@ allowed-tools: ["Read", "Write", "Edit", "Bash(mkdir*|ls*|find*|wc*)", "Glob", "
 - 技术债评估
 - 快速架构扫描
 
-**⏸️ 等待用户选择。**
+workflow 确定后，先向用户宣告本次场景、目标和执行链路，再进入后续步骤。
 
 ---
 
@@ -56,6 +68,9 @@ workflow_mode: full-architecture
 slug: {缩写}
 completed_steps: []
 next_step: api-design
+goal: {一句话目标}
+constraints: []
+risk_focus: []
 artifact_paths: {}
 decisions: []
 ```
@@ -140,22 +155,30 @@ decisions: []
 
 新会话进入时，如果 `_backend-arch/` 下已有任务目录：
 
-1. 读取最近任务的 `meta/arch-state.md`
-2. 用 Glob 检查实际产物文件（产物优先于 state 文件）
-3. 向用户展示当前进度，使用 `AskUserQuestion` 确认：继续未完成任务 / 开始新任务
+1. 优先识别用户是否明确要“继续上次任务 / 恢复任务”
+2. 读取最近任务的 `meta/arch-state.md`
+3. 用 Glob 检查实际产物文件（产物优先于 state 文件）：
+   - `api/api-design-*.md`
+   - `database/db-model-*.md`
+   - `scalability/scalability-review-*.md`
+   - `microservice/microservice-design-*.md`
+   - `tech-debt/tech-debt-assessment-*.md`
+4. 若状态文件与产物冲突，以产物为准回推阶段并更新推荐下一步
+5. 向用户展示当前进度，使用 `AskUserQuestion` 确认：继续未完成任务 / 开始新任务
 
 <IMPORTANT>
 ## 质量硬规则
 
 ### 编排纪律
-1. 工作台职责是"意图识别 + 路由 + 接续"，不默认跑完整 API → DB → Scalability 管道
-2. 微服务设计和技术债评估是独立 workflow，不经过三阶段管道
+1. 工作台职责是"先装配后路由 + 接续"，不默认跑完整 API → DB → Scalability 管道
+2. 微服务设计、技术债评估和快速扫描是独立 workflow，不经过三阶段管道
 3. 每个阶段完成后必须等待用户确认再进入下一阶段
 4. 产出文件与状态文件冲突时，以产出文件为准
+5. 恢复时必须先读状态、再校验产物，不可只凭对话记忆推进
 
 ### 后端架构专业规则
-5. 每个扩展方案必须同时标注实施成本和预期收益——禁止无代价分析的"银弹"推荐
-6. API 端点必须同时定义正常响应和错误响应（含 HTTP 状态码 + 业务错误码）——只有 happy path 的设计不合格
-7. 数据库反范式化决策必须记录原因、读写比数据和一致性保障方案——"为了性能"不是充分理由
-8. CAP 权衡必须关联到具体业务场景（如"支付->CP，推荐->AP"），不可笼统选择
+6. 每个扩展方案必须同时标注实施成本和预期收益——禁止无代价分析的"银弹"推荐
+7. API 端点必须同时定义正常响应和错误响应（含 HTTP 状态码 + 业务错误码）——只有 happy path 的设计不合格
+8. 数据库反范式化决策必须记录原因、读写比数据和一致性保障方案——"为了性能"不是充分理由
+9. CAP 权衡必须关联到具体业务场景（如"支付->CP，推荐->AP"），不可笼统选择
 </IMPORTANT>

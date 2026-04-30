@@ -1,6 +1,6 @@
 ---
 name: uxa
-description: UX 架构工作台——按意图路由到信息架构、用户流程分析、交互审计或完整流程
+description: UX 架构工作台——先装配任务，再按意图路由到信息架构、用户流程分析、交互审计、快速检查或完整流程
 argument-hint: "<任务描述>"
 allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Skill"]
 ---
@@ -9,21 +9,25 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 
 用户传入的参数：`$ARGUMENTS`
 
-先判断用户此刻要完成的工作，再带他进入对应 workflow。不是所有需求都需要走完整管道。
+先装配 UX 架构任务，再带他进入对应 workflow。不是所有需求都需要走完整管道。
+
+**入口纪律**：凡自然语言 UX 请求（信息架构 / 流程 / 交互 / 体验审计 / 快速检查），默认先走 `/ux-architect:uxa` 装配任务；仅当用户明确点名子 skill（`/information-architecture`、`/user-flow-analysis`、`/interaction-audit`）或明确说“只做某一项”时，才直达子 skill。
 
 ---
 
 ## 强制执行规则
 
 - ✅ 始终用中文与用户沟通
-- ✅ 先识别 workflow 类型，再进入对应流程
+- ✅ 先装配任务卡，再识别 workflow 类型
 - 🚫 不默认跑完整管道
 - 🚫 不在入口全量加载所有 references
 - ⏸️ 每个阶段完成后等待用户确认
 
 ---
 
-## Step 0: 意图识别与 Workflow 路由
+## Step 0: 任务装配与 Workflow 路由
+
+### 显式快路由
 
 | 意图信号 | Workflow | 动作 |
 |----------|----------|------|
@@ -31,16 +35,24 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 | "用户流程 / 旅程 / 路径" | flow-only | 调用 `/user-flow-analysis $ARGUMENTS` |
 | "交互 / 审计 / 可用性" | audit-only | 调用 `/interaction-audit $ARGUMENTS` |
 | "快速检查 / 概览" | quick-scan | → Step 3 |
-| "完整分析 / 全套 或复杂需求" | full-analysis | → Step 1 |
+| "继续上次 UX 架构任务 / 恢复任务" | resume | 优先进入断点恢复 |
+| "完整分析 / 全套" 或复杂需求 | full-analysis | → Step 1 |
 
-意图不明确时，用 `AskUserQuestion` 让用户选择：
-- 仅信息架构 
-- 仅用户流程 
-- 仅交互 
-- 快速用户体验架构检查
-- 完整用户体验架构流程（推荐）
+### 任务装配
 
-**⏸️ 等待用户选择。**
+意图不明确时，用 `AskUserQuestion` 一次性补齐最小任务卡：
+- `task_type`：ia-only / flow-only / audit-only / quick-scan / full-analysis
+- `objective`：一句话目标
+- `trigger_source`：new-feature / redesign / incident / optimization
+- `deliverable_type`：IA / flow / audit / 组合交付物
+- `scope_in`：纳入分析的页面 / 流程 / 角色
+- `scope_out`：排除项
+- `risk_profile`：关键体验风险
+- `persona_matrix`：核心用户 / 角色
+- `constraints`：时间 / 资源 / 业务约束
+- `workflow_candidate`：候选 workflow
+
+workflow 确定后，先向用户宣告本次场景、目标和执行链路，再进入后续步骤。
 
 ---
 
@@ -48,9 +60,27 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 
 1. 从 `$ARGUMENTS` 提取任务描述，生成英文缩写（2-4 词，连字符连接）
 2. 使用 `AskUserQuestion` 确认缩写
-3. 创建 `_ux-arch/{当前日期}-{缩写}/` 及子目录 `context/` `meta/` 和各阶段子目录
-4. 初始化 `meta/state.md`（workflow_mode、completed_steps、next_step）
-5. 使用 Glob 扫描 `_ux-arch/{当前日期}-{缩写}/` 下已有产出文件（`ia/ia-*.md`、`flows/flow-*.md`、`interaction/audit-*.md`），Read `meta/state.md` 检查 `completed_steps`，若产出文件已存在则标记对应阶段为已完成（产物优先于状态文件）
+3. 创建 `_ux-arch/{当前日期}-{缩写}/` 及子目录 `context/` `meta/` `ia/` `flows/` `interaction/`
+4. 初始化 `meta/state.md`：
+
+```markdown
+workflow_mode: full-analysis
+task_type: full-analysis
+objective: {一句话目标}
+trigger_source: redesign
+deliverable_type: audit-pack
+scope_in: []
+scope_out: []
+risk_profile: []
+persona_matrix: []
+constraints: []
+completed_steps: []
+next_step: information-architecture
+last_artifact: 
+```
+
+5. 使用 Glob 扫描 `ia/ia-*.md`、`flows/flow-*.md`、`interaction/audit-*.md`，如产物已存在则标记对应阶段已完成
+6. Read `meta/state.md` 校验接续点；产物优先于状态文件
 
 **⏸️ 使用 `AskUserQuestion` 确认从哪里开始。**
 
@@ -89,11 +119,12 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 ## 断点恢复
 
 1. 使用 Glob 扫描 `_ux-arch/*/meta/state.md`，Read 每个 state.md 检查 `next_step` 字段
-2. 若 `next_step` 不为 `done`，使用 Glob 检查对应阶段产出文件（`ia/ia-*.md`、`flows/flow-*.md`、`interaction/audit-*.md`）是否存在；产出文件存在则视为该阶段已完成（产物优先）
-3. 使用 `AskUserQuestion` 向用户展示进度，选择：从断点继续 / 重新开始
+2. 若 `next_step` 不为 `done`，使用 Glob 检查对应阶段产出文件（`ia/ia-*.md`、`flows/flow-*.md`、`interaction/audit-*.md`）是否存在；产出文件存在则视为该阶段已完成
+3. 产物优先于状态文件；恢复时补问只问缺口字段
+4. 使用 `AskUserQuestion` 向用户展示进度，选择：从断点继续 / 从某阶段重开 / 重新开始
 
 <IMPORTANT>
-工作台的职责是"意图识别 + 路由 + 接续"，不是把所有请求都塞进固定管道。
+工作台的职责是"先装配 UX 架构任务，再做路由 + 接续"，不是把所有请求都塞进固定管道。
 信息架构必须基于用户心智模型，不可仅照搬业务结构。
 用户流程分析必须标注关键决策点和退出点。
 交互审计必须引用 Nielsen 启发式规则。

@@ -1,6 +1,6 @@
 ---
 name: pdo
-description: 私域运营工作台——按意图路由到企微生态搭建、社群运营、用户生命周期、全链路转化或完整流程
+description: 私域运营工作台——先装配私域任务，再按意图路由到企微生态搭建、社群运营、用户生命周期、全链路转化、快速检查或完整流程
 argument-hint: "<任务描述>"
 allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Skill"]
 ---
@@ -9,21 +9,25 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 
 用户传入的参数：`$ARGUMENTS`
 
-先判断用户此刻要完成的工作，再带他进入对应 workflow。不是所有需求都需要走完整管道。
+先装配私域运营任务，再按意图路由到对应 workflow。不是所有需求都需要走完整管道。
+
+**入口纪律**：除非用户明确点名 `/wecom-ecosystem-setup`、`/community-operations`、`/user-lifecycle`、`/conversion-funnel`，或明确要求“只做企微 / 只做社群 / 只做生命周期 / 只做转化 / 只做快速检查”，否则统一先走 `/private-domain-operator:pdo` 入口。
 
 ---
 
 ## 强制执行规则
 
 - ✅ 始终用中文与用户沟通
-- ✅ 先识别 workflow 类型，再进入对应流程
+- ✅ 先装配任务卡，再识别 workflow 类型
 - 🚫 不默认跑完整管道
 - 🚫 不在入口全量加载所有 references
 - ⏸️ 每个阶段完成后等待用户确认
 
 ---
 
-## Step 0: 意图识别与 Workflow 路由
+## Step 0: 任务装配与 Workflow 路由
+
+### 显式快路由
 
 | 意图信号 | Workflow | 动作 |
 |----------|----------|------|
@@ -32,17 +36,33 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 | "生命周期 / 留存 / 召回" | lifecycle-only | 调用 `/user-lifecycle $ARGUMENTS` |
 | "转化 / 漏斗 / 成交" | conversion-only | 调用 `/conversion-funnel $ARGUMENTS` |
 | "检查 / 盘点 / 概览 / 快速看看" | quick-scan | → Step 3 |
-| "完整策略 / 全套 或复杂需求" | full-strategy | → Step 1 |
+| "继续上次私域任务 / 恢复任务" | resume | 优先进入断点恢复 |
+| "完整策略 / 全套" 或复杂需求 | full-strategy | → Step 1 |
 
-意图不明确时，用 `AskUserQuestion` 让用户选择：
-- 仅企微 
-- 仅社群 
-- 仅生命周期 
-- 仅转化 
-- 快速检查（概览现有私域资产）
-- 完整私域运营流程（推荐）
+### 任务装配
 
-**⏸️ 等待用户选择。**
+意图不明确时，用 `AskUserQuestion` 一次性补齐最小任务卡：
+- `task_type`：wecom-only / community-only / lifecycle-only / conversion-only / quick-scan / full-strategy
+- `objective`：本次运营目标
+- `trigger_source`：用户口述 / 历史盘点 / 外部活动 / 数据异常
+- `deliverable_type`：蓝图 / SOP / 生命周期策略 / 转化方案 / 全流程包
+- `scope_in`：本次纳入范围
+- `scope_out`：本次排除范围
+- `business_stage`：冷启动 / 成长期 / 稳定期 / 大促期
+- `channel_mix`：公域引流来源
+- `audience_segment`：目标人群分层
+- `current_assets`：已有私域资产
+- `risk_profile`：当前最高风险
+- `compliance_constraints`：合规约束
+- `budget_window`：预算窗口
+- `kpi_targets`：核心 KPI
+- `workflow_candidate`：当前 workflow
+- `fast_route`：是否快路由
+- `task_slug`：任务简称
+- `current_stage`：当前阶段
+- `next_step`：下一步动作
+
+workflow 确定后，先向用户宣告本次场景、目标和执行链路，再进入后续步骤。
 
 ---
 
@@ -50,9 +70,36 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 
 1. 从 `$ARGUMENTS` 提取任务描述，生成英文缩写（2-4 词，连字符连接）
 2. 使用 `AskUserQuestion` 确认缩写
-3. 创建 `_private-domain/{当前日期}-{缩写}/` 及子目录 `context/` `meta/` 和各阶段子目录
-4. 初始化 `meta/state.md`（workflow_mode、completed_steps、next_step）
-5. 使用 Glob 扫描 `_private-domain/{当前日期}-{缩写}/` 下已有文件，依次检查 `ecosystem/scrm-blueprint.yaml`、`community/community-playbook.md`、`lifecycle/lifecycle-automation.py`、`funnel/funnel-strategy.md`，存在即标记对应阶段为已完成（产物优先于 state.md）
+3. 创建 `_private-domain/{当前日期}-{缩写}/` 及子目录 `context/` `meta/` `ecosystem/` `community/` `lifecycle/` `funnel/`
+4. 初始化 `meta/state.md`：
+
+```markdown
+workflow_mode: full-strategy
+task_type: full-strategy
+task_slug: {缩写}
+objective: {一句话目标}
+trigger_source: user-input
+deliverable_type: private-domain-pack
+scope_in:
+scope_out:
+business_stage: unknown
+channel_mix: []
+audience_segment: []
+current_assets: []
+risk_profile: unknown
+compliance_constraints: []
+budget_window: unknown
+kpi_targets: []
+workflow_candidate: full-strategy
+fast_route: false
+current_stage: wecom-ecosystem-setup
+completed_steps: []
+next_step: wecom-ecosystem-setup
+updated_at: {YYYY-MM-DD}
+```
+
+5. 扫描已有目录，检查 `ecosystem/`、`community/`、`lifecycle/`、`funnel/` 产物，产物优先于状态文件
+6. 重新 Read `meta/state.md`，如 state 与产物冲突，以产物为准
 
 **⏸️ 使用 `AskUserQuestion` 确认从哪里开始。**
 
@@ -64,10 +111,10 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 
 | 阶段 | 调用 | 完成标志 | 门控 |
 |------|------|---------|------|
-| 企微生态搭建 | `/wecom-ecosystem-setup $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
-| 社群运营 | `/community-operations $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
-| 用户生命周期 | `/user-lifecycle $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
-| 全链路转化 | `/conversion-funnel $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
+| 企微生态搭建 | `/wecom-ecosystem-setup $ARGUMENTS` | `ecosystem/*` 存在 | 继续 / 回退 / 结束 |
+| 社群运营 | `/community-operations $ARGUMENTS` | `community/*` 存在 | 继续 / 回退 / 结束 |
+| 用户生命周期 | `/user-lifecycle $ARGUMENTS` | `lifecycle/*` 存在 | 继续 / 回退 / 结束 |
+| 全链路转化 | `/conversion-funnel $ARGUMENTS` | `funnel/*` 存在 | 继续 / 回退 / 结束 |
 
 每阶段写入摘要到 `meta/{stage}-summary.md`（不超过 20 行）。
 
@@ -77,37 +124,29 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 
 ## Step 3: 快速检查
 
-按以下维度逐项速览，每项用一句话总结现状：
+编排器内轻量执行，不调用子技能：
+1. 优先扫描最近任务的 `meta/state.md` 与四类阶段产物
+2. 输出企微基建、社群健康、生命周期、转化漏斗四维速览
+3. 若缺真实数据，仅生成缺口说明和建议采集项，不臆造 KPI
+4. 将速览结果保存到 `_private-domain/quick-scan-{当前日期}.md`
 
-| 维度 | 检查动作 | 输出 |
-|------|---------|------|
-| 企微基建 | Glob `_private-domain/*/ecosystem/scrm-blueprint.yaml`，存在则 Read 统计员工号数、活码数、标签维度数 | 有/无 + 关键配置数 |
-| 社群健康 | Glob `_private-domain/*/community/community-playbook.md`，存在则 Read 统计社群层数和活跃率目标 | 社群层数 + 活跃率目标 |
-| 生命周期 | Glob `_private-domain/*/lifecycle/lifecycle-automation.py`，存在则 Read 统计阶段数和触达规则数 | 阶段数 + 自动化规则数 |
-| 转化漏斗 | Glob `_private-domain/*/funnel/funnel-strategy.md`，存在则 Read 统计渠道数和各环节转化率目标 | 渠道数 + 整体转化率目标 |
-
-将速览结果保存到 `_private-domain/quick-scan-{当前日期}.md`，每个维度不超过 5 行。
-
-使用 `AskUserQuestion`：深入某项 / 进入完整流程 / 结束。
+使用 `AskUserQuestion`：深入企微 / 深入社群 / 深入生命周期 / 深入转化 / 进入完整流程 / 结束。
 
 ---
 
 ## 断点恢复
 
-1. 使用 Glob 扫描 `_private-domain/*/meta/state.md`，列出所有任务目录
-2. 对每个任务目录，Read `meta/state.md` 获取 `next_step`，然后检查四个阶段产出文件是否存在：
-   - `ecosystem/scrm-blueprint.yaml` → 企微搭建已完成
-   - `community/community-playbook.md` → 社群运营已完成
-   - `lifecycle/lifecycle-automation.py` → 生命周期已完成
-   - `funnel/funnel-strategy.md` → 转化漏斗已完成
-   - 若产出文件存在但 state.md 未标记完成，以产出文件为准
-3. 使用 `AskUserQuestion` 展示未完成任务及其断点位置，选项：从断点继续 / 重新开始
+1. 扫描 `_private-domain/` 下未完成目录
+2. 先 Read `meta/state.md`，再核对 `ecosystem/`、`community/`、`lifecycle/`、`funnel/` 产物
+3. 恢复时以产物优先于状态文件；切 workflow 时记录决策日志
+4. 使用 `AskUserQuestion`：从断点继续 / 从某阶段重开 / 重新开始
 
 <IMPORTANT>
-工作台的职责是"意图识别 + 路由 + 接续"，不是把所有请求都塞进固定管道。
-转化漏斗必须有可量化 KPI。
+工作台的职责是"先装配私域任务，再做路由 + 接续"，不是把所有请求都塞进固定管道。
+转化漏斗必须有可量化 KPI，不可只给方向。
 用户生命周期必须包含触发式自动化规则。
-社群运营方案必须考虑人力可执行性。
+社群运营方案必须考虑人力可执行性与触达频率。
+合规风险必须前置标注，不可默认忽略。
 每个阶段完成后必须等待用户确认。
 产出文件与状态文件冲突时，以产出文件为准。
 </IMPORTANT>

@@ -1,6 +1,6 @@
 ---
 name: uid
-description: UI 设计评审工作台——按意图路由到对应 workflow（视觉快扫 / 视觉审计 / 设计系统评审 / 原型反馈 / 完整流程 / 自定义组合）
+description: UI 设计评审工作台——先装配任务，再按意图路由到视觉快扫 / 视觉审计 / 设计系统评审 / 原型反馈 / 完整流程 / 自定义组合
 argument-hint: "<评审任务描述>"
 allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Skill"]
 ---
@@ -9,14 +9,16 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 
 用户传入的参数：`$ARGUMENTS`
 
-先判断用户此刻要完成的工作，再带他进入对应 workflow。不是所有需求都需要走完整 VA → DSR → PF 管道。
+先装配 UI 评审任务，再带他进入对应 workflow。不是所有需求都需要走完整 VA → DSR → PF 管道。
+
+**入口纪律**：除非用户明确点名 `/visual-audit`、`/design-system-review`、`/prototype-feedback`，或明确要求“只做视觉审计 / 只做设计系统评审 / 只做原型反馈 / 只做视觉快扫”，否则都先走 `/ui-designer:uid` 入口。像“帮我看下这个设计稿”“页面改版前做个评审”“看看视觉和交互有没有明显问题”这类泛化请求，一律先完成任务装配，再决定 workflow。
 
 ---
 
 ## 强制执行规则
 
 - ✅ 始终用中文与用户沟通
-- ✅ 先识别 workflow 类型，再进入对应流程
+- ✅ 先装配任务卡，再识别 workflow 类型
 - ✅ 使用 `AskUserQuestion` 让用户做选择，不假设
 - 🚫 不默认跑完整 VA → DSR → PF 管道
 - 🚫 不在入口全量加载所有 references
@@ -24,9 +26,9 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 
 ---
 
-## Step 0: 意图识别与 Workflow 路由
+## Step 0: 任务装配与 Workflow 路由
 
-根据 `$ARGUMENTS` 判断工作类型：
+### 显式快路由
 
 | 意图信号 | Workflow | 动作 |
 |----------|----------|------|
@@ -34,18 +36,25 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 | "视觉审计 / Gestalt / Nielsen / 启发式 / 视觉评估" | visual-audit-only | 调用 `/visual-audit $ARGUMENTS` |
 | "设计系统 / Token / 组件一致性 / DS" | design-system-only | 调用 `/design-system-review $ARGUMENTS` |
 | "原型 / 交互 / 流程 / 走查 / 用户旅程" | prototype-only | 调用 `/prototype-feedback $ARGUMENTS` |
+| "继续上次 UI 评审 / 恢复任务" | resume | 优先进入断点恢复 |
 | "完整流程 / 全套 / 完整评审" 或复杂需求 | full-audit | → Step 1 |
-| 用户明确指定组合（如"视觉+原型"） | custom | → Step 4 |
+| 用户明确指定组合（如“视觉+原型”） | custom | → Step 4 |
 
-如果无法唯一判断，使用 `AskUserQuestion` 让用户选择：
-- 完整评审流程（推荐）— VA → DSR → PF 全链路
-- 仅视觉审计（Gestalt + Nielsen 启发式）
-- 仅设计系统评审（Token + 组件一致性）
-- 仅原型反馈（交互走查 + 用户旅程）
-- 视觉快扫（轻量级快速检查）
-- 自定义组合（选择要执行的阶段）
+### 任务装配
 
-**⏸️ 等待用户选择。**
+意图不明确时，用 `AskUserQuestion` 一次性补齐最小任务卡：
+- `task_type`：visual-audit / design-system / prototype / full-audit / custom
+- `entry_intent`：用户原话
+- `trigger_source`：new-feature / redesign / pre-release / bug-feedback
+- `target_surface`：web / mobile / design-file
+- `target_artifact`：页面 / 路由 / Figma URL
+- `evidence_level`：light / standard / strict
+- `acceptance_source`：user-text / figma-comment / issue / none
+- `current_stage`：当前阶段
+- `completed_stages`：已完成阶段
+- `last_report`：最近报告
+
+workflow 确定后，先向用户宣告本次场景、目标和执行链路，再进入后续步骤。
 
 ---
 
@@ -60,15 +69,21 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 
 ```markdown
 workflow_mode: full-audit
-slug: {缩写}
-completed_steps: []
+task_type: full-audit
+entry_intent: {用户原话}
+trigger_source: redesign
+target_surface: design-file
+target_artifact: {页面/路由/Figma URL}
+evidence_level: standard
+acceptance_source: none
+current_stage: visual-audit
+completed_stages: []
 next_step: visual-audit
-artifact_paths: {}
-decisions: []
+last_report: 
 ```
 
-5. 扫描 `_design-review/` 已有目录，简要报告
-6. 检查 `meta/design-review-state.md` 和实际产物做接续判断（产物优先）
+5. 扫描 `visual/`、`design-system/`、`prototype/` 中已有产物，判断接续点——产物存在则跳过对应阶段
+6. 重新 Read `meta/design-review-state.md`，产物与状态冲突时以产物为准
 
 **⏸️ 使用 `AskUserQuestion` 确认从哪里开始。**
 
@@ -157,11 +172,12 @@ decisions: []
 
 当用户中途返回时：
 1. 扫描 `_design-review/` 下未完成目录
-2. Read `meta/design-review-state.md`，结合实际产物推断进度
-3. 使用 `AskUserQuestion`：从断点继续 / 重新开始
+2. 先 Read `meta/design-review-state.md`，再验 `visual/`、`design-system/`、`prototype/` 产物
+3. 产物优先于状态文件；恢复时优先读 `meta/{stage}-summary.md` 与产物路径
+4. 使用 `AskUserQuestion`：从断点继续 / 从某阶段重开 / 重新开始
 
 <IMPORTANT>
-工作台的职责是"意图识别 + 路由 + 接续"，不是把所有请求都塞进 VA → DSR → PF 管道。视觉快扫和单项子技能是独立 workflow，不经过完整管道。
+工作台的职责是"先装配 UI 评审任务，再做路由 + 接续"，不是把所有请求都塞进 VA → DSR → PF 管道。视觉快扫和单项子技能是独立 workflow，不经过完整管道。
 每个阶段完成后必须等待用户确认再进入下一阶段。
 产出文件与状态文件冲突时，以产出文件为准。
 绝不在没有看到设计产出的情况下给出评审意见。

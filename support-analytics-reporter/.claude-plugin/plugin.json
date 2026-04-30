@@ -1,11 +1,11 @@
 {
   "name": "support-analytics-reporter",
-  "description": "Analytics reporting: executive dashboards, customer segmentation, and marketing attribution analysis",
-  "version": "1.0.0",
+  "description": "Support analytics reporter workbench: route across executive dashboards, customer segmentation, marketing attribution, and quick scan workflows",
+  "version": "2.0.0",
   "author": { "name": "jxin" },
   "homepage": "https://github.com/Jxin-Cai/agents-plugin",
   "repository": "https://github.com/Jxin-Cai/agents-plugin",
-  "keywords": ["analytics", "dashboard", "customer-segmentation", "attribution"],
+  "keywords": ["analytics", "dashboard", "customer-segmentation", "attribution", "workbench"],
   "agents": [],
   "skills": ["./skills/"],
   "commands": ["./commands/"]

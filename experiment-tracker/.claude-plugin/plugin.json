@@ -1,14 +1,24 @@
 {
   "name": "experiment-tracker",
-  "description": "Experiment tracker: structured A/B test design, metrics definition, and results analysis",
-  "version": "1.0.0",
+  "description": "Experiment tracker workbench: route across A/B test design, metrics definition, results analysis, and quick check workflows",
+  "version": "2.0.0",
   "author": {
     "name": "jxin"
   },
   "homepage": "https://github.com/Jxin-Cai/agents-plugin",
   "repository": "https://github.com/Jxin-Cai/agents-plugin",
-  "keywords": ["experiment", "ab-test", "metrics", "statistical-significance", "experiment-design"],
+  "keywords": [
+    "experiment",
+    "ab-test",
+    "metrics",
+    "statistical-significance",
+    "experiment-design"
+  ],
   "agents": [],
-  "skills": ["./skills/"],
-  "commands": ["./commands/"]
+  "skills": [
+    "./skills/"
+  ],
+  "commands": [
+    "./commands/"
+  ]
 }

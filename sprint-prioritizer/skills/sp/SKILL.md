@@ -1,6 +1,6 @@
 ---
 name: sp
-description: Sprint 优先级工作台——按意图路由到 Backlog 梳理、优先级矩阵、Sprint 规划或完整流程
+description: Sprint 优先级工作台——先装配 Sprint 任务，再按意图路由到 Backlog 梳理、优先级矩阵、Sprint 规划、快速检查或完整流程
 argument-hint: "<Sprint 规划任务描述>"
 allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Skill"]
 ---
@@ -9,37 +9,51 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 
 用户传入的参数：`$ARGUMENTS`
 
-先判断用户此刻要完成的工作，再带他进入对应 workflow。不是所有需求都需要走完整 Backlog → Priority → Sprint 管道。
+先装配 Sprint 优先级任务，再按意图路由到对应 workflow。不是所有需求都需要走完整 Backlog → Priority → Sprint 管道。
+
+**入口纪律**：除非用户明确点名 `/backlog-grooming`、`/priority-matrix`、`/sprint-planning`，或明确要求“只做梳理 / 只做排序 / 只做规划 / 只做快速检查”，否则统一先走 `/sprint-prioritizer:sp` 入口。
 
 ---
 
 ## 强制执行规则
 
 - ✅ 始终用中文与用户沟通
-- ✅ 先识别 workflow 类型，再进入对应流程
+- ✅ 先装配任务卡，再识别 workflow 类型
 - 🚫 不默认跑完整三阶段管道
+- 🚫 不在入口全量加载所有 references
 - ⏸️ 每个阶段完成后等待用户确认
 
 ---
 
-## Step 0: 意图识别与 Workflow 路由
+## Step 0: 任务装配与 Workflow 路由
+
+### 显式快路由
 
 | 意图信号 | Workflow | 动作 |
 |----------|----------|------|
 | "梳理 / backlog / 需求池" | backlog-only | 调用 `/backlog-grooming $ARGUMENTS` |
 | "优先级 / RICE / WSJF / 排序" | priority-only | 调用 `/priority-matrix $ARGUMENTS` |
 | "Sprint / 规划 / 排期 / 容量" | planning-only | 调用 `/sprint-planning $ARGUMENTS` |
-| "快速检查 / 概览" | quick-check | → Step 3 |
+| "快速检查 / 概览 / 快扫" | quick-check | → Step 3 |
+| "继续上次 Sprint 任务 / 恢复任务" | resume | 优先进入断点恢复 |
 | "完整规划 / 全套" 或复杂需求 | full-planning | → Step 1 |
 
-意图不明确时，用 `AskUserQuestion` 让用户选择：
-- 完整 Sprint 规划流程（推荐）
-- 仅 Backlog 梳理
-- 仅优先级矩阵
-- 仅 Sprint 规划
-- 快速 Sprint 检查
+### 任务装配
 
-**⏸️ 等待用户选择。**
+意图不明确时，用 `AskUserQuestion` 一次性补齐最小任务卡：
+- `task_type`：backlog-only / priority-only / planning-only / quick-check / full-planning
+- `workflow`：当前 workflow
+- `goal`：本次 Sprint 决策目标
+- `input_source`：用户口述 / 文档 / Jira / 本地文件
+- `constraints`：截止日期 / 依赖 / 不可变约束
+- `backlog_source`：需求池来源
+- `framework`：RICE / WSJF / MoSCoW / 自定义
+- `capacity_basis`：历史速率 / 人天 / 故事点
+- `sync_intent`：是否需要回写外部系统或同步团队
+- `current_stage`：当前阶段
+- `next_step`：下一步动作
+
+workflow 确定后，先向用户宣告本次场景、目标和执行链路，再进入后续步骤。
 
 ---
 
@@ -49,10 +63,28 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 2. 使用 `AskUserQuestion` 确认缩写
 3. 创建 `_sprint/{当前日期}-{缩写}/` 及子目录 `context/` `backlog/` `priority/` `planning/` `meta/`
 4. **需求平台连接检查**：检查 requirement-mgmt 配置状态；若当前项目缺配置，用 `AskUserQuestion` 询问是否立即进入 `/req-setup` 初始化引导
-5. 初始化 `meta/sprint-state.md`（workflow_mode、completed_steps、next_step）
-6. 扫描已有目录，检查接续点（产物优先）
+5. 初始化 `meta/sprint-state.md`：
 
-**⏸️ 确认从哪里开始。**
+```markdown
+workflow_mode: full-planning
+task_type: full-planning
+goal: {一句话目标}
+input_source: user-input
+constraints: []
+backlog_source: unknown
+framework: RICE
+capacity_basis: recent-velocity
+sync_intent: local-only
+current_stage: backlog-grooming
+completed_steps: []
+next_step: backlog-grooming
+updated_at: {YYYY-MM-DD}
+```
+
+6. 扫描已有目录，检查 `backlog/`、`priority/`、`planning/` 产物，产物优先于状态文件
+7. 重新 Read `meta/sprint-state.md`，如 state 与产物冲突，以产物为准
+
+**⏸️ 使用 `AskUserQuestion` 确认从哪里开始。**
 
 ---
 
@@ -62,9 +94,9 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 
 | 阶段 | 调用 | 完成标志 | 门控 |
 |------|------|---------|------|
-| Backlog 梳理 | `/backlog-grooming $ARGUMENTS` | `backlog/backlog-*.md` | 继续 / 重新梳理 / 结束 |
-| 优先级矩阵 | `/priority-matrix $ARGUMENTS` | `priority/priority-matrix-*.md` | 继续 / 调整 / 回退 |
-| Sprint 规划 | `/sprint-planning $ARGUMENTS` | `planning/sprint-plan-*.md` | 完成 |
+| Backlog 梳理 | `/backlog-grooming $ARGUMENTS` | `backlog/backlog-*.md` 存在 | 继续 / 回退 / 结束 |
+| 优先级矩阵 | `/priority-matrix $ARGUMENTS` | `priority/priority-matrix-*.md` 存在 | 继续 / 回退 / 结束 |
+| Sprint 规划 | `/sprint-planning $ARGUMENTS` | `planning/sprint-plan-*.md` 存在 | 继续 / 回退 / 结束 |
 
 每阶段写入摘要到 `meta/{stage}-summary.md`（不超过 20 行）。
 
@@ -72,29 +104,29 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 
 ---
 
-## Step 3: 快速 Sprint 检查
+## Step 3: 快速检查
 
-编排器内轻量执行：
-1. 使用 Glob 扫描 `_sprint/*/backlog/backlog-*.md`，Read 最新文件，统计条目总数和就绪度分布（🟢/🟡/🔴 各多少）
-2. 使用 Glob 扫描 `_sprint/*/priority/priority-matrix-*.md`，Read 最新文件，提取 Top 5 优先级条目及其得分
-3. 使用 Read 加载 `_sprint/*/context/team-context.md`（如存在），对比团队容量与已排优先级条目的总故事点，计算供需比并标注预警级别（🟢 < 80% / 🟡 80-100% / 🔴 > 100%）
+编排器内轻量执行，不调用子技能：
+1. 用 Glob 扫描 `_sprint/` 下最近任务目录，优先读取最新产物和 `meta/sprint-state.md`
+2. 汇总最近一次 Backlog 梳理的条目规模、优先级前 5、当前容量基线与供需预警
+3. 若缺关键数据，则只收集最少信息并明确标注“待补数据”
+4. 将结果写入 `_sprint/quick-check-{日期}.md`
 
-若上述文件均不存在，提示用户先执行 `/backlog-grooming` 生成基础数据。
-
-使用 Write 生成精简报告到 `_sprint/quick-check-{日期}.md`，包含：容量快照 | Top 5 排序 | 供需预警。
+使用 `AskUserQuestion`：深入梳理 / 深入排序 / 深入 Sprint 规划 / 进入完整流程 / 结束。
 
 ---
 
 ## 断点恢复
 
-1. 使用 Glob 扫描 `_sprint/*/meta/sprint-state.md`，Read 每个匹配文件，筛选 `next_step` 非 `done` 的目录为未完成任务
-2. 对未完成任务，Read 其 `meta/sprint-state.md` 获取 `completed_steps` 和 `next_step`，再使用 Glob 检查对应阶段产出文件（`backlog/backlog-*.md`、`priority/priority-matrix-*.md`、`planning/sprint-plan-*.md`）是否存在，以产出文件为准推断实际进度
-3. 使用 `AskUserQuestion` 向用户展示未完成任务列表及其进度，提供选项：从断点继续 / 重新开始
+1. 扫描 `_sprint/` 下未完成目录
+2. 先 Read `meta/sprint-state.md`，再核对 `backlog/`、`priority/`、`planning/` 产物
+3. 恢复时以产物优先于状态文件；切 workflow 时记录决策日志
+4. 使用 `AskUserQuestion`：从断点继续 / 从某阶段重开 / 重新开始
 
 <IMPORTANT>
-工作台的职责是"意图识别 + 路由 + 接续"，不是把所有请求都塞进固定管道。
-优先级评分必须使用量化框架（RICE/WSJF），不可仅凭直觉排序。
-Sprint 容量规划必须考虑缓冲（建议预留 15-20%）。
+工作台的职责是"先装配 Sprint 任务，再做路由 + 接续"，不是把所有请求都塞进固定管道。
+优先级评分必须使用量化框架（RICE/WSJF 等），不可仅凭直觉排序。
+Sprint 容量规划必须标注容量基线和缓冲（建议预留 15-20%）。
 每个阶段完成后必须等待用户确认。
 产出文件与状态文件冲突时，以产出文件为准。
 </IMPORTANT>

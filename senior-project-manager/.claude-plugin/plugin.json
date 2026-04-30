@@ -1,13 +1,13 @@
 {
   "name": "senior-project-manager",
-  "description": "Senior project manager: structured risk assessment, stakeholder mapping, and timeline planning based on PMBOK framework",
-  "version": "1.0.0",
+  "description": "Senior project manager workbench: route across risk assessment, stakeholder mapping, timeline planning, and quick diagnosis workflows",
+  "version": "2.0.0",
   "author": {
     "name": "jxin"
   },
   "homepage": "https://github.com/Jxin-Cai/agents-plugin",
   "repository": "https://github.com/Jxin-Cai/agents-plugin",
-  "keywords": ["project-management", "risk-assessment", "stakeholder", "timeline", "PMBOK"],
+  "keywords": ["project-management", "risk-assessment", "stakeholder", "timeline", "PMBOK", "workbench"],
   "agents": [],
   "skills": ["./skills/"],
   "commands": ["./commands/"]

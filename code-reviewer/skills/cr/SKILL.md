@@ -7,37 +7,60 @@ allowed-tools: ["Read", "Write", "Glob", "Grep", "Bash(mkdir*|ls*|find*|wc*|head
 
 # 代码审查编排器
 
-意图路由入口，根据用户需求分流到不同 workflow。
+先装配审查任务，再按意图路由到安全审查、质量审计、重构建议或完整流程。
 
 用户传入的参数：`$ARGUMENTS`
 
+**入口纪律**：除非用户明确点名 `/security-review`、`/quality-audit`、`/refactor-suggestions`，或明确要求“只做安全 / 只做质量 / 只给快扫”，否则都先走 `/code-reviewer:cr` 入口。像“帮我看看这次改动”“审一下这个 PR”“给个发布前结论”这类泛化请求，一律先在入口完成任务装配，不直接绕过主编排器。
+
 ---
 
-## Step 0: 意图识别
+## Step 0: 任务装配与 Workflow 路由
 
-根据 `$ARGUMENTS` 匹配 workflow：
+### 显式快路由
 
-| workflow | 触发关键词 | 执行内容 |
-|----------|-----------|---------|
-| `full-review` | "完整审查"、"全面审查"、无明确意图 | security -> quality -> refactor 全链路 |
-| `security-focus` | "安全"、"漏洞"、"OWASP" | 路由到 `/security-review` |
-| `quality-focus` | "质量"、"复杂度"、"坏味道" | 路由到 `/quality-audit` |
-| `refactor-focus` | "重构"、"优化"、"改进代码" | 路由到 `/refactor-suggestions` |
-| `quick-scan` | "快速"、"扫一下"、"概览" | 编排器内轻量级全维度速览 |
+以下信号命中时，只做一次确认即可直达；否则仍先完成任务装配：
+
+| workflow | 触发信号 | 动作 |
+|----------|-----------|------|
+| `security-focus` | "安全"、"漏洞"、"OWASP"、"密钥"、"权限" | 路由到 `/security-review` |
+| `quality-focus` | "质量"、"复杂度"、"坏味道"、"可维护性" | 路由到 `/quality-audit` |
+| `refactor-focus` | "重构"、"优化结构"、"改进代码" | 路由到 `/refactor-suggestions` |
+| `quick-scan` | "快速"、"扫一下"、"概览"、"triage" | 留在编排器内做轻量级速览 |
+| `resume` | "继续上次审查"、"恢复审查"、"接着看" | 优先进入断点恢复 |
+
+### 任务装配
+
+非显式意图时，先用 `AskUserQuestion` 一次性补齐最小任务卡：
+- `review_target`：PR 链接 / 目录 / 文件 / 模块
+- `review_goal`：安全 / 质量 / 重构 / 发布前全审 / 快速分级
+- `deliverable`：问题清单 / 发布结论 / 重构路线 / 风险分级
+- `risk_focus`：认证授权 / 数据与隐私 / 配置与密钥 / migration / 依赖升级 / 性能 / 测试
+- `review_depth`：quick / standard / deep
+
+装配完成后，再按下表确定 workflow：
+
+| workflow | 使用场景 | 执行内容 |
+|----------|---------|---------|
+| `full-review` | 发布前审查、范围较大、目标不止一个维度 | security -> quality -> refactor 全链路 |
+| `security-focus` | 明确只关心安全风险 | 路由到 `/security-review` |
+| `quality-focus` | 明确只关心质量 / 复杂度 / 可维护性 | 路由到 `/quality-audit` |
+| `refactor-focus` | 明确只关心重构建议 | 路由到 `/refactor-suggestions` |
+| `quick-scan` | 需要快速风险分级，不要求完整结论 | 编排器内轻量级全维度速览 |
 | `custom` | 用户明确指定组合 | 按用户选择组合执行 |
 
-**意图不明确时**，用 `AskUserQuestion` 向用户展示 workflow 选项让其选择。
+workflow 确定后，先向用户宣告本次场景、目标和执行链路，再进入后续步骤。
 
 ---
 
 ## Step 1: 初始化工作区
 
-> 仅 `full-review` 和 `custom` workflow 执行此步骤。single-focus 和 quick-scan 跳过直接到 Step 2/Step 3。
+> 所有 workflow 都要先落最小状态；仅 `full-review` 和 `custom` 需要创建完整目录结构。`single-focus`、`quick-scan`、`resume` 至少也要写入/读取最小状态记录，避免只依赖对话记忆。 
 
 1. 从 `$ARGUMENTS` 提取审查目标，生成英文缩写（2-4 词，连字符连接）
 2. 使用 `AskUserQuestion` 确认任务简写名
 3. 创建工作目录 `_code-review/{日期}-{简写}/` 及子目录 `context/` `security/` `quality/` `refactoring/` `meta/`
-4. Read `references/review-state-template.md`，初始化 `meta/review-state.md`（写入 workflow 类型和初始状态）
+4. Read `references/review-state-template.md`，初始化 `meta/review-state.md`（写入 workflow 类型、review_depth、risk_focus 和初始状态）
 5. 用 `ls -dt _code-review/*/` 扫描已有审查目录，向用户简报
 6. 确定审查范围（PR 链接提取变更文件 / 文件路径扫描 / 模块名定位），保存到 `context/scope.md`
 
@@ -61,7 +84,7 @@ Read `references/workflow-playbook.md` 获取执行规范和门控模板。
 
 ### single-focus（security-focus / quality-focus / refactor-focus）
 
-直接路由到对应子技能，编排器只做初始化和收尾。
+直接路由到对应子技能，但编排器仍需先完成最小状态记录和范围确认，再交给下游 skill。
 
 ### quick-scan
 
@@ -97,10 +120,10 @@ Read `references/report-template.md`
 
 当用户中途返回或继续已有审查时：
 
-1. 检查 `_code-review/` 是否有未完成审查目录
-2. Read `meta/review-state.md` 获取进度
-3. 检查各阶段产出文件存在性（产出文件优先于状态记录）
-4. 使用 `AskUserQuestion` 展示恢复选项：从断点继续 / 重新开始
+1. 优先检查 `_code-review/` 是否有未完成审查目录
+2. 先 Read `meta/review-state.md` 获取 workflow、review_depth、next_step，再校验各阶段产出文件是否存在
+3. 若状态文件与真实产物冲突，以产出文件为准回推当前阶段
+4. 使用 `AskUserQuestion` 展示恢复选项：从断点继续 / 从某阶段重开 / 重新开始
 
 ---
 
@@ -112,11 +135,12 @@ Read `references/report-template.md`
 3. 不得跳过已选 workflow 中的任何阶段（用户主动要求除外）
 4. 每个阶段入口重读状态文件 `meta/review-state.md`，防止状态漂移
 5. 产出文件与状态文件冲突时，以产出文件为准
+6. 状态文件是唯一接续入口；恢复时必须先读状态、再校验产物，不可只凭对话记忆推进
 
 ## 代码审查领域硬规则
 
-6. 每条审查意见必须关联具体代码引用（文件路径:行号），禁止无代码定位的泛泛描述
-7. 安全发现必须标注 OWASP 类别编号（A01-A10），质量发现必须附带度量数值（如圈复杂度=18）
-8. 审查意见必须明确区分 Blocker（阻断发布，必须修改）和 Suggestion（建议改进，可选）——禁止使用模糊的"建议修复"
-9. 重构建议必须包含具体手法名称（如"提取函数""卫语句取代嵌套"），禁止"需要重构"的空泛描述
+7. 每条审查意见必须关联具体代码引用（文件路径:行号），禁止无代码定位的泛泛描述
+8. 安全发现必须标注 OWASP 类别编号（A01-A10），质量发现必须附带度量数值（如圈复杂度=18）
+9. 审查意见必须明确区分 Blocker（阻断发布，必须修改）和 Suggestion（建议改进，可选）——禁止使用模糊的"建议修复"
+10. 重构建议必须包含具体手法名称（如"提取函数""卫语句取代嵌套"），禁止"需要重构"的空泛描述
 </IMPORTANT>

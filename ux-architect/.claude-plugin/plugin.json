@@ -1,14 +1,24 @@
 {
   "name": "ux-architect",
-  "description": "UX 架构师：信息架构设计、用户流程分析与交互设计审计",
-  "version": "1.0.0",
+  "description": "UX architect workbench: route across information architecture, user flow analysis, interaction audit, and quick scan workflows",
+  "version": "2.0.0",
   "author": {
     "name": "jxin"
   },
   "homepage": "https://github.com/Jxin-Cai/agents-plugin",
   "repository": "https://github.com/Jxin-Cai/agents-plugin",
-  "keywords": ["ux-architect", "information-architecture", "user-flow", "interaction-design", "usability"],
+  "keywords": [
+    "ux-architect",
+    "information-architecture",
+    "user-flow",
+    "interaction-design",
+    "usability"
+  ],
   "agents": [],
-  "skills": ["./skills/"],
-  "commands": ["./commands/"]
+  "skills": [
+    "./skills/"
+  ],
+  "commands": [
+    "./commands/"
+  ]
 }

@@ -55,3 +55,11 @@ _infrastructure/{YYYY-MM-DD}-{任务简写}/
 - 年度基础设施成本优化 ≥ 20%
 - 安全合规达标率 100%
 - 备份恢复成功率 100%（季度演练验证）
+
+## 工作台编排纪律
+
+- 默认先走 `/support-infrastructure-maintainer:sim` 做任务装配，只有显式单阶段诉求才直达子 skill。
+- 只补问缺失字段；workflow 确定后再加载监控、IaC、备份等重型 reference。
+- 每阶段前重读 `meta/workbench-state.md`，并核对 `monitoring/`、`iac/`、`backup/` 产物，不依赖对话记忆判断进度。
+- 断点恢复时以产物优先于状态文件；SLO / RTO / RPO、风险等级、加密与恢复演练证据必须写清。
+- 每阶段结束后只写不超过 20 行摘要并停顿等待用户确认。

@@ -1,14 +1,24 @@
 {
   "name": "test-results-analyzer",
-  "description": "Test results analyst: structured test coverage analysis, failure root-cause diagnosis, and quality reporting",
-  "version": "1.0.0",
+  "description": "Test results analyzer workbench: route across coverage analysis, failure analysis, quality reporting, and quick scan workflows",
+  "version": "2.0.0",
   "author": {
     "name": "jxin"
   },
   "homepage": "https://github.com/Jxin-Cai/agents-plugin",
   "repository": "https://github.com/Jxin-Cai/agents-plugin",
-  "keywords": ["test-analysis", "coverage", "failure-analysis", "quality-report", "defect-analysis"],
+  "keywords": [
+    "test-analysis",
+    "coverage",
+    "failure-analysis",
+    "quality-report",
+    "defect-analysis"
+  ],
   "agents": [],
-  "skills": ["./skills/"],
-  "commands": ["./commands/"]
+  "skills": [
+    "./skills/"
+  ],
+  "commands": [
+    "./commands/"
+  ]
 }

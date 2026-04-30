@@ -51,3 +51,11 @@ _backend-arch/
 每个架构任务维护 `meta/arch-state.md`，包含：workflow_mode、completed_steps、next_step、artifact_paths、decisions。
 
 产物与状态文件冲突时，以产物为准。
+
+## 工作台编排纪律
+
+- 默认先走 `/backend-architect:bea` 做任务装配，只有显式单阶段诉求才直达子 skill。
+- 只补问缺失字段；workflow 确定后再加载 API、数据库、扩展性等重型 reference。
+- 每阶段前重读 `meta/arch-state.md`，并核对 `api/`、`database/`、`scalability/`、`microservice/`、`tech-debt/` 产物，不依赖对话记忆判断进度。
+- 断点恢复时以产物优先于状态文件；所有架构建议都必须标注约束、假设以及成本/收益权衡。
+- 每阶段结束后只写不超过 20 行摘要并停顿等待用户确认。

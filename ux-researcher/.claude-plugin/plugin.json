@@ -1,14 +1,24 @@
 {
   "name": "ux-researcher",
-  "description": "UX researcher: structured user interview guides, usability test plans, and persona building with JTBD framework",
-  "version": "1.0.0",
+  "description": "UX researcher workbench: route across interview guides, usability test planning, persona building, and quick scan workflows",
+  "version": "2.0.0",
   "author": {
     "name": "jxin"
   },
   "homepage": "https://github.com/Jxin-Cai/agents-plugin",
   "repository": "https://github.com/Jxin-Cai/agents-plugin",
-  "keywords": ["ux-research", "user-interview", "usability-testing", "persona", "jtbd"],
+  "keywords": [
+    "ux-research",
+    "user-interview",
+    "usability-testing",
+    "persona",
+    "jtbd"
+  ],
   "agents": [],
-  "skills": ["./skills/"],
-  "commands": ["./commands/"]
+  "skills": [
+    "./skills/"
+  ],
+  "commands": [
+    "./commands/"
+  ]
 }

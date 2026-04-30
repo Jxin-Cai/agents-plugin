@@ -50,6 +50,14 @@ _code-review/
 - 单独运行子技能时，使用最近的日期目录（若无则创建）
 - `meta/review-state.md` 记录 workflow 进度，支持断点恢复
 
+## 工作台编排纪律
+
+- 默认先走 `/code-reviewer:cr` 做任务装配，只有显式单阶段诉求才直达子 skill。
+- 只补问缺失字段；workflow 确定后再加载安全、质量、重构等重型 reference。
+- 每阶段前重读 `meta/review-state.md`，并核对 `security/`、`quality/`、`refactoring/` 产物，不依赖对话记忆判断进度。
+- 断点恢复时以产物优先于状态文件；每条审查意见都必须带文件定位，并明确区分 Blocker / Suggestion。
+- 每阶段结束后只写不超过 20 行摘要并停顿等待用户确认。
+
 ## 领域感知
 
 | 技术栈/领域 | 必须关注的审查重点 |

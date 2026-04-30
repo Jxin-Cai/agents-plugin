@@ -1,14 +1,26 @@
 {
   "name": "performance-benchmarker",
-  "description": "Performance benchmarker: structured load testing, application profiling, and optimization reporting",
-  "version": "1.0.0",
+  "description": "Performance benchmarker workbench: route across load test planning, profiling guidance, optimization reporting, and quick diagnosis workflows",
+  "version": "2.0.0",
   "author": {
     "name": "jxin"
   },
   "homepage": "https://github.com/Jxin-Cai/agents-plugin",
   "repository": "https://github.com/Jxin-Cai/agents-plugin",
-  "keywords": ["performance", "benchmark", "load-testing", "profiling", "optimization", "SLA", "SLO"],
+  "keywords": [
+    "performance",
+    "benchmark",
+    "load-testing",
+    "profiling",
+    "optimization",
+    "SLA",
+    "SLO"
+  ],
   "agents": [],
-  "skills": ["./skills/"],
-  "commands": ["./commands/"]
+  "skills": [
+    "./skills/"
+  ],
+  "commands": [
+    "./commands/"
+  ]
 }

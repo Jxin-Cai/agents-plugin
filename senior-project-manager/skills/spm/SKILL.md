@@ -1,6 +1,6 @@
 ---
 name: spm
-description: 高级项目经理工作台——按意图路由到风险评估、干系人地图、时间线规划或完整流程
+description: 高级项目经理工作台——先装配项目管理任务，再按意图路由到风险评估、干系人地图、时间线规划、快速诊断或完整流程
 argument-hint: "<任务描述>"
 allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Skill"]
 ---
@@ -9,48 +9,75 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 
 用户传入的参数：`$ARGUMENTS`
 
-先判断用户此刻要完成的工作，再带他进入对应 workflow。不是所有需求都需要走完整管道。
+先装配项目管理任务，再按意图路由到对应 workflow。不是所有需求都需要走完整风险 → 干系人 → 时间线管道。
+
+**入口纪律**：除非用户明确点名 `/risk-assessment`、`/stakeholder-map`、`/timeline-planning`，或明确要求“只做风险 / 只做干系人 / 只做时间线 / 只做快速诊断”，否则统一先走 `/senior-project-manager:spm` 入口。
 
 ---
 
 ## 强制执行规则
 
 - ✅ 始终用中文与用户沟通
-- ✅ 先识别 workflow 类型，再进入对应流程
+- ✅ 先装配任务卡，再识别 workflow 类型
 - 🚫 不默认跑完整管道
 - 🚫 不在入口全量加载所有 references
 - ⏸️ 每个阶段完成后等待用户确认
 
 ---
 
-## Step 0: 意图识别与 Workflow 路由
+## Step 0: 任务装配与 Workflow 路由
+
+### 显式快路由
 
 | 意图信号 | Workflow | 动作 |
 |----------|----------|------|
 | "风险 / 评估 / 应对" | risk-only | 调用 `/risk-assessment $ARGUMENTS` |
 | "干系人 / 利益相关 / stakeholder" | stakeholder-only | 调用 `/stakeholder-map $ARGUMENTS` |
 | "时间线 / 排期 / 里程碑" | timeline-only | 调用 `/timeline-planning $ARGUMENTS` |
-| "快速诊断 / 概览" | quick-diagnosis | → Step 3 |
-| "完整规划 / 全套 或复杂需求" | full-planning | → Step 1 |
+| "快速诊断 / 概览 / 快扫" | quick-diagnosis | → Step 3 |
+| "继续上次项目管理任务 / 恢复任务" | resume | 优先进入断点恢复 |
+| "完整规划 / 全套" 或复杂需求 | full-planning | → Step 1 |
 
-意图不明确时，用 `AskUserQuestion` 让用户选择：
-- 仅风险 
-- 仅干系人 
-- 仅时间线 
-- 快速项目管理检查
-- 完整项目管理流程（推荐）
+### 任务装配
 
-**⏸️ 等待用户选择。**
+意图不明确时，用 `AskUserQuestion` 一次性补齐最小任务卡：
+- `task_type`：risk-only / stakeholder-only / timeline-only / quick-diagnosis / full-planning
+- `deliverable`：风险包 / 干系人地图 / 时间线 / 完整管理包
+- `project_slug`：项目简称
+- `risk_focus`：核心风险焦点
+- `time_pressure`：时间压力级别
+- `resume_intent`：自动恢复 / 指定阶段 / 重新开始
+- `current_stage`：当前阶段
+- `next_step`：下一步动作
+- `updated_at`：最近更新时间
+
+workflow 确定后，先向用户宣告本次场景、目标和执行链路，再进入后续步骤。
 
 ---
 
 ## Step 1: 完整流程初始化
 
-1. 从 `$ARGUMENTS` 提取任务描述，生成英文缩写（2-4 词，连字符连接）
+1. 从 `$ARGUMENTS` 提取任务描述，生成英文缩写
 2. 使用 `AskUserQuestion` 确认缩写
-3. 创建 `_project-mgmt/{当前日期}-{缩写}/` 及子目录 `context/` `meta/` 和各阶段子目录
-4. 初始化 `meta/state.md`（workflow_mode、completed_steps、next_step）
-5. 用 Glob 扫描 `_project-mgmt/` 下已有日期目录；若存在同名目录，Read `meta/state.md` 获取 `next_step`，再用 Glob 检查各阶段产出文件（`risks/*.md`、`stakeholders/*.md`、`timeline/*.md`）——产出文件存在则视为该阶段已完成，覆盖 state.md 中的记录
+3. 创建 `_project-mgmt/{当前日期}-{缩写}/` 及子目录 `context/` `meta/` `risks/` `stakeholders/` `timeline/`
+4. 初始化 `meta/state.md`：
+
+```markdown
+workflow_mode: full-planning
+task_type: full-planning
+project_slug: {缩写}
+deliverable: project-management-pack
+risk_focus: unknown
+time_pressure: medium
+resume_intent: auto
+current_stage: risk-assessment
+completed_steps: []
+next_step: risk-assessment
+updated_at: {YYYY-MM-DD}
+```
+
+5. 扫描已有目录，检查 `risks/`、`stakeholders/`、`timeline/` 产物，产物优先于状态文件
+6. 重新 Read `meta/state.md`，如 state 与产物冲突，以产物为准
 
 **⏸️ 使用 `AskUserQuestion` 确认从哪里开始。**
 
@@ -72,33 +99,28 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 
 ---
 
-## Step 3: 快速检查
+## Step 3: 快速诊断
 
-对 `$ARGUMENTS` 中描述的项目，在编排器内逐维度生成速览表，不调用子技能。
+编排器内轻量执行，不调用子技能：
+1. 从用户描述或最近任务中提取 Top 风险、关键干系人、关键路径压力点
+2. 若数据不足，只输出初步诊断和待补信息，不直接生成完整计划
+3. 将速览写入 `_project-mgmt/quick-scan-{日期}.md`
 
-| 维度 | 检查项 | 输出内容 |
-|------|--------|---------|
-| 风险 | 从项目描述推断 Top 3 风险 | 风险名称 + 概率/影响初步判断（高/中/低） |
-| 干系人 | 从项目描述推断关键角色 | 角色名称 + 权力/利益象限（密切管理/保持满意/保持知情/持续监控） |
-| 进度 | 从项目描述推断阶段划分 | 阶段名称 + 预估周期 + 是否在关键路径 |
-
-输出：Write 到 `_project-mgmt/quick-scan-{日期}.md`，每个维度不超过 10 行，总计不超过 40 行。
-
-使用 `AskUserQuestion` 向用户展示选项：深入某个维度（调用对应子技能）/ 进入完整流程 / 结束。
+使用 `AskUserQuestion`：深入风险 / 深入干系人 / 深入时间线 / 进入完整流程 / 结束。
 
 ---
 
 ## 断点恢复
 
-1. 用 Glob 列出 `_project-mgmt/*/meta/state.md`，Read 每个文件筛选 `next_step` 不为 `done` 的目录
-2. 对该目录 Read `meta/state.md`，获取 `workflow_mode`、`completed_steps`、`next_step`
-3. 用 Glob 检查阶段产出文件（`risks/risk-register-*.md`、`stakeholders/stakeholder-map-*.md`、`timeline/timeline-plan-*.md`），若产出文件存在但 `completed_steps` 未记录，以产出文件为准修正进度
-4. 使用 `AskUserQuestion` 向用户展示当前进度和选项：从断点继续 / 重新开始 / 选择其他任务
+1. 扫描 `_project-mgmt/` 下未完成目录
+2. 先 Read `meta/state.md`，再核对 `risks/`、`stakeholders/`、`timeline/` 产物
+3. 恢复时以产物优先于状态文件；切 workflow 时记录决策日志
+4. 使用 `AskUserQuestion`：从断点继续 / 从某阶段重开 / 重新开始
 
 <IMPORTANT>
-工作台的职责是"意图识别 + 路由 + 接续"，不是把所有请求都塞进固定管道。
-风险评估必须有影响×概率矩阵。
-时间线必须标注关键路径和缓冲区。
+工作台的职责是"先装配项目管理任务，再做路由 + 接续"，不是把所有请求都塞进固定管道。
+风险评估必须量化概率 × 影响，不可只给模糊判断。
+时间线必须标注关键路径、缓冲区和时间压力来源。
 干系人地图必须区分影响力和利益维度。
 每个阶段完成后必须等待用户确认。
 产出文件与状态文件冲突时，以产出文件为准。

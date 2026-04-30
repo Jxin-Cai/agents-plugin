@@ -1,13 +1,13 @@
 {
   "name": "sprint-prioritizer",
-  "description": "Sprint prioritizer: structured backlog grooming, priority matrix scoring, and sprint planning",
-  "version": "1.0.1",
+  "description": "Sprint prioritizer workbench: route across backlog grooming, priority matrix, sprint planning, and quick check workflows",
+  "version": "2.0.0",
   "author": {
     "name": "jxin"
   },
   "homepage": "https://github.com/Jxin-Cai/agents-plugin",
   "repository": "https://github.com/Jxin-Cai/agents-plugin",
-  "keywords": ["sprint-planning", "backlog", "prioritization", "RICE", "WSJF", "MoSCoW", "agile"],
+  "keywords": ["sprint-planning", "backlog", "prioritization", "RICE", "WSJF", "MoSCoW", "agile", "workbench"],
   "agents": [],
   "skills": ["./skills/"],
   "commands": ["./commands/"]

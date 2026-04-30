@@ -85,4 +85,10 @@ _wechat-oa/
 - 内容定位：{描述}
 ```
 
-检查顺序：项目根目录 `EXTEND.md` → 用户目录 `~/.wechat-oa/EXTEND.md`
+## 工作台编排纪律
+
+- 默认先走 `/wechat-official-account:woa` 做任务装配，只有显式单阶段诉求才直达子 skill。
+- 先装配任务，再判断 workflow；只补问缺口字段，不分多轮零散追问。
+- 每阶段前重读 `meta/state.md`，并核对 `strategy/`、`articles/`、`analytics/` 产物，不依赖对话记忆判断进度。
+- 发布前必须再次确认；分析必须标注时间窗与样本来源；状态与产物冲突时，以产物为准。
+- 每阶段结束后只写不超过 20 行摘要并停顿等待用户确认。

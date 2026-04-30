@@ -1,6 +1,6 @@
 {
   "name": "e2e-tester",
-  "description": "E2E testing expert: BDD scenario design, automated test execution, and test asset management",
+  "description": "E2E tester: end-to-end test workflow covering scope clarification, scenario generation, test execution, and automation",
   "version": "1.0.0",
   "author": {
     "name": "jxin"

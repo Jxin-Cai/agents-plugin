@@ -1,6 +1,6 @@
 ---
 name: aa
-description: 无障碍审计工作台——按意图路由到 WCAG 审计、辅助技术测试、合规报告或完整流程
+description: 无障碍审计工作台——先装配任务，再按意图路由到 WCAG 审计、辅助技术测试、合规报告或完整流程
 argument-hint: "<审计目标描述（页面URL、组件名称或功能模块）>"
 allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Skill"]
 ---
@@ -9,23 +9,25 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 
 用户传入的参数：`$ARGUMENTS`
 
-先判断用户此刻要完成的工作，再带他进入对应 workflow。不是所有需求都需要走完整 WCAG → AT → 合规报告管道。
+先装配无障碍审计任务，再带他进入对应 workflow。不是所有需求都需要走完整 WCAG → AT → 合规报告管道。
+
+**入口纪律**：除非用户明确点名 `/wcag-audit`、`/assistive-tech-test`、`/compliance-report`，或明确要求“只做 WCAG / 只做辅助技术测试 / 只做合规报告 / 只做快速扫描”，否则都先走 `/accessibility-auditor:aa` 入口。像“帮我看下这个页面无障碍问题”“发版前做个可访问性体检”这类泛化请求，一律先完成任务装配，再决定 workflow。
 
 ---
 
 ## 强制执行规则
 
 - ✅ 始终用中文与用户沟通
-- ✅ 先识别 workflow 类型，再进入对应流程
+- ✅ 先装配任务卡，再识别 workflow 类型
 - 🚫 不默认跑完整三阶段管道
 - 🚫 不在入口全量加载所有 references
 - ⏸️ 每个阶段完成后等待用户确认
 
 ---
 
-## Step 0: 意图识别与 Workflow 路由
+## Step 0: 任务装配与 Workflow 路由
 
-根据 `$ARGUMENTS` 判断工作类型：
+### 显式快路由
 
 | 意图信号 | Workflow | 动作 |
 |----------|----------|------|
@@ -33,16 +35,22 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 | "辅助技术 / 屏幕阅读器 / 键盘导航" | at-test-only | 调用 `/assistive-tech-test $ARGUMENTS` |
 | "合规 / VPAT / ACR / 报告" | report-only | 调用 `/compliance-report $ARGUMENTS` |
 | "快速扫描 / 快查 / 概览" | quick-scan | → Step 3 |
+| "继续上次无障碍任务 / 恢复任务" | resume | 优先进入断点恢复 |
 | "完整审计 / 全面检查" 或复杂需求 | full-audit | → Step 1 |
 
-如果无法唯一判断，使用 `AskUserQuestion` 让用户选择：
-- 完整无障碍审计（推荐）— WCAG + 辅助技术 + 合规报告
-- 仅 WCAG 审计（POUR 四原则）
-- 仅辅助技术测试
-- 仅合规报告生成
-- 快速无障碍扫描
+### 任务装配
 
-**⏸️ 等待用户选择。**
+意图不明确时，用 `AskUserQuestion` 一次性补齐最小任务卡：
+- `target_scope`：页面 / 组件 / 流程
+- `target_standard`：WCAG2.1AA / WCAG2.2AA / 508 / EN301549
+- `evidence_level`：light / standard / strict
+- `acceptance_source`：user-text / markdown / url / doc
+- `entry_intent`：用户原话
+- `current_stage`：wcag / assistive-tech / report
+- `completed_stages`：已完成阶段
+- `next_step`：下一步动作
+
+workflow 确定后，先向用户宣告本次场景、目标和执行链路，再进入后续步骤。
 
 ---
 
@@ -53,8 +61,24 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 1. 从 `$ARGUMENTS` 提取审计目标，生成英文缩写（2-4 词）
 2. 使用 `AskUserQuestion` 确认缩写
 3. 创建 `_accessibility/{当前日期}-{缩写}/` 及子目录 `context/` `wcag/` `assistive-tech/` `reports/` `meta/`
-4. 初始化 `meta/audit-state.md`（workflow_mode、completed_steps、next_step）
-5. 扫描已有目录，检查接续点（产物优先于状态文件）
+4. 初始化 `meta/audit-state.md`：
+
+```markdown
+workflow_mode: full-audit
+task_type: full-audit
+entry_intent: {用户原话}
+target_scope: {页面/组件/流程}
+target_standard: WCAG2.1AA
+evidence_level: standard
+acceptance_source: user-text
+current_stage: wcag
+completed_stages: []
+next_step: wcag-audit
+last_updated: {YYYY-MM-DD}
+last_report: 
+```
+
+5. 扫描 `wcag/`、`assistive-tech/`、`reports/` 中已有产物，检查接续点（产物优先于状态文件）
 6. 使用 `AskUserQuestion` 确认从哪里开始
 
 **⏸️ 等待用户确认。**
@@ -95,12 +119,15 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 ## 断点恢复
 
 1. 扫描 `_accessibility/` 下未完成目录
-2. Read `meta/audit-state.md`，结合产物推断进度
-3. 使用 `AskUserQuestion`：从断点继续 / 重新开始
+2. 先 Read `meta/audit-state.md`，再验 `wcag/`、`assistive-tech/`、`reports/` 产物目录
+3. 产物优先于状态文件；恢复时只问一次 `AskUserQuestion`：从断点继续 / 重新开始 / 从某阶段重开
+4. 每阶段结束写 `meta/{stage}-summary.md`（≤20 行）作为恢复锚点
 
 <IMPORTANT>
-工作台的职责是"意图识别 + 路由 + 接续"，不是把所有请求都塞进固定管道。
-WCAG Level A 违规必须标记为 Blocker，不可降级。
+工作台的职责是"先装配无障碍审计任务，再做路由 + 接续"，不是把所有请求都塞进固定管道。
 每个阶段完成后必须等待用户确认再进入下一阶段。
 产出文件与状态文件冲突时，以产出文件为准。
+恢复时必须先读状态、再校验产物，不可只凭对话记忆推进。
+WCAG Level A 违规必须标记为 Blocker，不可降级。
+正式合规交付必须注明适用标准与证据级别，不可只给口头结论。
 </IMPORTANT>

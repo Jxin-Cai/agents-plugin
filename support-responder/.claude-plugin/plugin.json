@@ -1,11 +1,11 @@
 {
   "name": "support-responder",
-  "description": "Customer support: ticket resolution, knowledge base management, and support analytics",
-  "version": "1.0.0",
+  "description": "Support responder workbench: route across ticket resolution, knowledge base building, support analytics, and quick triage workflows",
+  "version": "2.0.0",
   "author": { "name": "jxin" },
   "homepage": "https://github.com/Jxin-Cai/agents-plugin",
   "repository": "https://github.com/Jxin-Cai/agents-plugin",
-  "keywords": ["customer-support", "ticket-resolution", "knowledge-base", "support-analytics"],
+  "keywords": ["customer-support", "ticket-resolution", "knowledge-base", "support-analytics", "workbench"],
   "agents": [],
   "skills": ["./skills/"],
   "commands": ["./commands/"]

@@ -1,14 +1,24 @@
 {
   "name": "api-tester",
-  "description": "API testing expert: contract testing, integration test planning, and API health check",
-  "version": "1.0.0",
+  "description": "API tester workbench: route across contract testing, integration planning, health checks, and quick API scan workflows",
+  "version": "2.0.0",
   "author": {
     "name": "jxin"
   },
   "homepage": "https://github.com/Jxin-Cai/agents-plugin",
   "repository": "https://github.com/Jxin-Cai/agents-plugin",
-  "keywords": ["api-testing", "contract-test", "integration-test", "health-check", "pact"],
+  "keywords": [
+    "api-testing",
+    "contract-test",
+    "integration-test",
+    "health-check",
+    "pact"
+  ],
   "agents": [],
-  "skills": ["./skills/"],
-  "commands": ["./commands/"]
+  "skills": [
+    "./skills/"
+  ],
+  "commands": [
+    "./commands/"
+  ]
 }

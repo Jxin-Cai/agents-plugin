@@ -65,3 +65,10 @@ _frontend-review/
 - **View Transitions API**：原生页面过渡动画，取代 JS 动画方案
 - **Signals 状态管理**：信号式状态管理（Preact Signals、Angular Signals、Vue ref、Svelte 5 Runes）已成主流范式
 - **新一代构建工具**：Turbopack、Rspack 等 Rust 构建工具逐步进入生产环境
+
+## 工作台编排纪律
+
+- 先装配前端审查任务，再选 workflow，不默认全流程。
+- 仅当用户明确指定单项时，才直达子 skill。
+- 每阶段后停顿等待确认，结论必须附代码证据（路径 / 行号）。
+- 断点恢复以产物优先，状态文件只负责导航。

@@ -1,14 +1,23 @@
 {
   "name": "trend-researcher",
-  "description": "Trend researcher: market analysis, competitive landscape mapping, and technology trend reporting",
-  "version": "1.0.0",
+  "description": "Trend researcher workbench: route across market analysis, competitive landscape, technology trend reporting, and quick scan workflows",
+  "version": "2.0.0",
   "author": {
     "name": "jxin"
   },
   "homepage": "https://github.com/Jxin-Cai/agents-plugin",
   "repository": "https://github.com/Jxin-Cai/agents-plugin",
-  "keywords": ["trend-researcher", "market-analysis", "competitive-landscape", "tech-trend"],
+  "keywords": [
+    "trend-researcher",
+    "market-analysis",
+    "competitive-landscape",
+    "tech-trend"
+  ],
   "agents": [],
-  "skills": ["./skills/"],
-  "commands": ["./commands/"]
+  "skills": [
+    "./skills/"
+  ],
+  "commands": [
+    "./commands/"
+  ]
 }

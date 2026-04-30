@@ -12,178 +12,218 @@
       "version": "3.0.2",
       "homepage": "https://github.com/Jxin-Cai/agents-plugin",
       "repository": "https://github.com/Jxin-Cai/agents-plugin",
-      "author": { "name": "jxin" }
+      "author": {
+        "name": "jxin"
+      }
     },
     {
       "name": "software-architect",
       "source": "./software-architect",
-      "description": "Software architect: system design, architecture review, and ADR generation",
-      "version": "1.0.0",
+      "description": "Software architect workbench: route across system design, architecture review, ADR generation, and quick diagnosis workflows",
+      "version": "2.0.0",
       "homepage": "https://github.com/Jxin-Cai/agents-plugin",
       "repository": "https://github.com/Jxin-Cai/agents-plugin",
-      "author": { "name": "jxin" }
+      "author": {
+        "name": "jxin"
+      }
     },
     {
       "name": "backend-architect",
       "source": "./backend-architect",
-      "description": "Backend architect: API design, database modeling, and scalability review",
-      "version": "1.0.0",
+      "description": "Backend architect workbench: route across API design, database modeling, scalability review, microservice design, and tech debt assessment workflows",
+      "version": "2.0.0",
       "homepage": "https://github.com/Jxin-Cai/agents-plugin",
       "repository": "https://github.com/Jxin-Cai/agents-plugin",
-      "author": { "name": "jxin" }
+      "author": {
+        "name": "jxin"
+      }
     },
     {
       "name": "frontend-developer",
       "source": "./frontend-developer",
-      "description": "Frontend developer: component review, responsive audit, and performance check",
-      "version": "1.0.0",
+      "description": "Frontend developer workbench: route across component review, responsive audit, performance checks, and quick scan workflows",
+      "version": "2.0.0",
       "homepage": "https://github.com/Jxin-Cai/agents-plugin",
       "repository": "https://github.com/Jxin-Cai/agents-plugin",
-      "author": { "name": "jxin" }
+      "author": {
+        "name": "jxin"
+      }
     },
     {
       "name": "ui-designer",
       "source": "./ui-designer",
-      "description": "UI designer: visual audit, design system review, and prototype feedback",
-      "version": "1.0.0",
+      "description": "UI designer workbench: route across visual audit, design system review, prototype feedback, and quick scan workflows",
+      "version": "2.0.0",
       "homepage": "https://github.com/Jxin-Cai/agents-plugin",
       "repository": "https://github.com/Jxin-Cai/agents-plugin",
-      "author": { "name": "jxin" }
+      "author": {
+        "name": "jxin"
+      }
     },
     {
       "name": "ux-architect",
       "source": "./ux-architect",
-      "description": "UX architect: information architecture, user flow analysis, and interaction audit",
-      "version": "1.0.0",
+      "description": "UX architect workbench: route across information architecture, user flow analysis, interaction audit, and quick scan workflows",
+      "version": "2.0.0",
       "homepage": "https://github.com/Jxin-Cai/agents-plugin",
       "repository": "https://github.com/Jxin-Cai/agents-plugin",
-      "author": { "name": "jxin" }
+      "author": {
+        "name": "jxin"
+      }
     },
     {
       "name": "ux-researcher",
       "source": "./ux-researcher",
-      "description": "UX researcher: interview guide, usability test plan, and persona builder",
-      "version": "1.0.0",
+      "description": "UX researcher workbench: route across interview guides, usability test planning, persona building, and quick scan workflows",
+      "version": "2.0.0",
       "homepage": "https://github.com/Jxin-Cai/agents-plugin",
       "repository": "https://github.com/Jxin-Cai/agents-plugin",
-      "author": { "name": "jxin" }
+      "author": {
+        "name": "jxin"
+      }
     },
     {
       "name": "code-reviewer",
       "source": "./code-reviewer",
-      "description": "Code reviewer: security review, quality audit, and refactor suggestions",
-      "version": "1.0.0",
+      "description": "Code reviewer: 按意图路由的代码审查工作台——安全审查、质量审计、重构建议",
+      "version": "2.0.0",
       "homepage": "https://github.com/Jxin-Cai/agents-plugin",
       "repository": "https://github.com/Jxin-Cai/agents-plugin",
-      "author": { "name": "jxin" }
+      "author": {
+        "name": "jxin"
+      }
     },
     {
       "name": "api-tester",
       "source": "./api-tester",
-      "description": "API tester: contract test, integration test plan, and API health check",
-      "version": "1.0.0",
+      "description": "API tester workbench: route across contract testing, integration planning, health checks, and quick API scan workflows",
+      "version": "2.0.0",
       "homepage": "https://github.com/Jxin-Cai/agents-plugin",
       "repository": "https://github.com/Jxin-Cai/agents-plugin",
-      "author": { "name": "jxin" }
+      "author": {
+        "name": "jxin"
+      }
     },
     {
       "name": "test-results-analyzer",
       "source": "./test-results-analyzer",
-      "description": "Test results analyzer: coverage analysis, failure analysis, and quality report",
-      "version": "1.0.0",
+      "description": "Test results analyzer workbench: route across coverage analysis, failure analysis, quality reporting, and quick scan workflows",
+      "version": "2.0.0",
       "homepage": "https://github.com/Jxin-Cai/agents-plugin",
       "repository": "https://github.com/Jxin-Cai/agents-plugin",
-      "author": { "name": "jxin" }
+      "author": {
+        "name": "jxin"
+      }
     },
     {
       "name": "performance-benchmarker",
       "source": "./performance-benchmarker",
-      "description": "Performance benchmarker: load test plan, profiling guide, and optimization report",
-      "version": "1.0.0",
+      "description": "Performance benchmarker workbench: route across load test planning, profiling guidance, optimization reporting, and quick diagnosis workflows",
+      "version": "2.0.0",
       "homepage": "https://github.com/Jxin-Cai/agents-plugin",
       "repository": "https://github.com/Jxin-Cai/agents-plugin",
-      "author": { "name": "jxin" }
+      "author": {
+        "name": "jxin"
+      }
     },
     {
       "name": "accessibility-auditor",
       "source": "./accessibility-auditor",
-      "description": "Accessibility auditor: WCAG audit, assistive tech test, and compliance report",
-      "version": "1.0.0",
+      "description": "Accessibility auditor workbench: route across WCAG audit, assistive tech testing, compliance reporting, and quick scan workflows",
+      "version": "2.0.0",
       "homepage": "https://github.com/Jxin-Cai/agents-plugin",
       "repository": "https://github.com/Jxin-Cai/agents-plugin",
-      "author": { "name": "jxin" }
+      "author": {
+        "name": "jxin"
+      }
     },
     {
       "name": "brand-guardian",
       "source": "./brand-guardian",
-      "description": "Brand guardian: brand consistency audit, voice & tone review, and visual identity check",
-      "version": "1.0.0",
+      "description": "Brand guardian workbench: route across consistency audit, voice review, visual identity checks, and quick scan workflows",
+      "version": "2.0.0",
       "homepage": "https://github.com/Jxin-Cai/agents-plugin",
       "repository": "https://github.com/Jxin-Cai/agents-plugin",
-      "author": { "name": "jxin" }
+      "author": {
+        "name": "jxin"
+      }
     },
     {
       "name": "experiment-tracker",
       "source": "./experiment-tracker",
-      "description": "Experiment tracker: A/B test design, metrics definition, and results analysis",
-      "version": "1.0.0",
+      "description": "Experiment tracker workbench: route across A/B test design, metrics definition, results analysis, and quick check workflows",
+      "version": "2.0.0",
       "homepage": "https://github.com/Jxin-Cai/agents-plugin",
       "repository": "https://github.com/Jxin-Cai/agents-plugin",
-      "author": { "name": "jxin" }
+      "author": {
+        "name": "jxin"
+      }
     },
     {
       "name": "feedback-synthesizer",
       "source": "./feedback-synthesizer",
-      "description": "Feedback synthesizer: feedback collection, sentiment analysis, and insight extraction",
-      "version": "1.0.0",
+      "description": "Feedback synthesizer workbench: route across feedback collection, sentiment analysis, insight extraction, and quick scan workflows",
+      "version": "2.0.0",
       "homepage": "https://github.com/Jxin-Cai/agents-plugin",
       "repository": "https://github.com/Jxin-Cai/agents-plugin",
-      "author": { "name": "jxin" }
+      "author": {
+        "name": "jxin"
+      }
     },
     {
       "name": "trend-researcher",
       "source": "./trend-researcher",
-      "description": "Trend researcher: market analysis, competitive landscape, and tech trend report",
-      "version": "1.0.0",
+      "description": "Trend researcher workbench: route across market analysis, competitive landscape, technology trend reporting, and quick scan workflows",
+      "version": "2.0.0",
       "homepage": "https://github.com/Jxin-Cai/agents-plugin",
       "repository": "https://github.com/Jxin-Cai/agents-plugin",
-      "author": { "name": "jxin" }
+      "author": {
+        "name": "jxin"
+      }
     },
     {
       "name": "sprint-prioritizer",
       "source": "./sprint-prioritizer",
-      "description": "Sprint prioritizer: backlog grooming, priority matrix, and sprint planning",
-      "version": "1.0.1",
+      "description": "Sprint prioritizer workbench: route across backlog grooming, priority matrix, sprint planning, and quick check workflows",
+      "version": "2.0.0",
       "homepage": "https://github.com/Jxin-Cai/agents-plugin",
       "repository": "https://github.com/Jxin-Cai/agents-plugin",
-      "author": { "name": "jxin" }
+      "author": {
+        "name": "jxin"
+      }
     },
     {
       "name": "senior-project-manager",
       "source": "./senior-project-manager",
-      "description": "Senior project manager: risk assessment, stakeholder map, and timeline planning",
-      "version": "1.0.0",
+      "description": "Senior project manager workbench: route across risk assessment, stakeholder mapping, timeline planning, and quick diagnosis workflows",
+      "version": "2.0.0",
       "homepage": "https://github.com/Jxin-Cai/agents-plugin",
       "repository": "https://github.com/Jxin-Cai/agents-plugin",
-      "author": { "name": "jxin" }
+      "author": {
+        "name": "jxin"
+      }
     },
     {
       "name": "project-shepherd",
       "source": "./project-shepherd",
-      "description": "Project shepherd: health check, blocker removal, and velocity tracking",
-      "version": "1.0.0",
+      "description": "Project shepherd workbench: route across health checks, blocker removal, velocity tracking, and quick scan workflows",
+      "version": "2.0.0",
       "homepage": "https://github.com/Jxin-Cai/agents-plugin",
       "repository": "https://github.com/Jxin-Cai/agents-plugin",
-      "author": { "name": "jxin" }
+      "author": {
+        "name": "jxin"
+      }
     },
     {
       "name": "jira-workflow-steward",
       "source": "./jira-workflow-steward",
-      "description": "Jira workflow steward: workflow design, issue triage, and board optimization",
-      "version": "1.0.1",
+      "description": "Jira workflow steward workbench: route across workflow design, issue triage, board optimization, and quick check workflows",
+      "version": "2.0.0",
       "homepage": "https://github.com/Jxin-Cai/agents-plugin",
       "repository": "https://github.com/Jxin-Cai/agents-plugin",
-      "author": { "name": "jxin" }
+      "author": {
+        "name": "jxin"
+      }
     },
     {
       "name": "e2e-tester",
@@ -192,79 +232,97 @@
       "version": "1.0.0",
       "homepage": "https://github.com/Jxin-Cai/agents-plugin",
       "repository": "https://github.com/Jxin-Cai/agents-plugin",
-      "author": { "name": "jxin" }
+      "author": {
+        "name": "jxin"
+      }
     },
     {
       "name": "ai-citation-strategist",
       "source": "./ai-citation-strategist",
-      "description": "AI citation strategist: citation audit, lost prompt analysis, and fix pack generation for AEO/GEO optimization",
-      "version": "1.0.0",
+      "description": "AI citation strategist workbench: route across citation audit, lost prompt analysis, fix pack generation, and quick check workflows",
+      "version": "2.0.0",
       "homepage": "https://github.com/Jxin-Cai/agents-plugin",
       "repository": "https://github.com/Jxin-Cai/agents-plugin",
-      "author": { "name": "jxin" }
+      "author": {
+        "name": "jxin"
+      }
     },
     {
       "name": "growth-hacker",
       "source": "./growth-hacker",
-      "description": "Growth hacker: growth experiment design, funnel optimization, and viral loop design",
-      "version": "1.0.0",
+      "description": "Growth hacker workbench: route across funnel optimization, growth experiments, viral loop design, and quick diagnosis workflows",
+      "version": "2.0.0",
       "homepage": "https://github.com/Jxin-Cai/agents-plugin",
       "repository": "https://github.com/Jxin-Cai/agents-plugin",
-      "author": { "name": "jxin" }
+      "author": {
+        "name": "jxin"
+      }
     },
     {
       "name": "private-domain-operator",
       "source": "./private-domain-operator",
-      "description": "Private domain operator: WeCom ecosystem setup, community operations, user lifecycle management, and conversion funnel",
-      "version": "1.0.0",
+      "description": "Private domain operator workbench: route across WeCom ecosystem setup, community operations, user lifecycle, conversion funnels, and quick scan workflows",
+      "version": "2.0.0",
       "homepage": "https://github.com/Jxin-Cai/agents-plugin",
       "repository": "https://github.com/Jxin-Cai/agents-plugin",
-      "author": { "name": "jxin" }
+      "author": {
+        "name": "jxin"
+      }
     },
     {
       "name": "wechat-official-account",
       "source": "./wechat-official-account",
-      "description": "WeChat official account: content strategy, article creation, publishing, and subscriber analytics",
-      "version": "1.0.0",
+      "description": "WeChat official account workbench: route across content strategy, article creation, publishing, subscriber analytics, and quick scan workflows",
+      "version": "2.0.0",
       "homepage": "https://github.com/Jxin-Cai/agents-plugin",
       "repository": "https://github.com/Jxin-Cai/agents-plugin",
-      "author": { "name": "jxin" }
+      "author": {
+        "name": "jxin"
+      }
     },
     {
       "name": "support-analytics-reporter",
       "source": "./support-analytics-reporter",
-      "description": "Support analytics reporter: executive dashboard, customer segmentation, and marketing attribution analysis",
-      "version": "1.0.0",
+      "description": "Support analytics reporter workbench: route across executive dashboards, customer segmentation, marketing attribution, and quick scan workflows",
+      "version": "2.0.0",
       "homepage": "https://github.com/Jxin-Cai/agents-plugin",
       "repository": "https://github.com/Jxin-Cai/agents-plugin",
-      "author": { "name": "jxin" }
+      "author": {
+        "name": "jxin"
+      }
     },
     {
       "name": "support-infrastructure-maintainer",
       "source": "./support-infrastructure-maintainer",
-      "description": "Support infrastructure maintainer: monitoring setup, IaC framework, and backup recovery",
-      "version": "1.0.0",
+      "description": "Support infrastructure maintainer workbench: route across monitoring setup, IaC framework, backup recovery, and quick diagnosis workflows",
+      "version": "2.0.0",
       "homepage": "https://github.com/Jxin-Cai/agents-plugin",
       "repository": "https://github.com/Jxin-Cai/agents-plugin",
-      "author": { "name": "jxin" }
+      "author": {
+        "name": "jxin"
+      }
     },
     {
       "name": "support-legal-compliance-checker",
       "source": "./support-legal-compliance-checker",
-      "description": "Support legal compliance checker: compliance audit, privacy policy generation, and contract review",
-      "version": "1.0.0",
+      "description": "Support legal compliance checker workbench: route across compliance audit, privacy policy, contract review, and quick scan workflows",
+      "version": "2.0.0",
       "homepage": "https://github.com/Jxin-Cai/agents-plugin",
       "repository": "https://github.com/Jxin-Cai/agents-plugin",
-      "author": { "name": "jxin" }
+      "author": {
+        "name": "jxin"
+      }
     },
     {
       "name": "support-responder",
       "source": "./support-responder",
-      "description": "Support responder: ticket resolution, knowledge base building, and support analytics",
-      "version": "1.0.0",
+      "description": "Support responder workbench: route across ticket resolution, knowledge base building, support analytics, and quick triage workflows",
+      "version": "2.0.0",
       "homepage": "https://github.com/Jxin-Cai/agents-plugin",
       "repository": "https://github.com/Jxin-Cai/agents-plugin",
-      "author": { "name": "jxin" }
+      "author": {
+        "name": "jxin"
+      }
     }
   ]
 }

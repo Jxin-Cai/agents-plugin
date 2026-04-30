@@ -53,3 +53,11 @@ _analytics/{YYYY-MM-DD}-{任务简写}/
 - 建议采纳率 ≥ 70%
 - 仪表盘月活跃使用率 ≥ 95%
 - 报告交付及时率 ≥ 98%
+
+## 工作台编排纪律
+
+- 默认先走 `/support-analytics-reporter:sar` 做任务装配，只有显式单阶段诉求才直达子 skill。
+- 只补问缺失字段；workflow 确定后再加载重型 reference。
+- 每阶段前重读 `meta/state.md`，并核对 `dashboards/`、`segmentation/`、`attribution/` 产物，不依赖对话记忆判断进度。
+- 断点恢复时以产物优先于状态文件；所有结论必须标注数据来源、时间范围、统计置信与假设。
+- 每阶段结束后只写不超过 20 行摘要并停顿等待用户确认。

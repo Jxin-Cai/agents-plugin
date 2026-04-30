@@ -1,14 +1,23 @@
 {
   "name": "software-architect",
-  "description": "Software architect: system design, architecture review, and architecture decision records",
-  "version": "1.0.0",
+  "description": "Software architect workbench: route across system design, architecture review, ADR generation, and quick diagnosis workflows",
+  "version": "2.0.0",
   "author": {
     "name": "jxin"
   },
   "homepage": "https://github.com/Jxin-Cai/agents-plugin",
   "repository": "https://github.com/Jxin-Cai/agents-plugin",
-  "keywords": ["software-architect", "system-design", "architecture-review", "adr"],
+  "keywords": [
+    "software-architect",
+    "system-design",
+    "architecture-review",
+    "adr"
+  ],
   "agents": [],
-  "skills": ["./skills/"],
-  "commands": ["./commands/"]
+  "skills": [
+    "./skills/"
+  ],
+  "commands": [
+    "./commands/"
+  ]
 }

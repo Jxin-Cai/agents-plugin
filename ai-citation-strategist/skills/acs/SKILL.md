@@ -1,6 +1,6 @@
 ---
 name: acs
-description: AI 引用优化工作台——按意图路由到引用审计、丢失分析、修复方案或完整流程
+description: AI 引用优化工作台——先装配任务，再按意图路由到引用审计、丢失分析、修复方案、快速检查或完整流程
 argument-hint: "<品牌/产品描述>"
 allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Skill"]
 ---
@@ -9,20 +9,24 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 
 用户传入的参数：`$ARGUMENTS`
 
-先判断用户此刻的目标，再进入对应 workflow。不是所有需求都需要走完整审计 → 分析 → 修复管道。
+先装配 AI 引用优化任务，再进入对应 workflow。不是所有需求都需要走完整审计 → 分析 → 修复管道。
+
+**入口纪律**：非用户明确点名子 skill 时，统一先经过 `/ai-citation-strategist:acs` 做任务装配；仅在显式要求单阶段时才直达。
 
 ---
 
 ## 强制执行规则
 
 - ✅ 始终用中文与用户沟通
-- ✅ 先识别 workflow 类型，再进入对应流程
+- ✅ 先装配任务卡，再识别 workflow 类型
 - 🚫 不默认跑完整三阶段管道
 - ⏸️ 每个阶段完成后等待用户确认
 
 ---
 
-## Step 0: 意图识别与 Workflow 路由
+## Step 0: 任务装配与 Workflow 路由
+
+### 显式快路由
 
 | 意图信号 | Workflow | 动作 |
 |----------|----------|------|
@@ -30,16 +34,23 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 | "丢失 / 缺失 / 竞品赢了" | analysis-only | 调用 `/lost-prompt-analysis $ARGUMENTS` |
 | "修复 / 优化方案 / fix" | fix-only | 调用 `/fix-pack-generation $ARGUMENTS` |
 | "快速检查 / 快扫" | quick-check | → Step 3 |
+| "继续上次引用优化任务 / 恢复任务" | resume | 优先进入断点恢复 |
 | "完整流程 / 全套优化" 或复杂需求 | full-workflow | → Step 1 |
 
-意图不明确时，用 `AskUserQuestion` 让用户选择：
-- 完整 AEO/GEO 优化流程（推荐）
-- 仅引用审计
-- 仅丢失查询分析
-- 仅修复方案生成
-- 快速引用检查
+### 任务装配
 
-**⏸️ 等待用户选择。**
+意图不明确时，用 `AskUserQuestion` 一次性补齐最小任务卡：
+- `task_dir`：任务目录简称
+- `task_type`：audit-only / analysis-only / fix-only / quick-check / full-workflow
+- `workflow`：当前 workflow
+- `brand`：品牌/产品名
+- `domain`：主域名
+- `competitors`：竞品列表
+- `platforms`：ChatGPT / Claude / Gemini / Perplexity
+- `current_stage`：当前阶段
+- `next_step`：下一步动作
+
+workflow 确定后，先向用户宣告本次场景、目标和执行链路，再进入后续步骤。
 
 ---
 
@@ -51,7 +62,22 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 2. 使用 `AskUserQuestion` 确认缩写
 3. 创建 `_ai-citation/{当前日期}-{缩写}/` 及子目录 `context/` `audit/` `analysis/` `fix-packs/` `meta/`
 4. 采集品牌基础信息（品牌名、主域名、品类、受众、竞品），保存到 `context/brand-profile.md`
-5. 初始化 `meta/citation-state.md`（workflow_mode、completed_steps、next_step）
+5. 初始化 `meta/citation-state.md`：
+
+```markdown
+workflow_mode: full-workflow
+task_dir: {缩写}
+task_type: full-workflow
+brand: {品牌名}
+domain: {主域名}
+competitors: []
+platforms: [ChatGPT, Claude, Gemini, Perplexity]
+current_stage: citation-audit
+completed_steps: []
+next_step: citation-audit
+updated_at: {YYYY-MM-DD}
+```
+
 6. 扫描已有目录，检查接续点（产物优先）
 
 **⏸️ 确认从哪里开始。**
@@ -88,14 +114,15 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 ## 断点恢复
 
 1. 扫描 `_ai-citation/` 下未完成目录
-2. Read `meta/citation-state.md`，结合产物推断进度
-3. 使用 `AskUserQuestion`：从断点继续 / 重新开始
+2. 先检查 `audit/`、`analysis/`、`fix-packs/` 产物，再 Read `meta/citation-state.md`
+3. 恢复顺序固定为：产物 > 状态 > 记忆
+4. 使用 `AskUserQuestion`：从断点继续 / 从某阶段重开 / 重新开始
 
 <IMPORTANT>
-工作台的职责是"意图识别 + 路由 + 接续"，不是把所有请求都塞进固定管道。
+工作台的职责是"先装配引用优化任务，再做路由 + 接续"，不是把所有请求都塞进固定管道。
 引用审计的结论必须基于实际检测数据，不可凭假设判定。
 SOV 和引用率计算必须标注查询日期和平台版本，不可跨日期/跨平台混合计算。
-修复方案的预期效果必须标注为"预期"而非"保证"——AI 引用受模型版本和上下文影响，不可承诺确定性结果。
+修复方案的预期效果必须标注为“预期”而非“保证”——AI 引用受模型版本和上下文影响，不可承诺确定性结果。
 每个阶段完成后必须等待用户确认。
 产出文件与状态文件冲突时，以产出文件为准。
 </IMPORTANT>

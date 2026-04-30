@@ -1,6 +1,6 @@
 ---
 name: sr
-description: 客户支持工作台——按意图路由到工单处理、知识库、支持分析或完整流程
+description: 客户支持工作台——先装配支持任务，再按意图路由到工单处理、知识库、支持分析、快速分诊或完整流程
 argument-hint: "<任务描述>"
 allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Skill"]
 ---
@@ -9,38 +9,59 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 
 用户传入的参数：`$ARGUMENTS`
 
-先判断用户此刻要完成的工作，再带他进入对应 workflow。不是所有需求都需要走完整管道。
+先装配支持任务，再按意图路由到对应 workflow。不是所有需求都需要走完整工单 → 知识库 → 分析管道。
+
+**入口纪律**：除非用户明确点名 `/ticket-resolution`、`/knowledge-base`、`/support-analytics`，或明确要求“只做工单 / 只做知识库 / 只做分析 / 只做快速分诊”，否则统一先走 `/support-responder:sr` 入口。
 
 ---
 
 ## 强制执行规则
 
 - ✅ 始终用中文与用户沟通
-- ✅ 先识别 workflow 类型，再进入对应流程
+- ✅ 先装配任务卡，再识别 workflow 类型
 - 🚫 不默认跑完整管道
 - 🚫 不在入口全量加载所有 references
 - ⏸️ 每个阶段完成后等待用户确认
 
 ---
 
-## Step 0: 意图识别与 Workflow 路由
+## Step 0: 任务装配与 Workflow 路由
+
+### 显式快路由
 
 | 意图信号 | Workflow | 动作 |
 |----------|----------|------|
-| "工单 / 处理 / 响应" | ticket-only | 调用 `/ticket-resolution $ARGUMENTS` |
-| "知识库 / FAQ / 文档" | kb-only | 调用 `/knowledge-base $ARGUMENTS` |
-| "分析 / 报告 / 趋势" | analytics-only | 调用 `/support-analytics $ARGUMENTS` |
-| "快速检查 / 概览" | quick-check | → Step 3 |
-| "完整体系 / 全套 或复杂需求" | full-system | → Step 1 |
+| "工单 / SLA / 响应 / 升级" | ticket-only | 调用 `/ticket-resolution $ARGUMENTS` |
+| "知识库 / FAQ / SOP / 文档" | kb-only | 调用 `/knowledge-base $ARGUMENTS` |
+| "支持分析 / CSAT / FCR / 趋势" | analytics-only | 调用 `/support-analytics $ARGUMENTS` |
+| "快速分诊 / 支持体检 / 快速概览" | quick-triage | → Step 3 |
+| "继续上次支持任务 / 恢复任务" | resume | 优先进入断点恢复 |
+| "完整支持体系 / 全套" 或复杂需求 | full-support | → Step 1 |
 
-意图不明确时，用 `AskUserQuestion` 让用户选择：
-- 仅工单 
-- 仅知识库 
-- 仅分析 
-- 快速客户支持体系检查
-- 完整客户支持体系流程（推荐）
+### 任务装配
 
-**⏸️ 等待用户选择。**
+意图不明确时，用 `AskUserQuestion` 一次性补齐最小任务卡：
+- `task_type`：ticket-only / kb-only / analytics-only / quick-triage / full-support
+- `workflow`：当前 workflow
+- `task_slug`：任务简称
+- `task_dir`：任务目录简称
+- `resume_mode`：自动恢复 / 指定阶段 / 重新开始
+- `support_scope`：支持对象 / 产品范围 / 渠道范围
+- `customer_segment`：客户等级 / 人群
+- `support_channels`：邮箱 / IM / 工单系统 / 电话 / 社群
+- `sla_target`：首响 / 解决时限 / 升级时限
+- `sentiment_risk`：客户情绪与流失风险
+- `known_facts`：已确认事实
+- `open_questions`：待确认问题
+- `kb_reuse_assets`：可复用知识库 / SOP / 宏模板
+- `success_criteria`：成功判据
+- `escalation_path`：升级路径
+- `artifact_paths`：最近产物
+- `state_history`：状态历史摘要
+- `next_step`：下一步动作
+- `current_stage`：当前阶段
+
+workflow 确定后，先向用户宣告本次场景、目标和执行链路，再进入后续步骤。
 
 ---
 
@@ -48,9 +69,35 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 
 1. 从 `$ARGUMENTS` 提取任务描述，生成英文缩写（2-4 词，连字符连接）
 2. 使用 `AskUserQuestion` 确认缩写
-3. 创建 `_support/{当前日期}-{缩写}/` 及子目录 `context/` `meta/` 和各阶段子目录
-4. 初始化 `meta/state.md`（workflow_mode、completed_steps、next_step）
-5. Glob `_support/{目录名}/tickets/` `_support/{目录名}/kb/` `_support/{目录名}/analytics/` 检查各阶段产出文件是否存在；Read `meta/state.md` 获取 next_step；若产物已存在但 state 未更新，以产物为准推进到下一阶段
+3. 创建 `_support/{当前日期}-{缩写}/` 及子目录 `context/` `meta/` `tickets/` `kb/` `analytics/`
+4. 初始化 `meta/state.md`：
+
+```markdown
+workflow_mode: full-support
+task_type: full-support
+task_slug: {缩写}
+task_dir: {缩写}
+resume_mode: auto
+support_scope: unknown
+customer_segment: unknown
+support_channels: []
+sla_target: unknown
+sentiment_risk: unknown
+known_facts: []
+open_questions: []
+kb_reuse_assets: []
+success_criteria: []
+escalation_path: []
+artifact_paths: []
+state_history: []
+current_stage: ticket-resolution
+completed_steps: []
+next_step: ticket-resolution
+updated_at: {YYYY-MM-DD}
+```
+
+5. 扫描已有目录，检查 `tickets/`、`kb/`、`analytics/` 产物，产物优先于状态文件
+6. 重新 Read `meta/state.md`，如 state 与产物冲突，以产物为准
 
 **⏸️ 使用 `AskUserQuestion` 确认从哪里开始。**
 
@@ -62,44 +109,41 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 
 | 阶段 | 调用 | 完成标志 | 门控 |
 |------|------|---------|------|
-| 工单处理 | `/ticket-resolution $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
-| 知识库 | `/knowledge-base $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
-| 支持分析 | `/support-analytics $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
+| 工单处理 | `/ticket-resolution $ARGUMENTS` | `tickets/*` 存在 | 继续 / 回退 / 结束 |
+| 知识库沉淀 | `/knowledge-base $ARGUMENTS` | `kb/*` 存在 | 继续 / 回退 / 结束 |
+| 支持分析 | `/support-analytics $ARGUMENTS` | `analytics/*` 存在 | 继续 / 回退 / 结束 |
 
-每阶段写入摘要到 `meta/{stage}-summary.md`（不超过 20 行）。
+每阶段写入摘要到 `meta/{stage}-summary.md`（不超过 20 行），并区分“已确认事实 / 推断 / 待确认”。
 
 **⏸️ 每步等待用户确认。**
 
 ---
 
-## Step 3: 快速检查
+## Step 3: 快速分诊
 
-编排器内按以下维度执行轻量扫描，生成精简报告到 `_support/quick-scan-{日期}.md`：
+编排器内轻量执行，不调用子技能：
+1. 优先读取最近任务的 `meta/state.md` 与 `tickets/`、`kb/`、`analytics/` 产物
+2. 输出 SLA 覆盖、升级路径、知识库复用、重复问题信号四维速览
+3. 结论必须区分“已确认事实”和“待验证推断”，不能把猜测当结论
+4. 将结果写入 `_support/quick-scan-{日期}.md`
 
-| 维度 | 检查内容 | 输出 |
-|------|----------|------|
-| 工单处理 | 是否有 SLA 定义、路由规则、升级流程 | 有/无 + 核心缺口 |
-| 知识库 | 是否有文章结构、分类体系、高频问题覆盖 | 有/无 + 覆盖率估算 |
-| 数据分析 | 是否有 KPI 定义、趋势报告、改进机制 | 有/无 + 关键指标现状 |
-
-扫描方式：Glob `_support/*/tickets/` `_support/*/kb/` `_support/*/analytics/` 定位已有产物；Read 找到的文件，按上表逐项检查对应内容是否存在，输出"有/无 + 一句话缺口说明"。
-
-使用 `AskUserQuestion`：深入某项 / 进入完整流程 / 结束。
+使用 `AskUserQuestion`：深入工单 / 深入知识库 / 深入分析 / 进入完整流程 / 结束。
 
 ---
 
 ## 断点恢复
 
-1. Glob `_support/*/meta/state.md` 获取所有任务目录列表
-2. 逐个 Read `meta/state.md`，提取 `workflow_mode`、`completed_steps`、`next_step`
-3. Glob `_support/{目录名}/tickets/` `_support/{目录名}/kb/` `_support/{目录名}/analytics/` 检查各阶段产出文件是否存在；若产物文件已存在但 `completed_steps` 未包含该阶段，以产物为准，将 next_step 推进到下一阶段
-4. 向用户展示未完成任务列表（目录名 + 当前进度 + 下一步），使用 `AskUserQuestion`：从断点继续 / 重新开始 / 放弃该任务
+1. 扫描 `_support/` 下未完成目录
+2. 先 Read `meta/state.md`，再核对 `tickets/`、`kb/`、`analytics/` 产物
+3. 恢复时以产物优先于状态文件；如已有工单方案但无知识库沉淀，下一步优先补知识库
+4. 使用 `AskUserQuestion`：从断点继续 / 从某阶段重开 / 重新开始
 
 <IMPORTANT>
-工作台的职责是"意图识别 + 路由 + 接续"，不是把所有请求都塞进固定管道。
-工单处理流程必须有 SLA 标准。
-知识库文章必须有版本和过期策略。
-分析报告必须区分事实与推断。
+工作台的职责是"先装配支持任务，再做路由 + 接续"，不是把所有请求都塞进固定管道。
+所有结论必须明确区分事实、推断与待确认项。
+不确定时必须升级或求证，不能为追求响应速度而猜测答案。
+重复问题必须沉淀成知识库条目或 SOP。
+工单流程必须显式写出 SLA 与升级路径。
 每个阶段完成后必须等待用户确认。
 产出文件与状态文件冲突时，以产出文件为准。
 </IMPORTANT>

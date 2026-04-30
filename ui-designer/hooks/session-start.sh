@@ -1,58 +1,62 @@
 #!/bin/bash
 # SessionStart hook for ui-designer plugin
-# 1. 创建顶层工作目录
-# 2. 展示工作区状态（任务数、近期评审、断点检测）
-# 3. 输出 UI Designer Agent 提示词到 stdout（注入为会话上下文）
 
 WORKSPACE="_design-review"
-
-# 创建 _design-review 顶层目录（具体评审子目录在流程中按日期创建）
+STATE_NAME="design-review-state.md"
 mkdir -p "$WORKSPACE"
 
-# ── 工作区状态 ──
-echo "## UI 设计评审工作区"
+echo "## UI 设计工作台状态"
 echo ""
 
-# 统计任务数
-TASK_COUNT=$(find "$WORKSPACE" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l | tr -d ' ')
-echo "- 评审任务总数: ${TASK_COUNT}"
+TASK_COUNT=$(find "$WORKSPACE" -maxdepth 1 -mindepth 1 -type d ! -name ".*" 2>/dev/null | wc -l | tr -d ' ')
+RESUMABLE=0
+INCONSISTENT=0
 
-# 列出近期评审目录（最近 5 个）
+for dir in "$WORKSPACE"/*/; do
+  [ -d "$dir" ] || continue
+  state="$dir/meta/$STATE_NAME"
+  next=""
+  if [ -f "$state" ]; then
+    next=$(grep "^next_step:" "$state" 2>/dev/null | head -1 | cut -d':' -f2- | xargs)
+    [ -n "$next" ] && [ "$next" != "done" ] && RESUMABLE=$((RESUMABLE + 1))
+  fi
+  artifact_count=$(find "$dir" -type f -name "*.md" ! -path "*/meta/*" ! -path "*/context/*" ! -path "*/.checkpoints/*" 2>/dev/null | wc -l | tr -d ' ')
+  if [ -f "$state" ] && [ "$next" = "done" ] && [ "$artifact_count" -eq 0 ]; then
+    INCONSISTENT=$((INCONSISTENT + 1))
+  fi
+done
+
+echo "- 任务数: ${TASK_COUNT}"
+echo "- 可接续任务数: ${RESUMABLE}"
+[ "$INCONSISTENT" -gt 0 ] && echo "- 状态提醒: ${INCONSISTENT} 个任务状态已完成但缺少阶段产物"
+
 if [ "$TASK_COUNT" -gt 0 ]; then
-  echo "- 近期评审:"
-  ls -1td "$WORKSPACE"/*/ 2>/dev/null | head -5 | while read -r dir; do
-    dirname=$(basename "$dir")
-    # 检查是否有状态文件
-    if [ -f "$dir/meta/design-review-state.md" ]; then
-      next_step=$(grep "^next_step:" "$dir/meta/design-review-state.md" 2>/dev/null | head -1 | sed 's/next_step: *//')
-      echo "  - ${dirname} (进行中 → ${next_step:-未知})"
-    else
-      # 通过产物推断完成度
-      has_visual=$(ls "$dir"/visual/visual-audit-*.md 2>/dev/null | head -1)
-      has_ds=$(ls "$dir"/design-system/ds-review-*.md 2>/dev/null | head -1)
-      has_proto=$(ls "$dir"/prototype/prototype-feedback-*.md 2>/dev/null | head -1)
-      stages=""
-      [ -n "$has_visual" ] && stages="${stages}VA "
-      [ -n "$has_ds" ] && stages="${stages}DSR "
-      [ -n "$has_proto" ] && stages="${stages}PF "
-      if [ -n "$stages" ]; then
-        echo "  - ${dirname} (已完成: ${stages})"
-      else
-        echo "  - ${dirname}"
-      fi
-    fi
-  done
-else
-  echo "- 暂无评审任务，使用 /uid 开始"
-fi
+  echo "- 最近任务:"
+  while IFS= read -r dir; do
+    [ -d "$dir" ] || continue
+    name=$(basename "$dir")
+    state="$dir/meta/$STATE_NAME"
+    workflow="-"
+    next="unknown"
+    target="-"
+    artifacts=""
 
-# 快扫产物计数
-QUICK_SCAN_COUNT=$(ls "$WORKSPACE"/quick-scan-*.md 2>/dev/null | wc -l | tr -d ' ')
-if [ "$QUICK_SCAN_COUNT" -gt 0 ]; then
-  echo "- 快扫报告: ${QUICK_SCAN_COUNT} 份"
+    if [ -f "$state" ]; then
+      workflow=$(grep "^workflow_mode:" "$state" 2>/dev/null | head -1 | cut -d':' -f2- | xargs)
+      next=$(grep "^next_step:" "$state" 2>/dev/null | head -1 | cut -d':' -f2- | xargs)
+      target=$(grep "^target_artifact:" "$state" 2>/dev/null | head -1 | cut -d':' -f2- | xargs)
+    fi
+
+    ls "$dir"/visual/visual-audit-*.md >/dev/null 2>&1 && artifacts="${artifacts}VA "
+    ls "$dir"/design-system/ds-review-*.md >/dev/null 2>&1 && artifacts="${artifacts}DSR "
+    ls "$dir"/prototype/prototype-feedback-*.md >/dev/null 2>&1 && artifacts="${artifacts}PF "
+    [ -z "$artifacts" ] && artifacts="INIT"
+    echo "  - ${name} | workflow=${workflow:-unknown} | next=${next:-unknown} | artifacts=[${artifacts}] | target=${target:--}"
+  done < <(ls -1dt "$WORKSPACE"/*/ 2>/dev/null | head -3)
 fi
 
 echo ""
+echo "- 提示: 默认先走 /ui-designer:uid 装配任务；如需恢复，可直接说明“继续上次 UI 评审”。"
+echo ""
 
-# 输出 UI Designer Agent 提示词作为会话上下文
 cat "${CLAUDE_PLUGIN_ROOT}/skills/uid/references/ui-designer-agent.md"

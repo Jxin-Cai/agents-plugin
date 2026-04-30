@@ -1,7 +1,7 @@
 {
   "name": "feedback-synthesizer",
-  "description": "Feedback synthesizer: structured feedback collection, sentiment analysis, and insight extraction for product decisions",
-  "version": "1.0.0",
+  "description": "Feedback synthesizer workbench: route across feedback collection, sentiment analysis, insight extraction, and quick scan workflows",
+  "version": "2.0.0",
   "author": {
     "name": "jxin"
   },

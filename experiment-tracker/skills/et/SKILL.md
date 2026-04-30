@@ -1,6 +1,6 @@
 ---
 name: et
-description: 实验跟踪工作台——按意图路由到A/B 测试设计、指标定义、结果分析或完整流程
+description: 实验跟踪工作台——先装配任务，再按意图路由到 A/B 测试设计、指标定义、结果分析、快速检查或完整流程
 argument-hint: "<任务描述>"
 allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Skill"]
 ---
@@ -9,21 +9,25 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 
 用户传入的参数：`$ARGUMENTS`
 
-先判断用户此刻要完成的工作，再带他进入对应 workflow。不是所有需求都需要走完整管道。
+先装配实验任务，再带他进入对应 workflow。不是所有需求都需要走完整管道。
+
+**入口纪律**：除非用户明确点名 `/ab-test-design`、`/metrics-definition`、`/results-analysis`，或明确要求“只做实验设计 / 只做指标定义 / 只做结果分析 / 只做快速检查”，否则都先走 `/experiment-tracker:et` 入口。
 
 ---
 
 ## 强制执行规则
 
 - ✅ 始终用中文与用户沟通
-- ✅ 先识别 workflow 类型，再进入对应流程
+- ✅ 先装配任务卡，再识别 workflow 类型
 - 🚫 不默认跑完整管道
 - 🚫 不在入口全量加载所有 references
 - ⏸️ 每个阶段完成后等待用户确认
 
 ---
 
-## Step 0: 意图识别与 Workflow 路由
+## Step 0: 任务装配与 Workflow 路由
+
+### 显式快路由
 
 | 意图信号 | Workflow | 动作 |
 |----------|----------|------|
@@ -31,16 +35,24 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 | "指标 / KPI / 北极星 / 转化率 / CTR / 留存 / 口径" | metrics-only | 调用 `/metrics-definition $ARGUMENTS` |
 | "结果 / 分析 / 显著性 / p值 / 置信区间 / 推全 / 回滚" | analysis-only | 调用 `/results-analysis $ARGUMENTS` |
 | "快速检查 / 实验状态 / 进度" | quick-check | → Step 3 |
-| "完整流程 / 全套 或复杂需求" | full-workflow | → Step 1 |
+| "继续上次实验任务 / 恢复任务" | resume | 优先进入断点恢复 |
+| "完整流程 / 全套" 或复杂需求 | full-workflow | → Step 1 |
 
-意图不明确时，用 `AskUserQuestion` 让用户选择：
-- 仅 A/B 测试设计
-- 仅指标定义
-- 仅结果分析
-- 快速实验状态检查
-- 完整实验管理流程（推荐）
+### 任务装配
 
-**⏸️ 等待用户选择。**
+意图不明确时，用 `AskUserQuestion` 一次性补齐最小任务卡：
+- `task_type`：design-only / metrics-only / analysis-only / quick-check / full-workflow
+- `workflow`：当前 workflow
+- `experiment_slug`：实验简称
+- `objective`：实验目标
+- `primary_metric`：核心指标
+- `guardrails`：护栏指标
+- `data_status`：无数据 / 已有基线 / 实验中 / 已收数
+- `required_artifacts`：预期产物
+- `next_action`：下一步动作
+- `current_stage`：当前阶段
+
+workflow 确定后，先向用户宣告本次场景、目标和执行链路，再进入后续步骤。
 
 ---
 
@@ -49,8 +61,25 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 1. 从 `$ARGUMENTS` 提取任务描述，生成英文缩写（2-4 词，连字符连接）
 2. 使用 `AskUserQuestion` 确认缩写
 3. 创建 `_experiments/{当前日期}-{缩写}/` 及子目录 `context/` `meta/` `designs/` `metrics/` `results/`
-4. 初始化 `meta/state.md`（workflow_mode、completed_steps、next_step）
-5. 扫描已有目录，检查接续点（产物优先于状态文件）
+4. 初始化 `meta/state.md`：
+
+```markdown
+workflow_mode: full-workflow
+task_type: full-workflow
+experiment_slug: {缩写}
+objective: {一句话目标}
+primary_metric: 
+guardrails: []
+data_status: baseline-ready
+required_artifacts: [designs, metrics, results]
+current_stage: ab-test-design
+completed_steps: []
+next_step: ab-test-design
+next_action: 完成实验设计并预注册
+```
+
+5. 扫描已有目录，检查 `designs/`、`metrics/`、`results/` 产物，产物优先于状态文件
+6. 使用 `AskUserQuestion` 确认从哪里开始
 
 **⏸️ 使用 `AskUserQuestion` 确认从哪里开始。**
 
@@ -62,9 +91,9 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 
 | 阶段 | 调用 | 完成标志 | 门控 |
 |------|------|---------|------|
-| A/B 测试设计 | `/ab-test-design $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
-| 指标定义 | `/metrics-definition $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
-| 结果分析 | `/results-analysis $ARGUMENTS` | 对应产出文件 | 继续 / 回退 / 结束 |
+| A/B 测试设计 | `/ab-test-design $ARGUMENTS` | `designs/*.md` | 继续 / 回退 / 结束 |
+| 指标定义 | `/metrics-definition $ARGUMENTS` | `metrics/*.md` | 继续 / 回退 / 结束 |
+| 结果分析 | `/results-analysis $ARGUMENTS` | `results/*.md` | 继续 / 回退 / 结束 |
 
 每阶段写入摘要到 `meta/{stage}-summary.md`（不超过 20 行）。
 
@@ -93,11 +122,12 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 ## 断点恢复
 
 1. 扫描 `_experiments/` 下未完成目录
-2. Read `meta/state.md`，结合产物推断进度
-3. 使用 `AskUserQuestion`：从断点继续 / 重新开始
+2. 先 Read `meta/state.md`，再核对 `designs/`、`metrics/`、`results/` 产物
+3. 恢复时以 `designs / metrics / results` 实物优先
+4. 使用 `AskUserQuestion`：从断点继续 / 从某阶段重开 / 重新开始
 
 <IMPORTANT>
-工作台的职责是"意图识别 + 路由 + 接续"，不是把所有请求都塞进固定管道。
+工作台的职责是"先装配实验任务，再做路由 + 接续"，不是把所有请求都塞进固定管道。
 A/B 测试必须包含样本量计算和统计显著性标准。
 结果分析必须区分统计显著与业务显著。
 不可在实验未达到最小样本量时下结论。

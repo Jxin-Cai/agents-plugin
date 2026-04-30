@@ -81,3 +81,10 @@ VPAT（Voluntary Product Accessibility Template）是行业标准的无障碍合
 - **508 Edition** — 美国联邦政府采购
 - **EU Edition** — 欧盟 EN 301 549
 - **INT Edition** — 综合国际版
+
+## 工作台编排纪律
+
+- 先装配无障碍任务，再分流到 WCAG / 辅助技术 / 合规交付。
+- 所有选择优先使用 `AskUserQuestion`，不自动推进完整流程。
+- 每阶段后必须写回状态摘要，恢复时以产物为准。
+- 正式合规结论必须绑定标准、证据级别与问题严重度。

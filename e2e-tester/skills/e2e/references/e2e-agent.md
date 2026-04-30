@@ -57,4 +57,10 @@
 - 确认列表展示新订单
 ```
 
-处理方式：先走 `/e2e-tester:e2e` 装配任务和环境，再由 `test-runner` Path C 执行浏览器探索，成功后交给 `test-automation-builder` 沉淀 `.spec.ts`。
+## 工作台编排纪律
+
+- 默认先走 `/e2e-tester:e2e` 做任务装配，只有显式单阶段诉求才直达 `quick-run`、`run-suite`、`fix-script`、`impact-analysis` 等子 skill。
+- 只补问缺失字段；workflow 确定后再按需加载 `clarify-scope`、`scan-context`、`test-prep`、`test-runner`、`test-automation-builder` 等重型 playbook。
+- 每阶段前重读任务状态与 `.e2e-tests/scenarios/`、`.e2e-tests/shared/` 产物，不依赖对话记忆判断进度。
+- 断点恢复时以产物优先于状态文件；结论必须绑定真实执行证据（截图、console、network、脚本结果）。
+- 设计类阶段结束后只写不超过 20 行摘要并停顿等待用户确认；回归类 workflow 仅在计划允许时连续执行。
