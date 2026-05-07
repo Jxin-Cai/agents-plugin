@@ -8,6 +8,15 @@ allowed-tools: Read, Write, Glob, AskUserQuestion
 
 > **条件加载**：进入装配细化前读取 `references/qa-task-assembly-dimensions.md` 和 `references/workflow-decision-table.md`。
 
+<IMPORTANT>
+## 路径安全提醒
+
+本 skill 产出的 `task.md` 和 `index.md` 只能写入 `.e2e-tests/scenarios/{scenario}/runs/{run}/` 下。
+- ❌ 禁止创建 `task/` 目录或在项目根目录写入 `task.md`
+- ❌ 禁止创建 `test/` 目录
+- ✅ 正确路径：`.e2e-tests/scenarios/{scenario-slug}/runs/{YYYY-MM-DD}-{run-slug}/task.md`
+</IMPORTANT>
+
 ---
 
 ## 执行流程

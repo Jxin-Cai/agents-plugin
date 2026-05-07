@@ -45,11 +45,31 @@ fi
 if [ -d "task" ] && ls task/*.md task/*.png task/*.jpg 2>/dev/null | head -1 > /dev/null 2>&1; then
   LEAKED="${LEAKED}\n  - task/ 目录含测试产物（应在 .e2e-tests/ 下）"
 fi
-for F in $(find . -maxdepth 1 \( -name "*.png" -o -name "screenshot*.jpg" \) 2>/dev/null | head -5); do
+# 检查 test/ 目录（排除已有的 test-results-analyzer 插件目录）
+if [ -d "test" ]; then
+  LEAKED="${LEAKED}\n  - test/ 目录存在（测试产物应在 .e2e-tests/ 下，测试脚本应在 .e2e-tests/shared/automation/ 下）"
+fi
+# 检查根目录的 test-results/ 目录（Playwright CLI 默认输出目录）
+if [ -d "test-results" ]; then
+  LEAKED="${LEAKED}\n  - test-results/ 目录存在（Playwright 输出应重定向到 .e2e-tests/ 下，使用 --output 参数）"
+fi
+# 检查截图文件（扩大检测范围：所有 png/jpg/jpeg）
+for F in $(find . -maxdepth 1 \( -name "*.png" -o -name "*.jpg" -o -name "*.jpeg" \) 2>/dev/null | head -5); do
   LEAKED="${LEAKED}\n  - ${F}（截图应在 .e2e-tests/scenarios/*/runs/*/evidence/ 下）"
+done
+# 检查根目录的 page-*.png / page-*.jpeg（Playwright MCP 默认截图命名）
+for F in $(find . -maxdepth 2 \( -name "page-*.png" -o -name "page-*.jpeg" \) ! -path "./.e2e-tests/*" 2>/dev/null | head -5); do
+  LEAKED="${LEAKED}\n  - ${F}（Playwright MCP 默认截图泄漏，应指定 filename 到 .e2e-tests/ 路径）"
 done
 if [ -d "temp" ] && ls temp/test-* temp/report-* temp/evidence-* 2>/dev/null | head -1 > /dev/null 2>&1; then
   LEAKED="${LEAKED}\n  - temp/ 目录含测试产物（应在 .e2e-tests/ 下）"
+fi
+# 检查 .playwright-mcp/ 目录中的截图（Playwright MCP 有时也会输出到此）
+if [ -d ".playwright-mcp" ]; then
+  PW_SCREENSHOTS=$(find .playwright-mcp -name "page-*.png" -o -name "page-*.jpeg" -o -name "page-*.yml" 2>/dev/null | grep -v "\.log$" | head -5)
+  if [ -n "$PW_SCREENSHOTS" ]; then
+    LEAKED="${LEAKED}\n  - .playwright-mcp/ 含截图/快照文件（应在 .e2e-tests/scenarios/*/runs/*/evidence/ 下）"
+  fi
 fi
 if [ -n "$LEAKED" ]; then
   ISSUES="${ISSUES}\n🚨 测试产物泄漏到 .e2e-tests/ 以外！以下文件应移入正确位置：${LEAKED}"

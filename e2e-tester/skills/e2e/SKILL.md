@@ -9,9 +9,32 @@ allowed-tools: Read, Write, Glob, Bash(mkdir*), AskUserQuestion, Skill
 
 用户传入的参数：`$ARGUMENTS`
 
+<IMPORTANT>
+## 🚫 路径安全铁律（本文件最高优先级规则，任何操作前必须遵守）
+
+**绝对禁止在 `.e2e-tests/` 以外创建以下任何目录或文件：**
+- ❌ `task/`、`test/`、`temp/`、`output/`、`reports/` 目录
+- ❌ 任何 `.png`、`.jpg`、`.jpeg` 截图文件
+- ❌ 任何 `task.md`、`report.md`、`test-report.md` 文件
+- ❌ 任何 `.spec.ts`、`.test.ts` 测试脚本文件
+
+**所有产物唯一合法路径前缀：`.e2e-tests/`**
+
+执行任何文件写入或 mkdir 前，必须验证路径以 `.e2e-tests/` 开头。若路径不以此开头——**停下来，修正路径后再执行**。
+
+**`browser_take_screenshot` 强制规则：**
+- 必须指定 `filename` 参数
+- `filename` 必须以 `.e2e-tests/scenarios/` 开头
+- 完整格式：`.e2e-tests/scenarios/{scenario}/runs/{run}/evidence/{case-id}/screenshots/{name}.png`
+- ❌ 禁止：`screenshot.png`、`page.png`、`test.png` 等纯文件名
+- ❌ 禁止：`task/screenshot.png`、`test/result.png` 等非法路径
+
+**违反此规则等同于执行失败。**
+</IMPORTANT>
+
 > **条件加载**：入口先读取 `references/intent-assembly-router.md` 做 workflow 分流。只有 workflow 确定后才按需加载对应 playbook。
 
-**入口纪律**：自然语言测试请求、Markdown 验收步骤、浏览器真实操作验收、UI 自测、失败定位、成功后沉淀 Playwright 用例等，都先视为 `/e2e-tester:e2e` 入口任务。只有用户明确点名 `/e2e-tester:run-suite`、`/e2e-tester:fix-script`、`/e2e-tester:test-runner` 等子 skill，或明确要求“只跑现有回归/只修脚本”时，才直达子 skill。
+**入口纪律**：自然语言测试请求、Markdown 验收步骤、浏览器真实操作验收、UI 自测、失败定位、成功后沉淀 Playwright 用例等，都先视为 `/e2e-tester:e2e` 入口任务。只有用户明确点名 `/e2e-tester:run-suite`、`/e2e-tester:fix-script`、`/e2e-tester:test-runner` 等子 skill，或明确要求”只跑现有回归/只修脚本”时，才直达子 skill。
 
 ---
 
@@ -136,10 +159,21 @@ workflow 确定后，**必须先向用户宣告场景**再开始执行：
 
 ## 产物落盘铁律（所有 workflow 共守）
 
-1. NEVER 在 `.e2e-tests/` 以外的任何位置写入测试产物（报告、截图、脚本、配置）。禁止写入 `task/`、`temp/`、`output/`、项目根目录。
+1. NEVER 在 `.e2e-tests/` 以外的任何位置写入测试产物（报告、截图、脚本、配置）。禁止写入 `task/`、`test/`、`temp/`、`output/`、项目根目录。
 2. 任何 workflow 进入执行前，必须先用 `mkdir -p` 创建完整的 `.e2e-tests/` 目录树。目录不存在则不执行。
 3. 环境数据（URL/账号/API 端点/认证方式）一旦获取，立即写入 `.e2e-tests/shared/env/`，不允许只存在对话中。
 4. 即使是 `express` / `quick-run` 路径，也必须在 `.e2e-tests/scenarios/{scenario}/` 下生成最小 scenario.md。
 5. 脚本沉淀默认触发：Path C 成功后自动进入 `test-automation-builder`，用户可主动选择跳过。
 6. 每个 skill 执行完成后用 `Glob` 校验产物是否落在 `.e2e-tests/` 下正确位置，缺失则补写。
+
+## 路径自检清单（每次写文件前检查）
+
+| 要写的东西 | ✅ 正确路径 | ❌ 错误路径（绝对禁止） |
+|-----------|------------|---------------------|
+| 任务卡 | `.e2e-tests/scenarios/{s}/runs/{r}/task.md` | `task/task.md`、`task.md` |
+| 截图 | `.e2e-tests/scenarios/{s}/runs/{r}/evidence/{c}/screenshots/*.png` | `*.png`(根目录)、`test/*.png` |
+| 报告 | `.e2e-tests/scenarios/{s}/runs/{r}/reports/*.md` | `test/report.md`、`report.md` |
+| 测试脚本 | `.e2e-tests/shared/automation/{domain}/*.ts` | `test/*.ts`、`tests/*.ts` |
+| 环境配置 | `.e2e-tests/shared/env/*.yaml` | `env.yaml`(根目录) |
+| 知识索引 | `.e2e-tests/shared/knowledge-index.md` | `knowledge-index.md`(根目录) |
 </IMPORTANT>

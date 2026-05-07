@@ -12,6 +12,7 @@ mkdir -p .e2e-tests/shared/mocks
 mkdir -p .e2e-tests/shared/helpers
 mkdir -p .e2e-tests/shared/registry
 mkdir -p .e2e-tests/shared/reports
+mkdir -p .e2e-tests/shared/.checkpoints
 
 # ── 测试剧本区 ──
 mkdir -p .e2e-tests/scenarios

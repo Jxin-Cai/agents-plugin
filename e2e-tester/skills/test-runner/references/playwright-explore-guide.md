@@ -7,6 +7,14 @@
 所有 `browser_take_screenshot` 的 `filename` 参数必须使用以 `.e2e-tests/` 开头的完整路径。
 **禁止使用纯文件名或相对路径**。路径模式：`.e2e-tests/scenarios/{scenario}/runs/{run}/evidence/{case-id}/screenshots/{name}.png`
 
+所有 `browser_console_messages` 和 `browser_snapshot` 的 `filename` 参数同样必须以 `.e2e-tests/` 开头。
+
+**违规路径自检清单**——如果你的 filename 长这样，**立刻停止并修正**：
+- `page-*.png` → ❌ Playwright MCP 默认命名，会写到 CWD
+- `screenshot.png` / `result.png` → ❌ 纯文件名
+- `test/xxx.png` / `task/xxx.png` → ❌ 非法目录
+- 任何不以 `.e2e-tests/` 开头的路径 → ❌
+
 `{evidence_root}` = `.e2e-tests/scenarios/{scenario}/runs/{run}/evidence/{case-id}`，执行前必须拼出完整值。
 
 ## 子文件按需加载

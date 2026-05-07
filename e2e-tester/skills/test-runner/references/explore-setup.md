@@ -4,6 +4,29 @@
 
 **路径变量**：`{evidence_root}` = `.e2e-tests/scenarios/{scenario}/runs/{run}/evidence/{case-id}`。执行前必须拼出完整值。
 
+<IMPORTANT>
+## 路径变量展开检查（进入 Path C 的第一步）
+
+在执行任何浏览器操作前，必须：
+
+1. **确认 scenario-slug 和 run-slug 已确定**（从 index.md 或上下文获取）
+2. **拼出完整 evidence_root 路径**——必须以 `.e2e-tests/scenarios/` 开头
+3. **验证路径**：如果拼出的路径不含 `.e2e-tests/`，则拼接有误，停下修正
+4. **mkdir -p 完整路径**
+
+示例：
+```
+scenario = "user-login"
+run = "2026-05-07-quick-1430"
+case-id = "case-01"
+evidence_root = ".e2e-tests/scenarios/user-login/runs/2026-05-07-quick-1430/evidence/case-01"
+```
+
+然后执行：`mkdir -p .e2e-tests/scenarios/user-login/runs/2026-05-07-quick-1430/evidence/case-01/{screenshots,api,network,console}`
+
+**所有后续 filename 参数都必须用此展开后的 evidence_root 作为前缀。禁止使用纯文件名。**
+</IMPORTANT>
+
 ## C.0 读取证据级别
 
 从 `index.md` frontmatter 读取 `evidence_level`（light / standard / strict）。缺失时视为 `standard`。

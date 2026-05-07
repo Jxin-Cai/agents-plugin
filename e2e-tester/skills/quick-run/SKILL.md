@@ -9,6 +9,20 @@ allowed-tools: Read, Write, Glob, Bash(mkdir*), AskUserQuestion, Skill
 
 用户传入的参数：`$ARGUMENTS`
 
+<IMPORTANT>
+## 🚫 路径安全铁律（快速模式也必须遵守）
+
+quick-run 虽然跳过设计仪式，但**绝不跳过产物路径约束**。
+
+- 所有 mkdir、Write、browser_take_screenshot 目标路径必须以 `.e2e-tests/` 开头
+- ❌ 禁止创建 `task/`、`test/`、`temp/` 目录
+- ❌ 禁止在项目根目录写入任何 `.png`、`.md`、`.ts` 文件
+- `browser_take_screenshot` 的 `filename` 必须是完整路径：`.e2e-tests/scenarios/{scenario}/runs/{run}/evidence/{case-id}/screenshots/{name}.png`
+- 不传 filename 或使用纯文件名（如 `screenshot.png`）= 执行失败
+
+**快 ≠ 乱。路径错误不可修复——必须一次写对。**
+</IMPORTANT>
+
 > **核心理念**：跳过设计仪式，直达浏览器执行。适用于目标明确、不需要完整风险分析的快速验证场景。
 
 ---
@@ -104,8 +118,11 @@ allowed-tools: Read, Write, Glob, Bash(mkdir*), AskUserQuestion, Skill
 6. 失败时不自动进入 fix-script——只报告结果
 7. **成功后自动沉淀脚本**——不问用户确认，用户可事后选择跳过
 8. NEVER 在 `.e2e-tests/` 以外写入任何测试产物
+9. **browser_take_screenshot 必须指定完整 filename 路径**——以 `.e2e-tests/scenarios/` 开头，禁止纯文件名
 
 <IMPORTANT>
 quick-run 的目标是"30 秒内开始浏览器操作"。任何阻止这个目标的确认环节都应该被跳过或自动推断。
 但"快"不等于"不留痕"——环境数据、最小剧本、报告和截图必须落盘到 `.e2e-tests/`，成功后脚本必须自动沉淀。quick-run 跳过的是"设计仪式"，不是"产物沉淀"。
+
+路径检查口诀：写文件前看路径头——不是 `.e2e-tests/` 开头就是错的。
 </IMPORTANT>

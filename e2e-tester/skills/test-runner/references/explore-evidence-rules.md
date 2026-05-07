@@ -4,6 +4,24 @@
 
 **路径变量**：`{evidence_root}` = `.e2e-tests/scenarios/{scenario}/runs/{run}/evidence/{case-id}`
 
+<IMPORTANT>
+## 路径安全检查（每次截图/保存前执行）
+
+1. 确认 `{evidence_root}` 已展开为完整路径（以 `.e2e-tests/scenarios/` 开头）
+2. 确认已执行 `mkdir -p {evidence_root}/screenshots`
+3. `browser_take_screenshot` 的 filename 必须是以 `.e2e-tests/` 开头的完整路径
+
+**错误示例 vs 正确示例：**
+- ❌ `browser_take_screenshot(filename: "given-verified.png")` → 写到根目录！
+- ❌ `browser_take_screenshot(filename: "screenshots/given-verified.png")` → 写到根目录下 screenshots/！
+- ❌ `browser_take_screenshot(type: "png")` → 不传 filename，写到 CWD！
+- ✅ `browser_take_screenshot(filename: ".e2e-tests/scenarios/login/runs/2026-05-07-quick-1430/evidence/case-01/screenshots/given-verified.png")`
+
+同理 console_messages 和 network 文件：
+- ❌ `filename: "console-error.txt"` → 写到根目录！
+- ✅ `filename: ".e2e-tests/scenarios/login/runs/2026-05-07-quick-1430/evidence/case-01/console/step-01-error.txt"`
+</IMPORTANT>
+
 ## C.2 逐 case 执行
 
 对每个 case：

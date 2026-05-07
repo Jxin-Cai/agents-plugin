@@ -56,10 +56,11 @@ allowed-tools: Read, Glob, Write, Skill, Bash(npx tsx*), Bash(npx playwright*), 
 
 执行规则：
 - api-script: `npx tsx`
-- e2e-script: `npx playwright test --reporter=json`
+- e2e-script: `npx playwright test --reporter=json --output=.e2e-tests/shared/reports/playwright-artifacts`
 - 每脚本记录：exit code / stdout / stderr / 耗时 / PASS|FAIL|ERROR|TIMEOUT
 - 脚本间不停顿，失败不中断批次
 - 超时阈值：API 60s，E2E 120s
+- ⚠️ 禁止让 Playwright 输出到默认 `test-results/` 目录（会泄漏到项目根目录）
 
 重试与重跑：
 - `retry_policy=on-failure-once` → 首次 FAIL/ERROR/TIMEOUT 后立刻重试一次

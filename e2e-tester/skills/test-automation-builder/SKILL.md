@@ -8,6 +8,17 @@ allowed-tools: Read, Glob, Write, Agent, AskUserQuestion, Bash(mkdir*), Bash(npx
 
 通过 subagent 将剧本 + prep + 报告 + evidence manifest + console/network artifacts 转化为可回归的自动化脚本。
 
+<IMPORTANT>
+## 路径安全
+
+所有脚本文件只能写入 `.e2e-tests/shared/automation/` 下。
+- ❌ 禁止写入 `test/`、`tests/`、`src/tests/` 或项目根目录
+- ✅ 业务脚本：`.e2e-tests/shared/automation/{domain}/ts-{nnn}-{slug}.{test|spec}.ts`
+- ✅ 认证脚本：`.e2e-tests/shared/automation/auth/login-{env}.test.ts`
+
+subagent 生成脚本时，prompt 中必须明确指定输出路径在 `.e2e-tests/` 下。
+</IMPORTANT>
+
 ## 脚本类型
 
 - **api-script**（`.test.ts`）：纯 API，`npx tsx` 执行，禁止 import playwright

@@ -8,14 +8,57 @@ allowed-tools: Read, Glob, Write, Skill, AskUserQuestion, Bash(npx playwright*),
 
 通过准备度门禁、三路径策略和多层 oracle 验证执行测试，给出可信测试结论。
 
+<IMPORTANT>
+## 🚫 路径安全铁律（最高优先级——任何操作前必读）
+
+**所有文件写入、mkdir、browser_take_screenshot 的目标路径必须以 `.e2e-tests/` 开头。没有例外。**
+
+### browser_take_screenshot 强制规则
+
+每次调用 `browser_take_screenshot` 前，按此模板构造 filename：
+
+```
+filename: ".e2e-tests/scenarios/{scenario}/runs/{run}/evidence/{case-id}/screenshots/{name}.png"
+```
+
+**禁止写法示例（违反即执行失败）：**
+- ❌ `filename: "screenshot.png"` — 会写到项目根目录
+- ❌ `filename: "test/result.png"` — 会创建 test/ 目录
+- ❌ `filename: "task/evidence.png"` — 会创建 task/ 目录
+- ❌ 不传 filename 参数 — Playwright MCP 默认写到 CWD
+
+**正确写法示例：**
+- ✅ `filename: ".e2e-tests/scenarios/login-flow/runs/2026-05-07-quick-1430/evidence/case-01/screenshots/given-verified.png"`
+- ✅ `filename: ".e2e-tests/scenarios/login-flow/runs/2026-05-07-quick-1430/evidence/case-01/screenshots/then-result.png"`
+
+### 文件写入路径对照
+
+| 产物 | ✅ 唯一合法路径 | ❌ 绝对禁止 |
+|------|--------------|-----------|
+| 截图 | `.e2e-tests/scenarios/{s}/runs/{r}/evidence/{c}/screenshots/` | 根目录、`test/`、`task/` |
+| 报告 | `.e2e-tests/scenarios/{s}/runs/{r}/reports/` | 根目录、`test/` |
+| 环境配置 | `.e2e-tests/shared/env/` | 根目录 |
+| 测试脚本 | `.e2e-tests/shared/automation/` | `test/`、`tests/` |
+| console 日志 | `.e2e-tests/scenarios/{s}/runs/{r}/evidence/{c}/console/` | 根目录 |
+| network 数据 | `.e2e-tests/scenarios/{s}/runs/{r}/evidence/{c}/network/` | 根目录 |
+| API 响应 | `.e2e-tests/scenarios/{s}/runs/{r}/evidence/{c}/api/` | 根目录 |
+
+### 执行前三步检查
+
+1. **拼路径** — 用变量展开完整路径，确认以 `.e2e-tests/` 开头
+2. **建目录** — `mkdir -p {完整路径的父目录}`
+3. **再操作** — 确认路径正确后再 Write/screenshot/保存
+</IMPORTANT>
+
 ## 产物落盘铁律
 
 > 以下规则不可违反，无论哪个路径、哪个 workflow。
 
-1. **所有截图、报告、证据只能写入 `.e2e-tests/` 目录内**。NEVER 写入 `task/`、`temp/`、项目根目录等其他位置。
-2. **截图必须保存到 `.e2e-tests/scenarios/{scenario}/runs/{run}/evidence/{case-id}/screenshots/`**。使用 `browser_take_screenshot` 时，必须指定保存路径到此目录。如果截图工具不支持指定路径，截取后必须立即复制到此目录。
+1. **所有截图、报告、证据只能写入 `.e2e-tests/` 目录内**。NEVER 写入 `task/`、`test/`、`temp/`、项目根目录等其他位置。
+2. **截图必须保存到 `.e2e-tests/scenarios/{scenario}/runs/{run}/evidence/{case-id}/screenshots/`**。使用 `browser_take_screenshot` 时，必须指定 `filename` 参数且路径以 `.e2e-tests/scenarios/` 开头。
 3. **执行前必须 mkdir -p 创建证据目录**。每个 case 开始执行前：`mkdir -p .e2e-tests/scenarios/{scenario}/runs/{run}/evidence/{case-id}/screenshots`
 4. **环境信息必须立即沉淀**。执行过程中获取到的 URL、API 端点、认证信息、浏览器配置，必须写入 `.e2e-tests/shared/env/{target_env}.yaml`，不允许只记在对话中。
+5. **npx playwright test 输出目录**。运行 Playwright CLI 时必须指定 `--output=.e2e-tests/scenarios/{scenario}/runs/{run}/evidence/playwright-results`，防止默认 `test-results/` 目录泄漏到根目录。
 
 ## 路径变量
 
@@ -54,7 +97,7 @@ allowed-tools: Read, Glob, Write, Skill, AskUserQuestion, Bash(npx playwright*),
 #### 路径 A
 ```bash
 # api-script: npx tsx .e2e-tests/shared/automation/{domain}/ts-{nnn}-*.test.ts
-# e2e-script: npx playwright test .e2e-tests/shared/automation/{domain}/ts-{nnn}-*.spec.ts --reporter=json
+# e2e-script: npx playwright test .e2e-tests/shared/automation/{domain}/ts-{nnn}-*.spec.ts --reporter=json --output=.e2e-tests/scenarios/{scenario}/runs/{run}/evidence/playwright-results
 ```
 
 #### 路径 B
@@ -154,8 +197,11 @@ Path C guardrails：
 10. NEVER 在 `.e2e-tests/` 以外写入任何测试产物（报告、截图、脚本、日志）
 11. 环境数据一旦获取必须立即写入 `.e2e-tests/shared/env/`
 12. Path C 成功后默认沉淀脚本，不等用户选择
+13. `browser_take_screenshot` 的 `filename` 参数必须以 `.e2e-tests/scenarios/` 开头——纯文件名或不含此前缀的路径等同于执行失败
+14. `npx playwright test` 必须带 `--output=.e2e-tests/...` 参数，防止 `test-results/` 泄漏
 
 <IMPORTANT>
 关键 oracle 缺失时，即使页面表现正常，也不能判 PASS。
 测试产物 NEVER 写到 `.e2e-tests/` 以外——这是不可商量的铁律。
+每次调用 browser_take_screenshot 前，先心算路径是否以 `.e2e-tests/scenarios/` 开头。不是？停下来修正。
 </IMPORTANT>
