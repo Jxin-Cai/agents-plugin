@@ -101,10 +101,16 @@ if [ "$ACTIVE_RUNS" -gt 0 ] && [ "$ENV_COUNT" -eq 0 ]; then
   ISSUES="${ISSUES}\n⚠️ 有 ${ACTIVE_RUNS} 个 run 记录但环境配置为空——环境数据未沉淀"
 fi
 
-# 只有发现问题时才输出
+# 发现问题时阻止本轮结束，让 Claude 继续修正
 if [ -n "$ISSUES" ]; then
-  echo ""
-  echo "### QA 状态检查"
-  echo -e "$ISSUES"
-  echo ""
+  MESSAGE="### QA 状态检查\n$(echo -e "$ISSUES")\n\n请先修正这些问题：所有 e2e 过程产物必须移动或重新写入 .e2e-tests/ 下正确位置，然后才能结束本轮。"
+  MESSAGE="$MESSAGE" python3 - <<'PY'
+import json
+import os
+
+print(json.dumps({
+    "decision": "block",
+    "reason": os.environ.get("MESSAGE", "E2E artifacts leaked outside .e2e-tests/.")
+}, ensure_ascii=False))
+PY
 fi
