@@ -1,0 +1,18 @@
+{
+  "name": "ask-buddy",
+  "version": "2.1.0",
+  "description": "有记忆的只读问答助手——支持分层检索、会话上下文、自适应直觉和优雅降级",
+  "author": {
+    "name": "jxin"
+  },
+  "homepage": "https://github.com/Jxin-Cai/agents-plugin",
+  "repository": "https://github.com/Jxin-Cai/agents-plugin",
+  "keywords": [
+    "问答",
+    "只读",
+    "助手",
+    "记忆",
+    "直觉",
+    "分层检索"
+  ]
+}

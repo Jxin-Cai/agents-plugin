@@ -1,0 +1,7 @@
+.ask-buddy/*.md
+.ask-buddy/_backup/
+.ask-buddy/memory/*.md
+.ask-buddy/memory/_backup/
+!.ask-buddy/.gitkeep
+!.ask-buddy/memory/.gitkeep
+.env
