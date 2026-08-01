@@ -51,7 +51,7 @@ knowledge_sync:
 |------|----------|------|
 | `draft` | 完成需求澄清或 PRD 仍需修订 | 不允许发布到需求平台 |
 | `approved` | PRD 通过 Spec Quality Gate | 可进入 Story 切片和 UAT |
-| `in-development` | Story 已发布到 Jira/需求平台 | 需要记录 `jira-sync.yaml` |
+| `in-development` | Story 进入开发阶段 | — |
 | `shipped` | 完成上线复盘 | 知识回流候选应标记 pending |
 | `retired` | 完成归档与知识回流 | 需求周期只读归档 |
 

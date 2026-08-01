@@ -57,4 +57,4 @@
 | generate-prd | glossary | glossary、context |
 | post-launch-review | 全部 | 知识回流候选（pending） |
 | product-knowledge | 全部 | 全部 |
-| product-knowledge archive-spec | review、PRD、stories、UAT、jira-sync | decisions、glossary、patterns、context、archive 状态 |
+| product-knowledge archive-spec | review、PRD、stories、UAT | decisions、glossary、patterns、context、archive 状态 |

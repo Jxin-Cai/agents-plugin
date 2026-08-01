@@ -44,7 +44,7 @@ allowed-tools: ["Read", "Write", "Glob", "Bash(mkdir*)", "AskUserQuestion", "Ski
 - `task_type`：backlog-only / priority-only / planning-only / quick-check / full-planning
 - `workflow`：当前 workflow
 - `goal`：本次 Sprint 决策目标
-- `input_source`：用户口述 / 文档 / Jira / 本地文件
+- `input_source`：用户口述 / 文档 / 本地文件
 - `constraints`：截止日期 / 依赖 / 不可变约束
 - `backlog_source`：需求池来源
 - `framework`：RICE / WSJF / MoSCoW / 自定义

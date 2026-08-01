@@ -215,17 +215,6 @@
       }
     },
     {
-      "name": "jira-workflow-steward",
-      "source": "./jira-workflow-steward",
-      "description": "Jira workflow steward workbench: route across workflow design, issue triage, board optimization, and quick check workflows",
-      "version": "2.0.0",
-      "homepage": "https://github.com/Jxin-Cai/agents-plugin",
-      "repository": "https://github.com/Jxin-Cai/agents-plugin",
-      "author": {
-        "name": "jxin"
-      }
-    },
-    {
       "name": "e2e-tester",
       "source": "./e2e-tester",
       "description": "E2E tester: end-to-end test workflow covering scope clarification, scenario generation, test execution, and automation",

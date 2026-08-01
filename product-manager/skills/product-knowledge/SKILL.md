@@ -188,7 +188,6 @@ argument-hint: "<操作：init | view | add-decision | add-term | add-pattern | 
    - `prd/prd-*.md`
    - `stories/stories-*.md`
    - `stories/uat-pack-*.md`（如存在）
-   - `meta/jira-sync.yaml`（如存在）
 2. 从复盘的“知识回流候选清单”提取候选项，按类型分组：
    - 决策 → `decision-journal.md`
    - 术语 → `domain-glossary.md`

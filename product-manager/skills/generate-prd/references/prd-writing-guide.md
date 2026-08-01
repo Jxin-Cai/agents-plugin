@@ -85,4 +85,3 @@ PRD 保存前必须生成独立的规格质量门结论。质量门不是润色�
 - 所有维度通过 → `quality_gate.status: passed`，PRD `status` 可进入 `approved`
 - 任一维度失败 → `quality_gate.status: failed`，PRD 保持 `draft`
 - 失败项必须写出修复建议，并停下来让用户选择：修订 PRD / 保留草稿 / 取消保存
-- 不允许在质量门失败时推荐发布到 Jira 或进入需求平台同步
