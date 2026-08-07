@@ -7,8 +7,8 @@ Observe user behavior patterns, accumulate evidence, and use confirmed patterns 
 
 ## Core principles
 
-- **Observe silently** — run in background, never interrupt Q&A flow
-- **Predict gently** — use instincts to improve answers, never announce "I noticed you..."
+- **Observe quietly** — collect candidates without interrupting Q&A flow
+- **Confirm before influence** — inferred patterns never shape answers until the user approves them
 - **Fail gracefully** — wrong predictions get retired immediately, no harm done
 - **Respect privacy** — only record work-relevant patterns, never personal details
 
@@ -53,18 +53,23 @@ If the user makes an explicit standing-order statement ("以后都...", "from no
 - Set `fast-tracked: explicit user directive` in the entry
 - Do NOT require score accumulation for clear mandates
 
-### Promote (Adaptive Thresholds)
+### Promote (Adaptive Thresholds + Approval)
 
 After each signal recording, check promotion eligibility:
 
-| Condition | Promotes? | Rationale |
+| Condition | Ready for review? | Rationale |
 |-----------|-----------|-----------|
 | effective_score >= 5.0 AND contradictions == 0 | YES | Standard path |
 | effective_score >= 3.0 AND time span > 14 days AND contradictions == 0 | YES | Slow-burn consistent pattern |
 | effective_score >= 8.0 AND contradictions <= 1 | YES | Overwhelming evidence, minor noise tolerated |
-| Fast-track (explicit user directive) | YES | Clear user mandate |
+| Fast-track (explicit user directive) | Promote immediately | Clear user mandate |
 
-On promotion:
+When an inferred Candidate reaches a threshold:
+- Add `ready_for_review: true`
+- Wait for a natural pause or a manual pattern review
+- Ask one concise confirmation question; do not apply the pattern yet
+
+On user-approved promotion:
 - Move entry from Candidates to Confirmed
 - Assign confidence tier (see below)
 - Assign `active_influence` based on category
@@ -242,4 +247,4 @@ If `.ask-buddy/memory/instincts.md` doesn't exist, create:
 - Maximum 10 Confirmed instincts (if exceeded, retire least-used one)
 - Maximum 15 Candidates (if exceeded, prune oldest with signals=1)
 - Never record personal information, only work behavior patterns
-- Don't create instincts from a single interaction — minimum 2 signals to even create a Candidate
+- Don't create instincts from a single ambiguous observation; an explicit correction may create a non-active Candidate immediately

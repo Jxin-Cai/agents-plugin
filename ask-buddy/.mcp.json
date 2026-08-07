@@ -1,0 +1,51 @@
+{
+  "mcpServers": {
+    "ask-buddy-memory": {
+      "type": "stdio",
+      "command": "python3",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/servers/memory_server.py"],
+      "env": {
+        "ASK_BUDDY_PROJECT_DIR": "${CLAUDE_PROJECT_DIR}"
+      }
+    },
+    "feishu-openapi-readonly": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@larksuiteoapi/lark-mcp@0.5.1",
+        "mcp",
+        "--oauth",
+        "--token-mode",
+        "user_access_token",
+        "--language",
+        "zh",
+        "--tool-name-case",
+        "snake",
+        "--tools",
+        "calendar.v4.calendar.primary,calendar.v4.calendarEvent.list,calendar.v4.calendarEvent.get,calendar.v4.calendarEvent.search,calendar.v4.calendarEvent.instanceView,calendar.v4.freebusy.list,task.v2.task.list,task.v2.task.get,task.v2.tasklist.list,task.v2.tasklist.get,task.v2.tasklist.tasks,task.v2.taskSubtask.list",
+        "--scope",
+        "offline_access,calendar:calendar:read,calendar:calendar.event:read,calendar:calendar.free_busy:read,task:task:read,task:tasklist:read"
+      ],
+      "env": {
+        "APP_ID": "${ASK_BUDDY_LARK_APP_ID}",
+        "APP_SECRET": "${ASK_BUDDY_LARK_APP_SECRET}",
+        "LARK_DOMAIN": "https://open.feishu.cn"
+      }
+    },
+    "feishu-assistant-readonly": {
+      "type": "stdio",
+      "command": "python3",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/servers/lark_readonly_server.py"]
+    },
+    "one-search": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "one-search-mcp@1.2.2"],
+      "env": {
+        "SEARCH_PROVIDER": "duckduckgo",
+        "ALLOW_PRIVATE_NETWORK": "false"
+      }
+    }
+  }
+}

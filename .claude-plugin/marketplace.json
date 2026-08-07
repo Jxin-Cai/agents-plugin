@@ -316,8 +316,8 @@
     {
       "name": "ask-buddy",
       "source": "./ask-buddy",
-      "description": "Ask Buddy: 有记忆的只读问答助手——支持分层检索、会话上下文、自适应直觉和优雅降级",
-      "version": "2.1.0",
+      "description": "Ask Buddy: 本地优先的智能个人助理——支持渐进交互、可检索分层记忆、飞书简报和可信研究",
+      "version": "2.6.0",
       "homepage": "https://github.com/Jxin-Cai/agents-plugin",
       "repository": "https://github.com/Jxin-Cai/agents-plugin",
       "author": {
