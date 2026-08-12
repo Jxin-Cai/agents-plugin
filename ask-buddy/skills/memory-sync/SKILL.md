@@ -9,6 +9,8 @@ description: 更新 Ask Buddy 的短期、精选长期和待确认记忆。当�
 - `ask-first`：明确请求可直接保存；自动发现内容写入 `pending.md`。
 - `on`：用户明确事实和已验证项目事实可保存；模型推断仍写入 `pending.md`。
 
+用户明确说“记住 X”或给出长期 directive 时，该话语本身就是对 X 的批准：先调用 `memory_stage` 生成可审计候选，再在同一轮调用 `learning_decide approve`，不要重复询问。助手推断的内容始终等待单独批准。
+
 旧版本工作区缺少 `memory.md`、`daily/`、`pending.md` 或 `playbook.md` 时按 init 中的模板惰性创建。保留 topics、insights、instincts 和现有 ID；禁止在迁移时把旧内容自动提升为精选记忆。
 
 ## 分层存储
@@ -16,10 +18,10 @@ description: 更新 Ask Buddy 的短期、精选长期和待确认记忆。当�
 | 层级 | 文件 | 用途 | 注入方式 |
 |---|---|---|---|
 | 工作状态 | `.ask-buddy/session-context.md` | 当前目标、事实、开放问题、下一步 | 当前会话持续更新 |
-| 每日记忆 | `memory/daily/YYYY-MM-DD.md` | 当天重要事件、过程和未决事项 | 仅今天和昨天在新会话加载 |
-| 精选记忆 | `memory/memory.md` | 稳定事实、决策、承诺和高价值摘要 | 新会话加载，限 6,000 字符 |
-| 用户模型 | `memory/profile.md` | 明确偏好与协作方式 | 新会话加载，限 3,000 字符 |
-| 程序经验 | `memory/playbook.md` | 经批准、可复用的方法 | 新会话加载，限 6,000 字符 |
+| 每日记忆 | `memory/daily/YYYY-MM-DD.md` | 当天重要事件、过程和未决事项 | 按需检索 |
+| 精选记忆 | `memory/memory.md` | 稳定事实、决策、承诺和高价值摘要 | 按需检索，限 6,000 字符 |
+| 用户模型 | `memory/profile.md` | 明确偏好与协作方式 | 启动只加载 active 部分，限 3,000 字符 |
+| 程序经验 | `memory/playbook.md` | 经批准、可复用的方法 | trigger 匹配时检索，限 6,000 字符 |
 | 待确认 | `memory/pending.md` | 推断或自学习候选 | 不参与回答 |
 | 可检索档案 | `topics.md`、`insights.md` | 详细主题与跨主题洞察 | 按需检索 |
 
@@ -33,7 +35,9 @@ description: 更新 Ask Buddy 的短期、精选长期和待确认记忆。当�
 4. **敏感度**：是否包含凭据、身份、财务、健康、私人通信等不应保存的信息？
 5. **重复与冲突**：是否已有相同或相反条目？
 
-低价值、易重新查询、短暂或敏感内容直接跳过。推断、行为猜测和不确定关联只能进入 `pending.md`。本地 Memory MCP 可用时优先调用 `memory_stage`，由服务端校验字段、分配 ID 并原子写入；不可用时再用 Write/Edit 按模板写入。
+低价值、易重新查询、短暂或敏感内容直接跳过。推断、行为猜测和不确定关联只能进入 `pending.md`。本地 Memory MCP 可用时优先调用 `memory_stage`，由服务端校验字段、去重、发现同 `subject` 冲突并原子写入；不可用时再用 Write/Edit 按模板写入。
+
+候选尽量填写 `subject`、`source`、`expires_at`。同一 subject 已有 active 条目时，不得直接批准新条目；先向用户展示差异，并在新候选的 `supersedes` 中填写旧条目的唯一 ID 或标题片段。
 
 ## 每日记忆
 
@@ -95,7 +99,11 @@ description: 更新 Ask Buddy 的短期、精选长期和待确认记忆。当�
 
 待确认内容不进入检索结果、不改变回答。仅在自然停顿、用户主动查看记忆或候选再次相关时，用一句话询问；每次最多确认两个，避免打扰。
 
-`memory_stage` 是唯一允许改变状态的 Memory MCP 工具，而且只能追加 pending。它不能批准候选、改写 active 记忆或访问项目其他文件。
+服务端对 pending 和 active 内容都做精确去重；候选 ID 拒绝后也不复用，避免旧审批指令误作用于新候选。
+
+批准后使用正式 ID：profile 为 `PREF-NNN`，长期记忆为 `MEM-NNN`，程序经验为 `PROC-NNN`。`PENDING-NNN` 只能存在于 pending 队列。
+
+`memory_stage` 和 `learning_stage` 只能追加 pending。`learning_decide` 仅在用户明确说批准或拒绝某个 ID 后调用；approve 只会把候选移入其 target 对应的 Markdown 文件，reject 只会移除候选。三者都不能访问 `.ask-buddy/` 以外的文件。
 
 ## 巩固与压缩
 
@@ -105,7 +113,7 @@ description: 更新 Ask Buddy 的短期、精选长期和待确认记忆。当�
 2. 检查最近 daily 中是否存在可提升的重复事实或未决承诺。
 3. 把过期或被替代内容标记为 superseded，不直接丢失来源链。
 4. 当 `profile.md` 超过 3,000、`memory.md` 或 `playbook.md` 超过 6,000 字符时，合并重复项，把细节下沉到 daily/topics；禁止静默截断。
-5. 同步 `index.md`，记录 ID、关键词、类型、importance、status、last_accessed。
+5. 保持纯 Markdown 结构；不创建会话数据库或向量库。仅在项目已有 `index.md` 时同步其 ID、关键词、类型、importance、status、last_accessed。
 
 索引按层分区：Curated、Daily、Playbook、Topics、Insights。每行使用 `ID | keywords | kind | importance | status | last_accessed`。Pending 和 Superseded 不进入 active 索引。
 

@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/session-start.sh",
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/session-start.py",
             "args": [],
             "timeout": 5
           }
@@ -32,7 +32,20 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/pre-compact.sh",
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/pre-compact.py",
+            "args": [],
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/learning-review.py",
             "args": [],
             "timeout": 5
           }

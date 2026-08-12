@@ -1,7 +1,7 @@
 {
   "name": "ask-buddy",
   "displayName": "Ask Buddy",
-  "version": "2.6.0",
+  "version": "2.9.0",
   "description": "本地优先的智能个人助理——支持渐进交互、可检索分层记忆、飞书简报、可信研究和隐私控制",
   "author": {
     "name": "jxin"

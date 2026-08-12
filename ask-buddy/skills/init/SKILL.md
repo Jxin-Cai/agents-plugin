@@ -58,7 +58,7 @@ description: 首次会话且 `.ask-buddy/memory/profile.md` 不存在时轻量�
 - `daily/`：按日期保存短期工作记忆；
 - `pending.md`：待用户确认的推断候选；
 - `playbook.md`：已批准的程序性经验；
-- `topics.md`、`insights.md`、`instincts.md`：兼容现有结构；
+- `topics.md`、`insights.md`：按需创建的详细档案；旧 `instincts.md` 仅保留迁移兼容；
 - `index.md`：统一检索索引。
 
 使用以下最小模板：

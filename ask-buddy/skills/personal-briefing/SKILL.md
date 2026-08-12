@@ -9,14 +9,14 @@ description: 用户要求日程摘要、晨间简报、每日计划、每周回�
 
 按请求选择最少的数据源：
 
-1. 日历：优先调用 `feishu_agenda` 读取目标日期的事件；需要忙闲信息时调用飞书 OpenAPI MCP 的 `calendar_v4_freebusy_list`。
-2. 任务：优先调用 `feishu_tasks` 读取未完成、即将到期和逾期事项；只有需要清单或任务详情时才调用飞书 OpenAPI MCP 的只读工具。
+1. 日历：优先调用 `feishu_agenda` 读取目标日期的事件；需要忙闲信息时调用只读桥接的 `feishu_freebusy`。
+2. 任务：优先调用 `feishu_tasks` 读取未完成、即将到期和逾期事项；只有需要清单或任务详情时才调用同一只读桥接的工具。
 3. 邮件：先用 `feishu_mail_search` 获取摘要，最多展开与当天决策、截止时间或会议有关的 5 封，再用 `feishu_mail_get` 获取纯文本正文；默认不读取 HTML。
 4. `.ask-buddy/session-context.md`：提取当前焦点和开放问题。
 5. `.ask-buddy/memory/topics.md`：仅检索与今天事项相关的历史结论。
 6. 联网搜索：只有用户要求新闻、天气、交通或行业动态时使用。
 
-飞书只允许调用 `feishu_agenda`、`feishu_tasks`、`feishu_mail_search`、`feishu_mail_get` 以及显式列入只读守卫的 OpenAPI 工具。即使 MCP 暴露了 create、patch、send、delete 等工具也不得调用。若需要的连接不存在，说明缺失的数据源并基于现有信息继续，不虚构空日程或零邮件。
+飞书只允许调用 `feishu_agenda`、`feishu_tasks`、`feishu_freebusy`、`feishu_mail_search`、`feishu_mail_get`。首次使用或连接缺失时，先调用 `feishu_binding_status` / `feishu_binding_preflight`；按返回 guidance 让用户完成二维码绑定，不要把 app secret、设备码或 token 写入记忆。即使 MCP 暴露了 create、patch、send、delete 等工具也不得调用。若需要的连接不存在，说明缺失的数据源并基于现有信息继续，不虚构空日程或零邮件。
 
 ## 每日简报
 

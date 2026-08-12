@@ -1,0 +1,5 @@
+# Project-scoped Feishu binding metadata and one-shot QR artifacts.
+.env
+*.png
+*.tmp
+!.gitkeep

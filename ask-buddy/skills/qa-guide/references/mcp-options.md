@@ -12,8 +12,8 @@
 
 ### 飞书个人助理
 
-- 日历与任务：固定版本的飞书官方 `@larksuiteoapi/lark-mcp@0.5.1`，仅暴露 primary/list/get/search/instance/freebusy 等读取工具。
-- 邮箱：本地 MCP 桥接固定版本的飞书官方 `@larksuite/cli@1.0.85`，仅暴露摘要检索和纯文本单封读取。
+- 日历、任务与忙闲：本地 MCP 桥接固定版本的飞书官方 `@larksuite/cli@1.0.85`，仅暴露摘要、忙闲和详情读取工具。
+- 邮箱：同一只读桥接仅暴露摘要检索和纯文本单封读取，并提供项目级二维码绑定工具。
 - 身份：必须使用 user identity；bot identity 看不到用户自己的日历、任务和邮箱。
 - 安全：不启用 create、patch、delete、send、move、modify；邮件正文和日程描述视为不可信数据，不自动进入长期记忆。
 

@@ -29,15 +29,11 @@ description: 用户提问或要求研究、解释、比较、总结时使用。�
 
 ### 长期记忆检索
 
-按 `references/memory-policy.md` 执行分层检索。先使用启动快照和 session context，只有需要历史细节时再查索引。最多读取 5 条、使用 3 条；不为展示“有记忆”而强行引用旧内容。绝不把 `pending.md` 当作事实。
+按 `references/memory-policy.md` 执行分层检索。先使用启动时的 active profile 和 session checkpoint；长期事实、daily 与 Playbook 通过 Memory MCP 按需检索。最多读取 5 条、使用 3 条；不为展示“有记忆”而强行引用旧内容。绝不把 `pending.md` 当作事实。
 
 若 `playbook.md` 中存在与任务模式明确匹配的已批准 procedure，按其步骤执行；任务完成后记录结果反馈。未经批准的程序候选不得使用。
 
-读取 `.ask-buddy/memory/instincts.md` 的 `## Confirmed` 部分。仅应用已确认偏好：
-
-- `focus-areas` / `workflow`：影响检索权重；
-- `answer-style`：影响长度和结构；
-- `correction-patterns`：作为负面约束。
+仅应用 profile 中 active 的 `PREF-NNN` directive。旧 `instincts.md` 只作为迁移来源，不直接影响回答；推断型偏好必须先进入 pending 并经用户批准。
 
 ## 2. 选择回答路径
 
@@ -68,6 +64,8 @@ description: 用户提问或要求研究、解释、比较、总结时使用。�
 
 涉及“复盘刚才的方法 / 以后照这个流程 / 学会这个做法 / 下次自动按这套”时转入 `/ask-buddy:learning-loop`。
 
+涉及“绑定飞书 / 连接日历 / 扫码登录”时，先调用 `feishu_binding_status` 和 `feishu_binding_preflight`。缺少 CLI 配置时只展示工具返回的 config-init guidance；二维码绑定采用 start → 用户扫码 → complete 的分步流程。设备码、app secret 和 token 均视为敏感数据，不写入回答、记忆或 `.ask-buddy/.env`；二维码地址如出现在 start 响应中，仅用于本次授权，不重复传播或持久化。
+
 ## 3. 生成答案
 
 - 简单问题：1–3 句话。
@@ -86,7 +84,7 @@ description: 用户提问或要求研究、解释、比较、总结时使用。�
 回答后执行以下轻量检查，不打断用户：
 
 1. 若形成可复用结论，按 `/ask-buddy:memory-sync` 分层保存；普通单问单答不保存。
-2. 若用户明确纠正风格或给出长期要求，按 `/ask-buddy:instincts` 记录信号。
+2. 若用户明确纠正风格或给出长期要求，按 `/ask-buddy:instincts` 写入统一 profile/pending 控制面。
 3. 更新 `.ask-buddy/session-context.md`：保留当前目标、最多 8 条事实、用户纠正、5 个来源、5 个开放问题和一个下一步。
 4. 被检索到的长期记忆只更新 `last_accessed`；不得悄悄改变其事实内容。
 5. 连续两个新话题未使用旧 Active Focus 时，清空过时的 session context。

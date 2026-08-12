@@ -3,9 +3,9 @@
 ## 存储模型
 
 - `profile.md`：稳定用户模型和 keyed directives；常驻快照，3,000 字符上限。
-- `memory.md`：精选长期事实、决策和跨会话承诺；常驻快照，6,000 字符上限。
-- `playbook.md`：用户批准的程序性经验；常驻快照，6,000 字符上限。
-- `daily/YYYY-MM-DD.md`：工作记忆；仅今天和昨天在新会话预加载。
+- `memory.md`：精选长期事实、决策和跨会话承诺；按需检索，6,000 字符上限。
+- `playbook.md`：用户批准的程序性经验；按需检索，6,000 字符上限。
+- `daily/YYYY-MM-DD.md`：工作记忆；按需检索，不在启动时整包注入。
 - `session-context.md`：当前目标和开放问题；压缩前重新注入。
 - `topics.md` / `insights.md`：按需检索的详细档案。
 - `pending.md`：未经批准的推断候选；永不参与回答或召回。
@@ -16,7 +16,7 @@
 
 1. 先判断是否真的需要记忆：当前消息已经包含答案时不检索。
 2. 从问题提取 2–4 个实体、ID、项目名、偏好或目标关键词。
-3. 先检查 Session Context 和启动时的 profile/memory/playbook snapshot。
+3. 先检查 Session Context 和启动时的 active profile；启动摘要只报告其他记忆是否可检索。
 4. 需要历史细节时，优先调用本地 `memory_search`，它会合并关键词相关度、新鲜度和 importance，最多返回 5 个候选。
 5. 用 `memory_get` 精确读取真正相关的片段；先调用 `memory_status` 可以检查容量和待审核数量。
 6. Memory MCP 不可用时，退回 Grep 查询 `index.md`，再依次检索最近 daily、topics、insights；不要全量读取所有 daily。

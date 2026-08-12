@@ -317,7 +317,7 @@
       "name": "ask-buddy",
       "source": "./ask-buddy",
       "description": "Ask Buddy: 本地优先的智能个人助理——支持渐进交互、可检索分层记忆、飞书简报和可信研究",
-      "version": "2.6.0",
+      "version": "2.9.0",
       "homepage": "https://github.com/Jxin-Cai/agents-plugin",
       "repository": "https://github.com/Jxin-Cai/agents-plugin",
       "author": {
